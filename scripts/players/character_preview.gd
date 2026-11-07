@@ -12,7 +12,7 @@ const SPIN_SPEED := 0.9 # radianes por segundo
 
 
 func _ready() -> void:
-	_camera.look_at_from_position(Vector3(0.0, 1.0, 3.3), Vector3(0.0, 0.62, 0.0))
+	_camera.look_at_from_position(Vector3(0.0, 0.95, 2.8), Vector3(0.0, 0.66, 0.0))
 	_light.look_at_from_position(Vector3(2.0, 3.0, 2.5), Vector3.ZERO)
 
 

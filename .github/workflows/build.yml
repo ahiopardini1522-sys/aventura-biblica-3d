@@ -178,16 +178,44 @@ jobs:
         run: |
           set -eo pipefail
           BT="$ANDROID_SDK_DIR/build-tools/35.0.1"
+          APK="build/android/$APK_NAME"
           {
-            echo "== aapt2 dump badging =="
-            "$BT/aapt2" dump badging "build/android/$APK_NAME" | grep -E "^(package|sdkVersion|targetSdkVersion|application-label|launchable-activity|native-code|uses-gl-es|supports-screens)" || true
+            echo "== aapt2 dump badging (resumen) =="
+            "$BT/aapt2" dump badging "$APK" 2>/dev/null | grep -v -E "^application-label-" | head -n 40 || true
+            echo
+            echo "== permisos declarados =="
+            "$BT/aapt2" dump permissions "$APK" 2>&1 || true
+            echo
+            echo "== AndroidManifest.xml (SDK mínimo, orientación y actividad de inicio) =="
+            "$BT/aapt2" dump xmltree --file AndroidManifest.xml "$APK" 2>&1 \
+              | grep -E "minSdkVersion|targetSdkVersion|screenOrientation|glEsVersion|android.intent.action.MAIN|android.intent.category.LAUNCHER|uses-permission|android:label|activity" || true
+            echo
+            echo "== contenido del APK (assets y bibliotecas) =="
+            unzip -l "$APK" | grep -E "assets/|lib/" || true
             echo
             echo "== apksigner verify =="
-            "$BT/apksigner" verify --verbose "build/android/$APK_NAME" || true
+            "$BT/apksigner" verify --verbose "$APK" || true
             echo
             echo "== tamaño =="
-            ls -la "build/android/$APK_NAME"
+            ls -la "$APK"
           } 2>&1 | tee logs/android-apk-info.log
+
+      - name: Probar el paquete de datos exportado (arranque desde el .pck)
+        # Se exporta solo el paquete de datos y se arranca el juego únicamente desde él,
+        # en una carpeta vacía, para comprobar que todo lo necesario viaja en la exportación.
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          mkdir -p build/pack logs /tmp/packrun
+          godot --headless --path . --export-pack "Android" build/pack/game.pck 2>&1 | tee logs/pack-export.log
+          ls -la build/pack
+          cd /tmp/packrun
+          godot --headless --main-pack "$GITHUB_WORKSPACE/build/pack/game.pck" --quit-after 240 2>&1 | tee "$GITHUB_WORKSPACE/logs/pack-run.log"
+          if grep -n -E "SCRIPT ERROR|Parse Error|Failed to load|Cannot open file|No loader found" "$GITHUB_WORKSPACE/logs/pack-run.log"; then
+            echo "::error::El juego empaquetado tiene errores al arrancar"
+            exit 1
+          fi
+          echo "El juego empaquetado arrancó sin errores de scripts ni de recursos."
 
       - name: Guardar APK
         uses: actions/upload-artifact@v4

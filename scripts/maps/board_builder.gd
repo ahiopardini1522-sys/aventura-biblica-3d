@@ -11,6 +11,7 @@ const LADDER_TINT := Color(0.50, 0.78, 0.35)
 const SNAKE_TINT := Color(0.88, 0.36, 0.30)
 const WOOD_COLOR := Color(0.58, 0.38, 0.19)
 const LADDER_WIDTH := 0.44
+const SHADOW_REACH := 1.6
 const SNAKE_COLORS := [
 	Color(0.30, 0.65, 0.30),
 	Color(0.82, 0.50, 0.20),
@@ -36,6 +37,7 @@ func build(new_layout: BoardLayout, theme_data: Dictionary) -> void:
 	clear()
 	layout = new_layout
 	_theme = theme_data
+	_build_contact_shadow()
 	_build_frame()
 	_build_tiles()
 	_build_ladders()
@@ -88,6 +90,44 @@ func dice_position() -> Vector3:
 
 
 # ---------------------------------------------------------------- Marco y casillas
+
+## Sombra suave bajo el tablero y la zona del dado, para que se vean apoyados en el suelo.
+func _build_contact_shadow() -> void:
+	var size: Vector2 = layout.board_size()
+	var reach: float = SHADOW_REACH
+	var plane := PlaneMesh.new()
+	# Cubre el tablero, el marco y la zona del dado (que queda a la derecha).
+	var dice_extra: float = 5.6
+	plane.size = Vector2(size.x + BoardLayout.FRAME_MARGIN * 2.0 + reach * 2.0 + dice_extra,
+			size.y + BoardLayout.FRAME_MARGIN * 2.0 + reach * 2.0)
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.albedo_texture = _soft_shadow_texture()
+	material.albedo_color = Color(0.10, 0.05, 0.02, 0.62)
+	var shadow := MeshInstance3D.new()
+	shadow.name = "ContactShadow"
+	shadow.mesh = plane
+	shadow.material_override = material
+	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# El suelo del entorno tiene su cara superior en y = -0.3; la sombra queda justo encima.
+	shadow.position = Vector3(dice_extra * 0.5, -0.29, 0.0)
+	add_child(shadow)
+
+
+## Textura cuadrada con el centro opaco y los bordes transparentes (esquinas redondeadas).
+func _soft_shadow_texture() -> ImageTexture:
+	var pixels: int = 64
+	var image := Image.create_empty(pixels, pixels, false, Image.FORMAT_RGBA8)
+	for y in pixels:
+		for x in pixels:
+			var u: float = (float(x) + 0.5) / float(pixels) * 2.0 - 1.0
+			var v: float = (float(y) + 0.5) / float(pixels) * 2.0 - 1.0
+			var distance: float = pow(pow(absf(u), 4.0) + pow(absf(v), 4.0), 0.25)
+			var alpha: float = 1.0 - smoothstep(0.62, 1.0, distance)
+			image.set_pixel(x, y, Color(1.0, 1.0, 1.0, alpha))
+	return ImageTexture.create_from_image(image)
+
 
 func _build_frame() -> void:
 	var size: Vector2 = layout.board_size()
@@ -346,14 +386,14 @@ func _build_start_marker() -> void:
 	var pole_mesh := CylinderMesh.new()
 	pole_mesh.top_radius = 0.04
 	pole_mesh.bottom_radius = 0.05
-	pole_mesh.height = 1.7
+	pole_mesh.height = 2.1
 	pole_mesh.radial_segments = 8
 	pole_mesh.rings = 1
 	var pole := MeshInstance3D.new()
 	pole.name = "Pole"
 	pole.mesh = pole_mesh
 	pole.material_override = _material("pole", Color(0.85, 0.82, 0.74), 0.5)
-	pole.position = Vector3(0.0, 0.85, 0.0)
+	pole.position = Vector3(0.0, 1.05, 0.0)
 	root.add_child(pole)
 
 	var flag_mesh := BoxMesh.new()
@@ -362,10 +402,10 @@ func _build_start_marker() -> void:
 	flag.name = "Flag"
 	flag.mesh = flag_mesh
 	flag.material_override = _material("flag", START_COLOR, 0.7)
-	flag.position = Vector3(0.33, 1.5, 0.0)
+	flag.position = Vector3(0.33, 1.85, 0.0)
 	root.add_child(flag)
 
-	root.add_child(_make_billboard("INICIO", Vector3(0.3, 2.05, 0.0), Color(0.80, 1.0, 0.82)))
+	root.add_child(_make_billboard("INICIO", Vector3(0.3, 2.5, 0.0), Color(0.80, 1.0, 0.82)))
 
 
 func _build_goal_marker() -> void:
@@ -458,7 +498,7 @@ func _make_billboard(text: String, at: Vector3, color: Color) -> Label3D:
 	label.name = "Label"
 	label.text = text
 	label.font_size = 64
-	label.pixel_size = 0.0075
+	label.pixel_size = 0.0058
 	label.outline_size = 16
 	label.outline_modulate = Color(0.12, 0.07, 0.02, 0.95)
 	label.modulate = color

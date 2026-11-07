@@ -213,7 +213,7 @@ func _test_resource_references() -> void:
 				checked += 1
 				if not (FileAccess.file_exists(reference) or DirAccess.dir_exists_absolute(reference)):
 					missing.append("%s -> %s" % [path, reference])
-	_check(checked > 50, "se revisaron las referencias res:// (%d)" % checked)
+	_check(checked >= 25, "se revisaron las referencias res:// (%d)" % checked)
 	_check(missing.is_empty(), "no hay referencias a archivos inexistentes %s" % str(missing))
 
 

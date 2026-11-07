@@ -7,6 +7,12 @@ extends Node3D
 const GROUND_Y := -0.4
 const PROP_MIN_RADIUS := 11.0
 const PROP_MAX_RADIUS := 46.0
+# Luz de la escena del tablero. El sol y la luz ambiente se suman sobre las superficies
+# horizontales; si la suma pasa de 1.2 aproximadamente, los colores claros se queman.
+const SUN_ENERGY := 0.95
+const AMBIENT_ENERGY := 0.5
+const FOG_DENSITY := 0.003
+const GROUND_DARKEN := 0.18
 
 @onready var _world_env: WorldEnvironment = %WorldEnvironment
 @onready var _sun: DirectionalLight3D = %Sun
@@ -15,9 +21,11 @@ const PROP_MAX_RADIUS := 46.0
 
 
 func _ready() -> void:
-	# El sol queda alto, a la izquierda y delante de la cámara.
-	var sun_in_sky: Vector3 = Vector3(-0.5, 0.85, 0.45).normalized()
+	# El sol queda alto, a la izquierda y delante de la cámara. No es cenital para que
+	# las escaleras, las serpientes y las fichas proyecten una sombra visible.
+	var sun_in_sky: Vector3 = Vector3(-0.55, 0.62, 0.5).normalized()
 	_sun.transform = Transform3D(Basis.looking_at(-sun_in_sky, Vector3.UP), Vector3.ZERO)
+	_sun.light_energy = SUN_ENERGY
 	_sun.shadow_enabled = SettingsManager.shadows_enabled()
 	_ground.position = Vector3(0.0, GROUND_Y, 0.0)
 
@@ -30,9 +38,11 @@ func apply_theme(theme_data: Dictionary, seed_value: int, keep_out: Array = []) 
 	var ground: Color = _color(theme_data, "ground", Color(0.80, 0.64, 0.40))
 	var ambient: Color = _color(theme_data, "ambient", Color(1.0, 0.94, 0.84))
 	var fog: Color = _color(theme_data, "fog", Color(0.95, 0.84, 0.64))
-	_world_env.environment = EnvFactory.create(sky_top, sky_horizon, ground, ambient, fog, 0.004, 1.0)
+	_world_env.environment = EnvFactory.create(sky_top, sky_horizon, ground, ambient, fog,
+			FOG_DENSITY, AMBIENT_ENERGY)
 	_sun.light_color = _color(theme_data, "sun", Color(1.0, 0.95, 0.82))
-	_ground.material_override = MeshFactory.material(ground, 1.0)
+	# El suelo es algo más oscuro que las casillas para que el tablero destaque.
+	_ground.material_override = MeshFactory.material(ground.darkened(GROUND_DARKEN), 1.0)
 	_build_props(theme_data, ground, seed_value, keep_out)
 
 
