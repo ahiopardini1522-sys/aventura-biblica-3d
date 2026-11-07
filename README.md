@@ -6,6 +6,18 @@ Orientación horizontal, interfaz táctil y recursos provisionales creados por c
 > **Etapa 1 (esta versión):** estructura del proyecto, menú principal 3D, pantallas de navegación y escena de preparación del tablero.
 > Las reglas del juego todavía **no** están implementadas (ver [Qué falta](#qué-falta)).
 
+## Capturas
+
+Generadas automáticamente por GitHub Actions con render por software (en un teléfono se verá más fluido y con otra resolución).
+
+| Menú principal | Tablero |
+| --- | --- |
+| ![Menú principal](docs/screenshots/main_menu.png) | ![Tablero 3D](docs/screenshots/board.png) |
+| **Tablero con la cámara inclinada** | **Personajes** |
+| ![Tablero inclinado](docs/screenshots/board_angle.png) | ![Personajes](docs/screenshots/characters.png) |
+
+![Configuración](docs/screenshots/settings.png)
+
 ## Qué incluye la Etapa 1
 
 | Pantalla | Qué hace |
@@ -86,10 +98,10 @@ El flujo `.github/workflows/build.yml` ejecuta en cada subida de código, con Go
 
 1. **validar**: importa el proyecto, compila los scripts y ejecuta `tools/smoke_test.gd` (carga todas las escenas, comprueba rutas `res://`, datos, tablero de 100 casillas, escaleras, serpientes, dado y navegación).
 2. **capturas**: abre cada pantalla con una pantalla virtual y guarda imágenes.
-3. **android**: exporta el APK de depuración con las plantillas oficiales y revisa su contenido con `aapt2`.
+3. **android**: exporta el APK de depuración con las plantillas oficiales, revisa su contenido con `aapt2` y `apksigner`, y además arranca el juego solo desde el paquete de datos exportado para comprobar que todo lo necesario viaja dentro.
 4. **resumen**: deja los registros y las imágenes en la rama `ci-artifacts`.
 
-El resultado de cada ejecución (verde o rojo) se ve en la pestaña **Actions**. Un APK solo existe si el paso de exportación terminó bien.
+El resultado de cada ejecución (verde o rojo) se ve en la pestaña **Actions**. Un APK solo existe si el paso de exportación terminó bien. Estas pruebas no sustituyen probar el juego en un teléfono real: el rendimiento y el comportamiento táctil en un dispositivo concreto solo se conocen probándolo ahí.
 
 ## Datos y cómo ampliar
 

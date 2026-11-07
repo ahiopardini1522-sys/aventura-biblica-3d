@@ -7,9 +7,9 @@ extends Node3D
 const GROUND_Y := -0.4
 const PROP_MIN_RADIUS := 11.0
 const PROP_MAX_RADIUS := 46.0
-# Luz de la escena del tablero. El sol y la luz ambiente se suman sobre las superficies
-# horizontales y el resultado ideal es cercano a 1.0 (los colores del mapa se ven tal cual).
-# Valores a afinar con las mediciones de tools/lighting_probe.gd.
+# Luz de la escena del tablero. Con el renderizador de compatibilidad, estas energías hacen
+# que las casillas se vean con los colores definidos en maps.json (ganancia cercana a 1.0
+# medida sobre las capturas de GitHub Actions). Si se suben mucho, los colores se queman.
 const SUN_ENERGY := 0.26
 const AMBIENT_ENERGY := 0.28
 const FOG_DENSITY := 0.003
