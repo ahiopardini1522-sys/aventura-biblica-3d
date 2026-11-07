@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "note": "Mensajes motivadores cristianos originales para la partida. No son citas bíblicas.",
+  "messages": {
+    "start": [
+      "¡Que Dios los bendiga en esta aventura!",
+      "¡Comienza el juego! Jugar en familia es una bendición.",
+      "¡Adelante! Cada casilla es una oportunidad para aprender."
+    ],
+    "challenge": [
+      "¡Casilla de desafío bíblico!",
+      "¡Desafío! Es hora de recordar la Palabra de Dios.",
+      "¡Una prueba! Confía y responde con calma."
+    ],
+    "correct": [
+      "¡Excelente! Tu estudio de la Palabra da fruto.",
+      "¡Muy bien! Dios bendice a quien lo busca de corazón.",
+      "¡Correcto! Sigue creciendo en el conocimiento de Dios.",
+      "¡Así se hace! Cada respuesta es un paso de fe.",
+      "¡Gloria a Dios! Tu esfuerzo vale la pena."
+    ],
+    "wrong": [
+      "No te desanimes: Dios te da una nueva oportunidad cada día.",
+      "Equivocarse también enseña. ¡Sigue adelante con ánimo!",
+      "Aprender la Palabra es un camino: cada paso suma.",
+      "Dios es paciente contigo. ¡Tú también sé paciente!",
+      "Lo importante es seguir intentándolo con fe."
+    ],
+    "ladder": [
+      "¡Subes por la gracia de Dios!",
+      "¡Una escalera! Dios te levanta cuando confías en Él.",
+      "¡Qué bendición! Un buen impulso hacia la meta."
+    ],
+    "snake": [
+      "Una serpiente... ¡pero Dios te ayuda a levantarte!",
+      "Retrocedes, pero no te rindas: la fe sigue firme.",
+      "Tropezar no es el final. ¡Vuelve a avanzar con ánimo!"
+    ],
+    "skip": [
+      "Pierdes un turno, pero Dios sigue contigo.",
+      "Un descanso corto: tu próximo turno llegará pronto."
+    ],
+    "last_stretch": [
+      "¡Ya casi llegas a la meta! ¡Ánimo!",
+      "¡Un último empujón hacia la meta!"
+    ],
+    "victory": [
+      "¡Felicidades! Llegaste a la meta con fe y perseverancia.",
+      "¡Victoria! Gloria a Dios por este gran juego.",
+      "¡Lo lograste! Cada paso de fe cuenta."
+    ]
+  }
+}

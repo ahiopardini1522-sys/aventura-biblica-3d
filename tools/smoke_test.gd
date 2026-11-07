@@ -7,7 +7,10 @@ extends SceneTree
 ## Comprueba, con el motor real:
 ##   - que todos los scripts compilan y todas las escenas se cargan,
 ##   - que no hay rutas res:// que apunten a archivos inexistentes,
-##   - que los datos (mapas, preguntas, versículos) y las reglas del tablero son válidos,
+##   - que los datos (mapas, desafíos, versículos, mensajes) y las reglas del tablero son válidos,
+##   - las reglas del juego: turnos, dado, movimiento, las 6 escaleras, las 7 serpientes,
+##     premios, castigos, victoria y cientos de partidas simuladas completas,
+##   - que cada desafío bíblico tiene referencias válidas y que los cinco tipos funcionan,
 ##   - que cada botón del menú abre su pantalla y que cada pantalla funciona,
 ##   - que el tablero se construye (100 casillas, 6 escaleras, 7 serpientes) y el dado muestra
 ##     el número que saca.
@@ -61,6 +64,11 @@ func _run() -> void:
 	_test_resource_references()
 	_test_data()
 	_test_board_layout()
+	_test_rules()
+	_test_match_state()
+	_test_simulated_games()
+	_test_bible_references()
+	_test_challenge_bank()
 	_test_character_roster()
 	_test_meshes()
 	await _test_menu_and_screens()
@@ -242,13 +250,6 @@ func _test_data() -> void:
 	_check((board.get("ladders", []) as Array).size() == 6, "el mapa jugable tiene 6 escaleras")
 	_check((board.get("snakes", []) as Array).size() == 7, "el mapa jugable tiene 7 serpientes")
 
-	var questions: Array = QuestionBank.all_questions()
-	_check(questions.size() >= 10, "banco de muestra con 10 preguntas o más (%d)" % questions.size())
-	for question in questions:
-		if not QuestionBank.is_valid(question):
-			_check(false, "pregunta válida: %s" % str(question))
-	_check(not QuestionBank.random_question().is_empty(), "se puede sacar una pregunta al azar")
-
 	var verses: Dictionary = JsonLoader.load_dictionary("res://data/verses/verse_references.json")
 	var verse_list: Array = verses.get("verses", [])
 	_check(verse_list.size() >= 10, "hay referencias bíblicas (%d)" % verse_list.size())
@@ -385,6 +386,465 @@ func _winding_ratio(mesh: ArrayMesh) -> float:
 		if front.dot(stored) > 0.0:
 			good += 1
 	return float(good) / float(maxi(total, 1))
+
+
+# ---------------------------------------------------------------- Reglas del juego
+
+func _desert_layout() -> BoardLayout:
+	return BoardLayout.from_map(MapCatalog.find_map("desierto_sinai"))
+
+
+func _roster(count: int) -> Array:
+	var roster: Array = []
+	for i in count:
+		roster.append({
+			"index": i,
+			"character_id": "jugador_%d" % i,
+			"name": "Jugador %d" % (i + 1),
+			"color": Color.WHITE,
+		})
+	return roster
+
+
+func _test_rules() -> void:
+	print("-- Reglas: dado, movimiento, escaleras y serpientes")
+	var layout: BoardLayout = _desert_layout()
+	_check(layout.last_tile() == 100, "la meta es la casilla 100")
+	_check(layout.challenge_tiles.size() >= 15 and layout.validate().is_empty(),
+			"hay casillas de desafío válidas (%d)" % layout.challenge_tiles.size())
+	_check(layout.default_challenge_tiles().size() >= 10,
+			"un mapa sin casillas de desafío recibe un reparto por defecto")
+
+	var normal: Dictionary = GameRules.plan_move(layout, 10, 4)
+	_check(str(normal["steps"]) == "[11, 12, 13, 14]" and int(normal["final"]) == 14
+			and (normal["jump"] as Dictionary).is_empty() and not bool(normal["reached_goal"]),
+			"un movimiento normal recorre las casillas una por una (10 + 4 = 14)")
+	var passing: Dictionary = GameRules.plan_move(layout, 2, 4)
+	_check(int(passing["final"]) == 6 and (passing["jump"] as Dictionary).is_empty(),
+			"pasar por encima de una escalera no la activa (solo cuenta caer en ella)")
+
+	var ladder_cases: int = 0
+	var ladders_ok: bool = true
+	for pair in layout.ladders:
+		for from_tile in range(maxi(1, pair.x - 6), pair.x):
+			var plan: Dictionary = GameRules.plan_move(layout, from_tile, pair.x - from_tile)
+			var jump: Dictionary = plan["jump"]
+			ladder_cases += 1
+			if jump.is_empty() or str(jump["kind"]) != "ladder" or int(jump["from"]) != pair.x \
+					or int(jump["to"]) != pair.y or int(plan["landed"]) != pair.x \
+					or int(plan["final"]) != pair.y or int(plan["final"]) <= int(plan["landed"]):
+				ladders_ok = false
+	_check(ladders_ok and ladder_cases >= 30,
+			"las 6 escaleras suben a su casilla superior desde cada tirada posible (%d casos)" % ladder_cases)
+
+	var snake_cases: int = 0
+	var snakes_ok: bool = true
+	for pair in layout.snakes:
+		for from_tile in range(maxi(1, pair.x - 6), pair.x):
+			var plan: Dictionary = GameRules.plan_move(layout, from_tile, pair.x - from_tile)
+			var jump: Dictionary = plan["jump"]
+			snake_cases += 1
+			if jump.is_empty() or str(jump["kind"]) != "snake" or int(jump["from"]) != pair.x \
+					or int(jump["to"]) != pair.y or int(plan["landed"]) != pair.x \
+					or int(plan["final"]) != pair.y or int(plan["final"]) >= int(plan["landed"]):
+				snakes_ok = false
+	_check(snakes_ok and snake_cases >= 36,
+			"las 7 serpientes bajan a su casilla inferior desde cada tirada posible (%d casos)" % snake_cases)
+
+	var win: Dictionary = GameRules.plan_move(layout, 97, 3)
+	_check(bool(win["reached_goal"]) and int(win["final"]) == 100, "caer justo en la meta gana la partida")
+	var over: Dictionary = GameRules.plan_move(layout, 99, 6)
+	_check(bool(over["reached_goal"]) and int(over["final"]) == 100 and (over["steps"] as Array).size() == 1,
+			"pasarse de la meta deja la ficha en la meta, nunca fuera del tablero")
+	var blocked: Dictionary = GameRules.plan_move(layout, 99, 6, true)
+	_check(bool(blocked["blocked"]) and int(blocked["final"]) == 99 and not bool(blocked["reached_goal"])
+			and (blocked["steps"] as Array).is_empty(),
+			"con tirada exacta, pasarse de la meta deja la ficha donde estaba")
+	var exact: Dictionary = GameRules.plan_move(layout, 99, 1, true)
+	_check(bool(exact["reached_goal"]) and not bool(exact["blocked"]), "con tirada exacta, el número justo gana")
+
+	var inside: bool = true
+	var contiguous: bool = true
+	for tile in range(1, 101):
+		for roll in range(1, 7):
+			for exact_mode in [false, true]:
+				var plan: Dictionary = GameRules.plan_move(layout, tile, roll, bool(exact_mode))
+				var final_tile: int = int(plan["final"])
+				var landed: int = int(plan["landed"])
+				if final_tile < 1 or final_tile > 100 or landed < 1 or landed > 100:
+					inside = false
+				var walked: Array = plan["steps"]
+				for i in walked.size():
+					if int(walked[i]) != tile + 1 + i:
+						contiguous = false
+				if walked.size() > 6:
+					contiguous = false
+	_check(inside, "ninguna tirada desde ninguna casilla saca la ficha del tablero (1200 casos)")
+	_check(contiguous, "el recorrido de cada tirada es continuo y de 6 casillas como máximo")
+
+	var back: Dictionary = GameRules.plan_shift(layout, 3, -5)
+	_check(int(back["to"]) == 1 and str(back["steps"]) == "[2, 1]", "retroceder nunca baja de la casilla 1")
+	var ahead: Dictionary = GameRules.plan_shift(layout, 98, 5)
+	_check(int(ahead["to"]) == 100 and bool(ahead["reached_goal"]), "avanzar por premio se detiene en la meta")
+	var no_chain: Dictionary = GameRules.plan_shift(layout, 96, 2)
+	_check(int(no_chain["to"]) == 98, "un premio que cae en una serpiente no la activa")
+	_check(GameRules.stars_for(0) == 1 and GameRules.stars_for(2) == 2 and GameRules.stars_for(9) == 3,
+			"las estrellas del desafío van de 1 a 3")
+	var normalized: Dictionary = GameRules.normalize_options({"reward_steps": 99, "penalty_mode": -4})
+	_check(int(normalized["reward_steps"]) == GameRules.MAX_SHIFT and int(normalized["penalty_mode"]) == 0,
+			"las opciones de juego se corrigen si vienen fuera de rango")
+
+
+func _test_match_state() -> void:
+	print("-- Partida: turnos, premios, castigos y victoria")
+	var layout: BoardLayout = _desert_layout()
+
+	for count in range(1, 5):
+		var state: MatchState = MatchState.create(layout, _roster(count), {"challenges": false})
+		var order_ok: bool = state.player_count() == count and state.current == 0
+		var rejects_intruders: bool = true
+		for turn in count * 3:
+			if state.current != turn % count:
+				order_ok = false
+			if count > 1:
+				var intruder: int = (state.current + 1) % count
+				if state.can_roll(intruder) or bool(state.apply_roll(intruder, 3)["ok"]):
+					rejects_intruders = false
+			if not state.can_roll(state.current) or not bool(state.apply_roll(state.current, 1)["ok"]):
+				order_ok = false
+			state.end_turn()
+		_check(order_ok, "con %d jugador(es) los turnos se alternan en orden" % count)
+		_check(rejects_intruders, "con %d jugador(es) no se puede tirar fuera de turno" % count)
+
+	var first: MatchState = MatchState.create(layout, _roster(2), {"challenges": false})
+	first.apply_roll(0, 1)
+	_check(int(first.get_player(0)["tile"]) == 2 and int(first.get_player(1)["tile"]) == 1,
+			"cada jugador tiene su propia casilla")
+
+	var challenge_state: MatchState = MatchState.create(layout, _roster(2), {})
+	challenge_state.players[0]["tile"] = 2
+	var on_challenge: Dictionary = challenge_state.apply_roll(0, 3)
+	_check(int(on_challenge["final"]) == 5 and bool(on_challenge["challenge"]),
+			"caer en una casilla de desafío (la 5) lo plantea")
+	var off_challenge: MatchState = MatchState.create(layout, _roster(2), {"challenges": false})
+	off_challenge.players[0]["tile"] = 2
+	_check(not bool(off_challenge.apply_roll(0, 3)["challenge"]), "con los desafíos desactivados no se plantea ninguno")
+	var on_ladder: MatchState = MatchState.create(layout, _roster(2), {})
+	_check(not bool(on_ladder.apply_roll(0, 2)["challenge"]) and int(on_ladder.get_player(0)["tile"]) == 22,
+			"una escalera no plantea desafío")
+
+	var reward: MatchState = MatchState.create(layout, _roster(2), {"reward_mode": GameRules.REWARD_ADVANCE, "reward_steps": 3})
+	reward.players[0]["tile"] = 10
+	var good: Dictionary = reward.apply_challenge_result(0, true, 2)
+	_check(bool(good["correct"]) and int(good["stars"]) == 2 and int(reward.get_player(0)["tile"]) == 13
+			and int(reward.get_player(0)["stars"]) == 2, "acertar da estrellas y avanza las casillas de premio")
+	var extra: MatchState = MatchState.create(layout, _roster(3), {"reward_mode": GameRules.REWARD_EXTRA_ROLL})
+	extra.apply_challenge_result(0, true, 1)
+	var repeat: Dictionary = extra.end_turn()
+	_check(bool(repeat["extra"]) and int(repeat["next"]) == 0 and extra.current == 0,
+			"el premio de tirada extra repite el turno del mismo jugador")
+	_check(int(extra.end_turn()["next"]) == 1, "después de la tirada extra el turno sigue su orden")
+	var stars_only: MatchState = MatchState.create(layout, _roster(2), {"reward_mode": GameRules.REWARD_STARS_ONLY})
+	stars_only.players[0]["tile"] = 20
+	stars_only.apply_challenge_result(0, true, 3)
+	_check(int(stars_only.get_player(0)["tile"]) == 20 and int(stars_only.get_player(0)["stars"]) == 3,
+			"el premio de solo estrellas no mueve la ficha")
+
+	var penalty: MatchState = MatchState.create(layout, _roster(2), {"penalty_mode": GameRules.PENALTY_BACK, "penalty_steps": 3})
+	penalty.players[0]["tile"] = 20
+	var bad: Dictionary = penalty.apply_challenge_result(0, false, 3)
+	_check(not bool(bad["correct"]) and int(bad["stars"]) == 0 and int(penalty.get_player(0)["tile"]) == 17,
+			"fallar retrocede las casillas configuradas y no da estrellas")
+	var near_start: MatchState = MatchState.create(layout, _roster(2), {"penalty_mode": GameRules.PENALTY_BACK, "penalty_steps": 4})
+	near_start.players[0]["tile"] = 3
+	near_start.apply_challenge_result(0, false, 1)
+	_check(int(near_start.get_player(0)["tile"]) == 1, "el castigo nunca manda la ficha antes de la casilla 1")
+	var none_state: MatchState = MatchState.create(layout, _roster(2), {"penalty_mode": GameRules.PENALTY_NONE})
+	none_state.players[0]["tile"] = 30
+	none_state.apply_challenge_result(0, false, 1)
+	_check(int(none_state.get_player(0)["tile"]) == 30 and not bool(none_state.get_player(0)["skip_next"]),
+			"con castigo desactivado fallar no cambia nada")
+
+	var skip: MatchState = MatchState.create(layout, _roster(3), {"penalty_mode": GameRules.PENALTY_SKIP_TURN})
+	skip.apply_challenge_result(0, false, 1)
+	var sequence: Array[int] = []
+	for turn_index in 3:
+		var step: Dictionary = skip.end_turn()
+		sequence.append(int(step["next"]))
+		if turn_index == 2:
+			_check(str(step["skipped"]) == "[0]", "el jugador castigado aparece como turno perdido")
+	_check(str(sequence) == "[1, 2, 1]", "perder el turno salta al jugador castigado una sola vez (%s)" % str(sequence))
+	var solo_skip: MatchState = MatchState.create(layout, _roster(1), {"penalty_mode": GameRules.PENALTY_SKIP_TURN})
+	solo_skip.apply_challenge_result(0, false, 1)
+	_check(not bool(solo_skip.get_player(0)["skip_next"]), "con un solo jugador perder el turno no se marca")
+
+	var win: MatchState = MatchState.create(layout, _roster(3), {"challenges": false})
+	win.players[0]["tile"] = 97
+	var finishing: Dictionary = win.apply_roll(0, 3)
+	_check(win.finished and win.winner == 0 and bool(finishing["reached_goal"]), "el primero que llega a la meta gana")
+	_check(not bool(win.apply_roll(1, 2)["ok"]), "después de la victoria nadie más puede tirar")
+	_check(bool(win.end_turn()["finished"]) and win.current == 0, "después de la victoria el turno no avanza")
+	var summary: Dictionary = win.summary()
+	_check(str(summary["winner_name"]) == "Jugador 1" and int(summary["winner"]) == 0 and bool(summary["finished"]),
+			"el resumen indica quién ganó")
+	_check((summary["players"] as Array).size() == 3 and int((summary["players"] as Array)[0]["rank"]) == 1
+			and bool((summary["players"] as Array)[0]["winner"]), "el resumen ordena a los jugadores con el ganador primero")
+	var reward_win: MatchState = MatchState.create(layout, _roster(2), {"reward_mode": GameRules.REWARD_ADVANCE, "reward_steps": 4})
+	reward_win.players[0]["tile"] = 97
+	var bonus_win: Dictionary = reward_win.apply_challenge_result(0, true, 1)
+	_check(reward_win.finished and bool(bonus_win["reached_goal"]), "llegar a la meta con un premio también gana")
+
+	var tied: MatchState = MatchState.create(layout, _roster(3), {})
+	tied.players[0]["tile"] = 40
+	tied.players[1]["tile"] = 60
+	tied.players[2]["tile"] = 60
+	tied.players[2]["stars"] = 5
+	_check(str(tied.ranking()) == "[2, 1, 0]", "sin ganador, el orden sale por casilla y luego por estrellas")
+
+	var exact_state: MatchState = MatchState.create(layout, _roster(2), {"exact_finish": true, "challenges": false})
+	exact_state.players[0]["tile"] = 98
+	var overshoot: Dictionary = exact_state.apply_roll(0, 5)
+	_check(bool(overshoot["blocked"]) and int(exact_state.get_player(0)["tile"]) == 98 and not exact_state.finished,
+			"con tirada exacta la ficha espera el número justo")
+
+
+func _test_simulated_games() -> void:
+	print("-- Partidas simuladas completas")
+	var layout: BoardLayout = _desert_layout()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20261107
+	var games: int = 400
+	var completed: int = 0
+	var invariants: bool = true
+	var longest: int = 0
+	var shortest: int = 1 << 30
+	var ladder_hits: Dictionary = {}
+	var snake_hits: Dictionary = {}
+	var challenges_seen: int = 0
+	var total_rolls: int = 0
+	var winners: Dictionary = {}
+	for _game in games:
+		var count: int = rng.randi_range(1, 4)
+		var options: Dictionary = {
+			"challenges": rng.randf() < 0.85,
+			"reward_mode": rng.randi_range(0, 2),
+			"reward_steps": rng.randi_range(1, 4),
+			"penalty_mode": rng.randi_range(0, 2),
+			"penalty_steps": rng.randi_range(1, 4),
+			"exact_finish": rng.randf() < 0.3,
+		}
+		var state: MatchState = MatchState.create(layout, _roster(count), options)
+		var guard: int = 0
+		var rolls: int = 0
+		while not state.finished and guard < 5000:
+			guard += 1
+			var who: int = state.current
+			var plan: Dictionary = state.apply_roll(who, rng.randi_range(1, 6))
+			rolls += 1
+			if not bool(plan["ok"]):
+				invariants = false
+				break
+			var jump: Dictionary = plan["jump"]
+			if not jump.is_empty():
+				if str(jump["kind"]) == "ladder":
+					ladder_hits[int(jump["from"])] = true
+				else:
+					snake_hits[int(jump["from"])] = true
+			if bool(plan["challenge"]) and not state.finished:
+				challenges_seen += 1
+				var answered: Dictionary = state.apply_challenge_result(who, rng.randf() < 0.6, rng.randi_range(1, 3))
+				if not bool(answered["ok"]):
+					invariants = false
+			for info in state.players:
+				var tile: int = int(info["tile"])
+				if tile < 1 or tile > 100:
+					invariants = false
+			if not state.finished:
+				state.end_turn()
+		total_rolls += rolls
+		if state.finished:
+			completed += 1
+			longest = maxi(longest, rolls)
+			shortest = mini(shortest, rolls)
+			winners[state.winner] = int(winners.get(state.winner, 0)) + 1
+			var champion: Dictionary = state.get_player(state.winner)
+			if int(champion["tile"]) != 100:
+				invariants = false
+			var finished_players: int = 0
+			for info in state.players:
+				if bool(info["finished"]):
+					finished_players += 1
+			if finished_players != 1:
+				invariants = false
+	_check(completed == games, "las %d partidas simuladas terminan con un ganador (%d)" % [games, completed])
+	_check(invariants, "en todas las partidas: casillas dentro del tablero, un solo ganador en la casilla 100 y turnos válidos")
+	_check(ladder_hits.size() == 6, "en las simulaciones se usaron las 6 escaleras (%d)" % ladder_hits.size())
+	_check(snake_hits.size() == 7, "en las simulaciones se usaron las 7 serpientes (%d)" % snake_hits.size())
+	_check(challenges_seen > 500, "en las simulaciones se plantearon desafíos (%d)" % challenges_seen)
+	var average_rolls: float = float(total_rolls) / float(games)
+	_check(shortest >= 6 and average_rolls >= 20.0 and average_rolls <= 600.0,
+			"la duración de las partidas es razonable (media %.0f tiradas, la más corta %d)" % [average_rolls, shortest])
+	_check(winners.size() >= 2, "ganan jugadores distintos según la suerte (%s)" % str(winners))
+	print("      (la partida más larga tuvo %d tiradas)" % longest)
+
+
+# ---------------------------------------------------------------- Referencias y desafíos
+
+func _test_bible_references() -> void:
+	print("-- Referencias bíblicas")
+	_check(BibleReference.BOOKS.size() == 66, "la lista tiene los 66 libros")
+	_check(BibleReference.total_chapters() == 1189, "los libros suman 1189 capítulos (%d)" % BibleReference.total_chapters())
+	_check(BibleReference.chapters_of("Salmos") == 150 and BibleReference.chapters_of("Salmo") == 150,
+			"Salmos tiene 150 capítulos (también como 'Salmo')")
+	_check(BibleReference.chapters_of("Genesis") == 50, "los libros se reconocen sin tildes")
+	_check(BibleReference.chapters_of("Judas") == 1 and BibleReference.chapters_of("Apocalipsis") == 22,
+			"Judas tiene 1 capítulo y Apocalipsis 22")
+	for good in ["Génesis 7:12", "Éxodo 14:21-22", "Éxodo 19-20", "Josué 3", "1 Samuel 17:48-50",
+			"Salmo 23:1", "Salmos 119:176", "Mateo 2:1; Lucas 2:4-7", "2 Samuel 5; 1 Reyes 6", "Judas 1:25"]:
+		_check(BibleReference.is_valid(good), "referencia válida: %s" % good)
+	for bad in ["", "Génesis", "Génesis 51:1", "Foo 1:1", "Juan 3:0", "Salmos 151", "Judas 2",
+			"Mateo 5:9-3", "Juan 3:16-", "Éxodo 20-19", "Juan x:1", "Lucas 2:4; Pedro 3:1"]:
+		_check(not BibleReference.is_valid(bad), "referencia inválida detectada: '%s'" % bad)
+	var parsed: Dictionary = BibleReference.parse("Mateo 2:1; Lucas 2:4-7")
+	_check((parsed["parts"] as Array).size() == 2 and str((parsed["parts"] as Array)[1]["book"]) == "Lucas"
+			and int((parsed["parts"] as Array)[1]["verse_to"]) == 7, "una referencia con dos partes se separa bien")
+	for entry in MapCatalog.all_maps():
+		var map_data: Dictionary = entry
+		_check(BibleReference.is_valid(str(map_data["reference"])), "la referencia del mapa '%s' es válida (%s)" % [map_data["id"], map_data["reference"]])
+
+
+func _test_challenge_bank() -> void:
+	print("-- Desafíos bíblicos")
+	var problems: PackedStringArray = ChallengeBank.load_problems()
+	_check(problems.is_empty(), "todos los desafíos del banco son válidos %s" % str(problems))
+	var counts: Dictionary = ChallengeBank.count_by_type()
+	_check(ChallengeBank.all().size() >= 80, "el banco tiene 80 desafíos o más (%d)" % ChallengeBank.all().size())
+	for type in Challenge.TYPES:
+		_check(int(counts[type]) >= 10, "hay 10 o más desafíos de tipo %s (%d)" % [type, counts[type]])
+
+	var prompts: Dictionary = {}
+	var difficulties: Dictionary = {}
+	var clean: bool = true
+	for item in ChallengeBank.all():
+		var key: String = item.prompt if item.type != Challenge.TYPE_CHARACTER else "|".join(item.clues)
+		if prompts.has(key):
+			clean = false
+		prompts[key] = true
+		difficulties[item.difficulty] = true
+		if item.prompt.length() > 220 or item.explanation.length() > 220:
+			clean = false
+		for option in item.options:
+			if option.length() > 60:
+				clean = false
+		if item.type == Challenge.TYPE_CHARACTER:
+			var folded_clues: String = " " + _letters_only(" ".join(item.clues)) + " "
+			var answer: String = " " + _letters_only(item.correct_text()) + " "
+			if folded_clues.contains(answer):
+				clean = false
+		if item.type == Challenge.TYPE_COMPLETE_VERSE:
+			var from_verse: Dictionary = BibleReference.parse(VerseProvider.reference_of(item.verse_id))
+			var from_item: Dictionary = BibleReference.parse(item.reference)
+			if not bool(from_verse["ok"]) or not bool(from_item["ok"]) \
+					or str((from_verse["parts"] as Array)[0]["book"]) != str((from_item["parts"] as Array)[0]["book"]) \
+					or int((from_verse["parts"] as Array)[0]["chapter"]) != int((from_item["parts"] as Array)[0]["chapter"]) \
+					or int((from_verse["parts"] as Array)[0]["verse"]) != int((from_item["parts"] as Array)[0]["verse"]):
+				clean = false
+	_check(clean, "no hay enunciados repetidos, textos demasiado largos, pistas que revelen el personaje ni versículos mal enlazados")
+	_check(difficulties.size() == 3, "hay desafíos de las tres dificultades")
+
+	var tf_correct: Dictionary = {}
+	for item in ChallengeBank.by_type(Challenge.TYPE_TRUE_FALSE):
+		tf_correct[item.correct] = int(tf_correct.get(item.correct, 0)) + 1
+		if item.options.size() != 2 or item.options[0] != "Verdadero" or item.options[1] != "Falso":
+			tf_correct["mal"] = 1
+	_check(tf_correct.size() == 2 and int(tf_correct[0]) >= 6 and int(tf_correct[1]) >= 6,
+			"verdadero o falso tiene afirmaciones verdaderas y falsas (%s)" % str(tf_correct))
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 99
+	var shuffle_ok: bool = true
+	for item in ChallengeBank.all():
+		for _round in 5:
+			var mixed: Challenge = item.shuffled(rng)
+			if mixed.correct_text() != item.correct_text() or mixed.options.size() != item.options.size():
+				shuffle_ok = false
+			var sorted_a: Array = Array(item.options)
+			var sorted_b: Array = Array(mixed.options)
+			sorted_a.sort()
+			sorted_b.sort()
+			if sorted_a != sorted_b:
+				shuffle_ok = false
+			if item.type == Challenge.TYPE_TRUE_FALSE and mixed.correct != item.correct:
+				shuffle_ok = false
+	_check(shuffle_ok, "mezclar las opciones conserva cuál es la respuesta correcta")
+
+	var deck_a := ChallengeDeck.new(4242)
+	var deck_b := ChallengeDeck.new(4242)
+	var same_sequence: bool = true
+	var all_types_per_block: bool = true
+	var block: Dictionary = {}
+	var seen_in_type: Dictionary = {}
+	var repeats: bool = false
+	for n in 60:
+		var drawn_a: Challenge = deck_a.draw()
+		var drawn_b: Challenge = deck_b.draw()
+		if drawn_a == null or drawn_b == null or drawn_a.id != drawn_b.id:
+			same_sequence = false
+			continue
+		block[drawn_a.type] = true
+		if (n + 1) % 5 == 0:
+			if block.size() != 5:
+				all_types_per_block = false
+			block.clear()
+		if seen_in_type.has(drawn_a.id):
+			repeats = true
+		seen_in_type[drawn_a.id] = true
+	_check(same_sequence, "con la misma semilla el mazo reparte los mismos desafíos")
+	_check(all_types_per_block, "cada 5 desafíos salen los cinco tipos")
+	_check(not repeats, "el mazo no repite desafíos mientras quedan sin salir (60 sacados)")
+	var forced: Challenge = ChallengeDeck.new(7).draw(Challenge.TYPE_EVENT)
+	_check(forced != null and forced.type == Challenge.TYPE_EVENT, "se puede pedir un tipo concreto de desafío")
+
+	# El texto bíblico solo aparece si hay una versión autorizada; hoy no la hay.
+	_check(VerseProvider.active_translation().is_empty(), "ninguna versión con derechos está activa (RVR1960 requiere autorización)")
+	_check(VerseProvider.text_of("sal_23_1").is_empty() and VerseProvider.attribution().is_empty(),
+			"sin autorización el juego no muestra texto bíblico")
+	var rvr: Dictionary = {}
+	for entry in VerseProvider.translations():
+		if str((entry as Dictionary).get("id", "")) == "rvr1960":
+			rvr = entry
+	_check(not rvr.is_empty() and str(rvr["status"]) == "requires_authorization" and not bool(rvr["enabled"]),
+			"RVR1960 está preparada en la estructura pero desactivada")
+	VerseProvider.use_test_translation({"sal_23_1": "texto de prueba"})
+	_check(VerseProvider.text_of("sal_23_1") == "texto de prueba" and not VerseProvider.attribution().is_empty(),
+			"la estructura muestra el texto cuando una versión está activa (versión falsa de prueba)")
+	VerseProvider.clear_test_translation()
+	_check(VerseProvider.text_of("sal_23_1").is_empty(), "al quitar la versión de prueba vuelve a no haber texto")
+
+	for category in MessageBank.CATEGORIES:
+		var messages: PackedStringArray = MessageBank.all_in(category)
+		var short_enough: bool = true
+		for text in messages:
+			if text.strip_edges().is_empty() or text.length() > 80:
+				short_enough = false
+		_check(messages.size() >= 2 and short_enough, "mensajes motivadores de '%s' (%d)" % [category, messages.size()])
+	var verse_ok: bool = true
+	for entry in VerseProvider.references().values():
+		var verse: Dictionary = entry
+		if not BibleReference.is_valid(str(verse.get("reference", ""))) or not str(verse.get("text", "")).is_empty():
+			verse_ok = false
+	_check(verse_ok, "las referencias de versículos son válidas y no incluyen texto con derechos")
+
+
+## Minúsculas con solo letras y espacios, para buscar palabras completas.
+func _letters_only(text: String) -> String:
+	var result: String = ""
+	for i in text.length():
+		var c: String = text.substr(i, 1).to_lower()
+		result += c if (c.unicode_at(0) > 96 and c.unicode_at(0) < 123) or "áéíóúüñ".contains(c) else " "
+	while result.contains("  "):
+		result = result.replace("  ", " ")
+	return result.strip_edges()
 
 
 # ---------------------------------------------------------------- Menú y pantallas

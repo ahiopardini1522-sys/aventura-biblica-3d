@@ -12,11 +12,16 @@ const FRAME_MARGIN := 0.4
 const FRAME_THICKNESS := 0.3
 const PITCH := TILE_SIZE + TILE_GAP
 
+const KIND_LADDER := "ladder"
+const KIND_SNAKE := "snake"
+
 var columns: int = 10
 var rows: int = 10
 ## Cada entrada es (casilla de origen, casilla de destino).
 var ladders: Array[Vector2i] = []
 var snakes: Array[Vector2i] = []
+## Casillas donde se plantea un desafío bíblico (nunca inicio, meta, escaleras ni serpientes).
+var challenge_tiles: Array[int] = []
 
 
 ## Crea el trazado a partir de una entrada de MapCatalog.
@@ -27,6 +32,12 @@ static func from_map(map_data: Dictionary) -> BoardLayout:
 	layout.rows = maxi(2, int(board.get("rows", 10)))
 	layout.ladders = _to_pairs(board.get("ladders", []))
 	layout.snakes = _to_pairs(board.get("snakes", []))
+	var tiles: Variant = board.get("challenge_tiles", [])
+	if tiles is Array and not (tiles as Array).is_empty():
+		for tile in tiles:
+			layout.challenge_tiles.append(int(tile))
+	else:
+		layout.challenge_tiles = layout.default_challenge_tiles()
 	return layout
 
 
@@ -40,6 +51,11 @@ static func _to_pairs(raw: Variant) -> Array[Vector2i]:
 
 
 func tile_count() -> int:
+	return columns * rows
+
+
+## Número de la casilla de meta (la última).
+func last_tile() -> int:
 	return columns * rows
 
 
@@ -76,6 +92,50 @@ func jump_target(tile: int) -> int:
 		if pair.x == tile:
 			return pair.y
 	return tile
+
+
+## "ladder" si en esa casilla empieza una escalera, "snake" si está la cabeza de una
+## serpiente y "" si es una casilla normal.
+func jump_kind(tile: int) -> String:
+	if is_ladder_start(tile):
+		return KIND_LADDER
+	if is_snake_head(tile):
+		return KIND_SNAKE
+	return ""
+
+
+func is_challenge_tile(tile: int) -> bool:
+	return challenge_tiles.has(tile)
+
+
+## Casillas que no pueden llevar desafío: inicio, meta y los dos extremos de cada
+## escalera y de cada serpiente.
+func reserved_tiles() -> Dictionary:
+	var reserved: Dictionary = {1: true}
+	reserved[last_tile()] = true
+	for pair in ladders:
+		reserved[pair.x] = true
+		reserved[pair.y] = true
+	for pair in snakes:
+		reserved[pair.x] = true
+		reserved[pair.y] = true
+	return reserved
+
+
+## Reparto determinista de casillas de desafío para mapas que no las definen: una cada
+## cinco casillas aproximadamente, saltando las reservadas.
+func default_challenge_tiles() -> Array[int]:
+	var reserved: Dictionary = reserved_tiles()
+	var result: Array[int] = []
+	var tile: int = 5
+	while tile < last_tile():
+		var candidate: int = tile
+		while candidate < last_tile() and reserved.has(candidate):
+			candidate += 1
+		if candidate < last_tile() and not result.has(candidate):
+			result.append(candidate)
+		tile = candidate + 5
+	return result
 
 
 func is_ladder_start(tile: int) -> bool:
@@ -122,6 +182,22 @@ func validate() -> PackedStringArray:
 		problems.append_array(_check_pair("Escalera", pair, total, true, used))
 	for pair in snakes:
 		problems.append_array(_check_pair("Serpiente", pair, total, false, used))
+	problems.append_array(_check_challenge_tiles(total))
+	return problems
+
+
+func _check_challenge_tiles(total: int) -> PackedStringArray:
+	var problems := PackedStringArray()
+	var reserved: Dictionary = reserved_tiles()
+	var seen: Dictionary = {}
+	for tile in challenge_tiles:
+		if tile < 1 or tile > total:
+			problems.append("Desafío en la casilla %d: fuera del tablero (1-%d)" % [tile, total])
+		elif reserved.has(tile):
+			problems.append("Desafío en la casilla %d: está reservada (inicio, meta, escalera o serpiente)" % tile)
+		if seen.has(tile):
+			problems.append("Desafío en la casilla %d: está repetido" % tile)
+		seen[tile] = true
 	return problems
 
 

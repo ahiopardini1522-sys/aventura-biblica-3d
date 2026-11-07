@@ -96,5 +96,6 @@ static func _normalize(entry: Dictionary) -> Dictionary:
 			"rows": int(board_in.get("rows", 10)),
 			"ladders": board_in.get("ladders", []),
 			"snakes": board_in.get("snakes", []),
+			"challenge_tiles": board_in.get("challenge_tiles", []),
 		},
 	}

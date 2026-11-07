@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "note": "Catálogo de mapas bíblicos. En la Etapa 1 solo 'desierto_sinai' es jugable; los demás reservan su lugar en la estructura y se completarán en etapas posteriores.",
+  "note": "Catálogo de mapas bíblicos. Por ahora solo 'desierto_sinai' es jugable; los demás reservan su lugar en la estructura y se completarán en etapas posteriores. 'challenge_tiles' son las casillas que plantean un desafío bíblico (nunca inicio, meta, escaleras ni serpientes); si falta, el juego reparte unas por defecto.",
   "maps": [
     {
       "id": "betel",
@@ -67,7 +67,8 @@
         "columns": 10,
         "rows": 10,
         "ladders": [[3, 22], [8, 30], [28, 56], [39, 60], [51, 72], [71, 92]],
-        "snakes": [[98, 78], [94, 67], [85, 64], [62, 44], [54, 34], [46, 15], [36, 6]]
+        "snakes": [[98, 78], [94, 67], [85, 64], [62, 44], [54, 34], [46, 15], [36, 6]],
+        "challenge_tiles": [5, 12, 14, 19, 24, 26, 33, 38, 41, 48, 50, 55, 58, 65, 69, 75, 80, 87, 90, 96]
       }
     },
     {

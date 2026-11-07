@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "note": "Versiones bíblicas previstas. Ninguna está activa: el texto de Reina-Valera 1960 (RVR1960) tiene derechos de autor de las Sociedades Bíblicas Unidas y NO se incluye en el juego hasta contar con su autorización por escrito. Para activarla: (1) crear data/verses/rvr1960.json con {\"verses\": {\"<id de verse_references.json>\": \"<texto>\"}}, (2) poner aquí \"status\": \"authorized\" y \"enabled\": true. Mientras tanto el juego muestra solo la referencia de cada pasaje.",
+  "translations": [
+    {
+      "id": "rvr1960",
+      "name": "Reina-Valera 1960",
+      "abbreviation": "RVR1960",
+      "publisher": "Sociedades Bíblicas Unidas",
+      "language": "es",
+      "status": "requires_authorization",
+      "enabled": false,
+      "text_file": "rvr1960.json"
+    }
+  ]
+}
