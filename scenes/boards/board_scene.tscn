@@ -6,6 +6,9 @@
 [ext_resource type="PackedScene" path="res://scenes/boards/dice.tscn" id="4_dice"]
 [ext_resource type="Script" path="res://scripts/maps/board_camera.gd" id="5_camera"]
 [ext_resource type="PackedScene" path="res://scenes/interfaces/board_hud.tscn" id="6_hud"]
+[ext_resource type="PackedScene" path="res://scenes/challenges/challenge_panel.tscn" id="7_panel"]
+[ext_resource type="PackedScene" path="res://scenes/interfaces/pause_menu.tscn" id="8_pause"]
+[ext_resource type="Script" path="res://scripts/game/game_flow.gd" id="9_flow"]
 
 [node name="BoardScene" type="Node"]
 script = ExtResource("1_scene")
@@ -25,6 +28,9 @@ unique_name_in_owner = true
 [node name="Dice" parent="World" instance=ExtResource("4_dice")]
 unique_name_in_owner = true
 
+[node name="Effects" type="Node3D" parent="World"]
+unique_name_in_owner = true
+
 [node name="BoardCamera" type="Camera3D" parent="World"]
 unique_name_in_owner = true
 current = true
@@ -32,7 +38,23 @@ fov = 45.0
 far = 400.0
 script = ExtResource("5_camera")
 
+[node name="Flow" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("9_flow")
+
 [node name="UI" type="CanvasLayer" parent="."]
 
 [node name="Hud" parent="UI" instance=ExtResource("6_hud")]
+unique_name_in_owner = true
+
+[node name="ChallengeLayer" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="ChallengePanel" parent="ChallengeLayer" instance=ExtResource("7_panel")]
+unique_name_in_owner = true
+
+[node name="PauseLayer" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="PauseMenu" parent="PauseLayer" instance=ExtResource("8_pause")]
 unique_name_in_owner = true

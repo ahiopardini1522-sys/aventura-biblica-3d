@@ -1,0 +1,209 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/challenge_panel.gd" id="1_panel"]
+
+[node name="ChallengePanel" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_panel")
+
+[node name="Dim" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.08, 0.7)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Card" type="PanelContainer" parent="Center"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1780, 0)
+layout_mode = 2
+
+[node name="Columns" type="HBoxContainer" parent="Center/Card"]
+layout_mode = 2
+theme_override_constants/separation = 36
+
+[node name="Left" type="VBoxContainer" parent="Center/Card/Columns"]
+custom_minimum_size = Vector2(1040, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+
+[node name="Header" type="HBoxContainer" parent="Center/Card/Columns/Left"]
+layout_mode = 2
+
+[node name="TypeLabel" type="Label" parent="Center/Card/Columns/Left/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HeadingLabel"
+theme_override_font_sizes/font_size = 40
+text = "PREGUNTA BÍBLICA"
+
+[node name="DifficultyBox" type="HBoxContainer" parent="Center/Card/Columns/Left/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 6
+
+[node name="PromptLabel" type="Label" parent="Center/Card/Columns/Left"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 46
+text = "Pregunta"
+autowrap_mode = 3
+
+[node name="CluesBox" type="VBoxContainer" parent="Center/Card/Columns/Left"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Options" type="VBoxContainer" parent="Center/Card/Columns/Left"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="NoteLabel" type="Label" parent="Center/Card/Columns/Left"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 22
+text = "Es una idea basada en el versículo, no una cita textual."
+autowrap_mode = 3
+
+[node name="RightPanel" type="PanelContainer" parent="Center/Card/Columns"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(580, 0)
+layout_mode = 2
+
+[node name="Right" type="VBoxContainer" parent="Center/Card/Columns/RightPanel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="PlayerRow" type="HBoxContainer" parent="Center/Card/Columns/RightPanel/Right"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="PlayerDot" type="Panel" parent="Center/Card/Columns/RightPanel/Right/PlayerRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="PlayerName" type="Label" parent="Center/Card/Columns/RightPanel/Right/PlayerRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 34
+text = "Jugador"
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="StakesBox" type="VBoxContainer" parent="Center/Card/Columns/RightPanel/Right"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="StakesTitle" type="Label" parent="Center/Card/Columns/RightPanel/Right/StakesBox"]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 22
+text = "EN JUEGO"
+
+[node name="WinLabel" type="Label" parent="Center/Card/Columns/RightPanel/Right/StakesBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 30
+text = "Si aciertas: ganas"
+autowrap_mode = 3
+
+[node name="LoseLabel" type="Label" parent="Center/Card/Columns/RightPanel/Right/StakesBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.62, 0.5, 1)
+theme_override_font_sizes/font_size = 30
+text = "Si fallas: pierdes"
+autowrap_mode = 3
+
+[node name="HelpLabel" type="Label" parent="Center/Card/Columns/RightPanel/Right/StakesBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 26
+text = "Toca la respuesta que creas correcta."
+autowrap_mode = 3
+
+[node name="FeedbackBox" type="VBoxContainer" parent="Center/Card/Columns/RightPanel/Right"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ResultLabel" type="Label" parent="Center/Card/Columns/RightPanel/Right/FeedbackBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 50
+text = "¡CORRECTO!"
+
+[node name="AnswerLabel" type="Label" parent="Center/Card/Columns/RightPanel/Right/FeedbackBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Respuesta correcta"
+autowrap_mode = 3
+
+[node name="ExplanationLabel" type="Label" parent="Center/Card/Columns/RightPanel/Right/FeedbackBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.86, 0.89, 0.96, 1)
+theme_override_font_sizes/font_size = 29
+text = "Explicación"
+autowrap_mode = 3
+
+[node name="ReferenceLabel" type="Label" parent="Center/Card/Columns/RightPanel/Right/FeedbackBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.54, 1)
+theme_override_font_sizes/font_size = 30
+text = "Referencia"
+autowrap_mode = 3
+
+[node name="OutcomeLabel" type="Label" parent="Center/Card/Columns/RightPanel/Right/FeedbackBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = ""
+autowrap_mode = 3
+
+[node name="Spacer" type="Control" parent="Center/Card/Columns/RightPanel/Right"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="ContinueButton" type="Button" parent="Center/Card/Columns/RightPanel/Right"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "CONTINUAR"

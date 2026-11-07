@@ -11,6 +11,8 @@ const MAX_PLAYERS := 4
 var selected_map_id: String = ""
 var selected_character_id: String = ""
 var player_count: int = 1
+## Resumen de la última partida terminada (lo usa la pantalla de victoria).
+var last_summary: Dictionary = {}
 
 
 func _ready() -> void:

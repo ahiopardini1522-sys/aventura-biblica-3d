@@ -3,6 +3,11 @@ extends Camera3D
 ## Cámara del tablero: gira alrededor del centro arrastrando con un dedo, se acerca y
 ## se aleja con el gesto de pellizco (o la rueda del ratón) y vuelve a la vista inicial
 ## con reset_view(). Los movimientos se suavizan para que se sienta fluido en el móvil.
+## Durante la partida también sabe enfocar una ficha (focus_on / follow), volver a la vista
+## general (release_focus) y sacudirse (shake). Si el jugador la mueve con el dedo, deja de
+## hacerlo sola hasta que pulse VISTA, para no pelearse con él.
+
+signal user_moved
 
 const MIN_PITCH := 28.0
 const MAX_PITCH := 84.0
@@ -11,6 +16,9 @@ const ORBIT_SPEED := Vector2(0.14, 0.12) # grados por píxel (giro, inclinación
 const SMOOTHING := 10.0
 
 var target: Vector3 = Vector3.ZERO
+var goal_target: Vector3 = Vector3.ZERO
+## Verdadero cuando el jugador movió la cámara a mano: las ayudas automáticas se detienen.
+var user_override: bool = false
 var default_yaw: float = 0.0
 var default_pitch: float = 56.0
 var default_distance: float = 17.0
@@ -28,6 +36,12 @@ var goal_distance: float = 17.0
 var _touches: Dictionary = {}
 var _pinch_last: float = 0.0
 var _tween: Tween
+var _home_target: Vector3 = Vector3.ZERO
+var _extent: float = 10.0
+var _shake_left: float = 0.0
+var _shake_total: float = 0.1
+var _shake_strength: float = 0.0
+var _shake_offset: Vector3 = Vector3.ZERO
 
 
 func _ready() -> void:
@@ -42,12 +56,18 @@ func _process(delta: float) -> void:
 	yaw = lerpf(yaw, goal_yaw, k)
 	pitch = lerpf(pitch, goal_pitch, k)
 	distance = lerpf(distance, goal_distance, k)
+	target = target.lerp(goal_target, k)
+	_update_shake(delta)
 	_apply()
 
 
 ## Define el punto central y calcula una distancia que deje ver todo el tablero.
 func configure(new_target: Vector3, board_extent: float) -> void:
 	target = new_target
+	goal_target = new_target
+	_home_target = new_target
+	_extent = board_extent
+	user_override = false
 	default_distance = clampf(board_extent * 1.55 + 1.0, 10.0, 28.0)
 	min_distance = maxf(6.0, board_extent * 0.7)
 	max_distance = default_distance * 1.9
@@ -57,6 +77,8 @@ func configure(new_target: Vector3, board_extent: float) -> void:
 ## Vuelve a la vista inicial (con animación, o de golpe si "animated" es false).
 func reset_view(animated: bool = true) -> void:
 	_kill_tween()
+	user_override = false
+	goal_target = _home_target
 	if not animated:
 		goal_yaw = default_yaw
 		goal_pitch = default_pitch
@@ -72,6 +94,8 @@ func reset_view(animated: bool = true) -> void:
 ## Entrada de la escena: la cámara baja desde arriba y se coloca en la vista inicial.
 func play_intro() -> void:
 	_kill_tween()
+	target = _home_target
+	goal_target = _home_target
 	yaw = -32.0
 	pitch = 78.0
 	distance = default_distance * 1.7
@@ -88,13 +112,73 @@ func play_intro() -> void:
 ## Acerca (factor < 1) o aleja (factor > 1) la cámara.
 func zoom_by(factor: float) -> void:
 	_kill_tween()
+	_mark_user_moved()
 	goal_distance = clampf(goal_distance * factor, min_distance, max_distance)
 
 
 func orbit_by(delta_pixels: Vector2) -> void:
 	_kill_tween()
+	_mark_user_moved()
 	goal_yaw = clampf(goal_yaw - delta_pixels.x * ORBIT_SPEED.x, -MAX_YAW, MAX_YAW)
 	goal_pitch = clampf(goal_pitch + delta_pixels.y * ORBIT_SPEED.y, MIN_PITCH, MAX_PITCH)
+
+
+## Centra la cámara en un punto del tablero (por ejemplo, la ficha que va a moverse) y se acerca un poco.
+## No hace nada si el jugador movió la cámara a mano.
+func focus_on(point: Vector3, zoom_factor: float = 0.68) -> void:
+	if user_override:
+		return
+	_kill_tween()
+	goal_target = _clamp_to_board(point)
+	goal_distance = clampf(default_distance * zoom_factor, min_distance, max_distance)
+
+
+## Sigue un punto que se mueve (la ficha mientras camina) sin cambiar el zoom.
+func follow(point: Vector3) -> void:
+	if user_override:
+		return
+	goal_target = _clamp_to_board(point)
+
+
+## Vuelve a la vista general conservando el giro que tenga la cámara.
+func release_focus() -> void:
+	if user_override:
+		return
+	_kill_tween()
+	goal_target = _home_target
+	goal_distance = default_distance
+
+
+## Sacude la cámara un momento (la mordida de una serpiente, por ejemplo).
+func shake(strength: float = 0.12, duration: float = 0.4) -> void:
+	_shake_strength = maxf(strength, 0.0)
+	_shake_total = maxf(duration, 0.05)
+	_shake_left = _shake_total
+
+
+func is_shaking() -> bool:
+	return _shake_left > 0.0
+
+
+func _mark_user_moved() -> void:
+	if not user_override:
+		user_override = true
+		user_moved.emit()
+
+
+func _clamp_to_board(point: Vector3) -> Vector3:
+	var half: float = _extent * 0.5
+	return Vector3(clampf(point.x, -half, half), _home_target.y, clampf(point.z, -half, half))
+
+
+func _update_shake(delta: float) -> void:
+	if _shake_left <= 0.0:
+		_shake_offset = Vector3.ZERO
+		return
+	_shake_left = maxf(0.0, _shake_left - delta)
+	var fade: float = _shake_left / _shake_total
+	_shake_offset = Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) \
+			* (_shake_strength * fade)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -137,6 +221,7 @@ func _snap_to_goal() -> void:
 	yaw = goal_yaw
 	pitch = goal_pitch
 	distance = goal_distance
+	target = goal_target
 	_apply()
 
 
@@ -149,4 +234,4 @@ func _apply() -> void:
 	var yaw_rad: float = deg_to_rad(yaw)
 	var pitch_rad: float = deg_to_rad(pitch)
 	var offset := Vector3(sin(yaw_rad) * cos(pitch_rad), sin(pitch_rad), cos(yaw_rad) * cos(pitch_rad)) * distance
-	transform = Transform3D(Basis.looking_at(-offset, Vector3.UP), target + offset)
+	transform = Transform3D(Basis.looking_at(-offset, Vector3.UP), target + offset + _shake_offset)

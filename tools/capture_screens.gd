@@ -4,14 +4,25 @@ extends SceneTree
 ##   SHOT_DIR=/ruta xvfb-run -a godot --path . --rendering-driver opengl3 \
 ##       --resolution 1600x720 --script res://tools/capture_screens.gd
 ## El render por software es lento y no representa el rendimiento de un teléfono.
+##
+## Además de los menús, juega unos turnos de verdad en el tablero (con tiradas forzadas) para
+## fotografiar el dado, una escalera, una serpiente, un desafío, la pausa y la victoria.
 
 const SCREENS := ["main_menu", "maps", "multiplayer", "characters", "settings", "board"]
-const TIME_LIMIT := 240.0
+const TIME_LIMIT := 330.0
 
 var _dir: String = ""
 var _router: Node
 var _state: Node
 var _finished: bool = false
+
+# Piezas del tablero abierto.
+var _flow: Node
+var _hud: Node
+var _panel: Node
+var _camera: Node
+var _dice: Node
+var _pause: Node
 
 
 func _initialize() -> void:
@@ -49,30 +60,135 @@ func _run() -> void:
 		await _wait_for(key)
 		await create_timer(2.6).timeout
 		await _save(key)
+		if key == "settings":
+			await _capture_rules_tab()
 
-	# Vistas extra del tablero: lanzamiento del dado y cámara cercana en ángulo.
-	var scene: Node = current_scene
-	var dice: Node = scene.get_node_or_null("%Dice")
-	var camera: Node = scene.get_node_or_null("%BoardCamera")
-	if dice != null:
-		dice.roll(5)
-		await create_timer(2.4).timeout
-		await _save("board_dice")
-	if camera != null:
-		camera.goal_yaw = 28.0
-		camera.goal_pitch = 34.0
-		camera.goal_distance = camera.default_distance * 0.62
-		await create_timer(1.8).timeout
-		await _save("board_angle")
-		camera.goal_yaw = 0.0
-		camera.goal_pitch = 78.0
-		camera.goal_distance = camera.default_distance * 0.78
-		await create_timer(1.8).timeout
-		await _save("board_top")
+	await _capture_board()
+	await _capture_victory()
 
 	_finished = true
 	print("CAPTURAS: listo (%s)" % _dir)
 	quit(0)
+
+
+func _capture_rules_tab() -> void:
+	var tab: Node = current_scene.get_node_or_null("%RulesTab")
+	if tab == null:
+		print("CAPTURAS: no hay pestaña de reglas")
+		return
+	tab.pressed.emit()
+	await create_timer(1.6).timeout
+	await _save("settings_rules")
+
+
+func _bind_board() -> bool:
+	var scene: Node = current_scene
+	if scene == null:
+		return false
+	_flow = scene.get_node_or_null("%Flow")
+	_hud = scene.get_node_or_null("%Hud")
+	_panel = scene.get_node_or_null("%ChallengePanel")
+	_camera = scene.get_node_or_null("%BoardCamera")
+	_dice = scene.get_node_or_null("%Dice")
+	_pause = scene.get_node_or_null("%PauseMenu")
+	return _flow != null and _hud != null and _panel != null and _camera != null and _dice != null and _pause != null
+
+
+func _capture_board() -> void:
+	if not _bind_board():
+		print("CAPTURAS: el tablero no tiene todas sus piezas")
+		return
+
+	# Vistas de la cámara.
+	_camera.goal_yaw = 28.0
+	_camera.goal_pitch = 34.0
+	_camera.goal_distance = _camera.default_distance * 0.62
+	await create_timer(1.8).timeout
+	await _save("board_angle")
+	_camera.goal_yaw = 0.0
+	_camera.goal_pitch = 78.0
+	_camera.goal_distance = _camera.default_distance * 0.78
+	await create_timer(1.8).timeout
+	await _save("board_top")
+	_camera.reset_view(false)
+	await create_timer(1.0).timeout
+
+	# Turno 1: un 4 desde la casilla 1 cae en la casilla 5, que tiene un desafío.
+	_flow.try_roll(0, 4)
+	await create_timer(0.7).timeout
+	await _save("board_dice")
+	await _wait_cond(_challenge_open, 25.0)
+	await create_timer(1.5).timeout
+	await _save("challenge_question")
+	var item: Variant = _panel.challenge
+	if item != null:
+		_panel.choose(int(item.correct))
+	await create_timer(1.0).timeout
+	await _save("challenge_answered")
+	_panel.continue_pressed()
+	await _wait_cond(_ready_for_roll, 25.0)
+	await create_timer(0.6).timeout
+	await _save("board_next_turn")
+
+	# Turno 2: escalera de la casilla 3 a la 22.
+	var second: int = _flow.current_player()
+	_flow.place_player(second, 1)
+	_flow.try_roll(second, 2)
+	await _wait_cond(_toast_starts.bind("¡Escalera"), 20.0)
+	await create_timer(1.0).timeout
+	await _save("board_ladder")
+	await _wait_cond(_ready_for_roll, 25.0)
+
+	# Turno 3: serpiente de la casilla 98 a la 78.
+	var third: int = _flow.current_player()
+	_flow.place_player(third, 92)
+	_flow.try_roll(third, 6)
+	await _wait_cond(_toast_starts.bind("¡Serpiente"), 20.0)
+	await create_timer(1.1).timeout
+	await _save("board_snake")
+	await _wait_cond(_ready_for_roll, 25.0)
+
+	# Pausa.
+	_hud.pause_pressed.emit()
+	await create_timer(0.8).timeout
+	await _save("pause")
+	_pause.close()
+	await create_timer(0.5).timeout
+
+
+func _capture_victory() -> void:
+	if _flow == null or not is_instance_valid(_flow):
+		return
+	var winner: int = _flow.current_player()
+	_flow.place_player(winner, 96)
+	_flow.try_roll(winner, 4)
+	await create_timer(1.0).timeout
+	await _save("board_goal")
+	await _wait_for("victory")
+	await create_timer(3.2).timeout
+	await _save("victory")
+
+
+func _challenge_open() -> bool:
+	return _panel != null and _panel.is_open() and not _panel.is_answered()
+
+
+func _ready_for_roll() -> bool:
+	return _flow != null and _flow.is_waiting_for_roll()
+
+
+func _toast_starts(prefix: String) -> bool:
+	return _hud != null and _hud.toast_text().begins_with(prefix)
+
+
+func _wait_cond(condition: Callable, timeout: float) -> void:
+	var waited: float = 0.0
+	while waited < timeout:
+		if condition.call():
+			return
+		await create_timer(0.1).timeout
+		waited += 0.1
+	print("CAPTURAS: una espera terminó sin cumplirse")
 
 
 func _wait_for(key: String) -> void:

@@ -52,7 +52,28 @@ theme_override_constants/separation = 24
 layout_mode = 2
 title = "CONFIGURACIÓN"
 
+[node name="Tabs" type="HBoxContainer" parent="UI/Root/Margin/VBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 18
+
+[node name="GeneralTab" type="Button" parent="UI/Root/Margin/VBox/Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(380, 84)
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+text = "GENERAL"
+
+[node name="RulesTab" type="Button" parent="UI/Root/Margin/VBox/Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(500, 84)
+layout_mode = 2
+toggle_mode = true
+text = "REGLAS DEL JUEGO"
+
 [node name="Content" type="HBoxContainer" parent="UI/Root/Margin/VBox"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
@@ -225,3 +246,108 @@ theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 24
 text = "Información del juego"
 autowrap_mode = 3
+
+[node name="RulesContent" type="HBoxContainer" parent="UI/Root/Margin/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 32
+
+[node name="RewardPanel" type="PanelContainer" parent="UI/Root/Margin/VBox/RulesContent"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Reward" type="VBoxContainer" parent="UI/Root/Margin/VBox/RulesContent/RewardPanel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="RewardTitle" type="Label" parent="UI/Root/Margin/VBox/RulesContent/RewardPanel/Reward"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+theme_override_font_sizes/font_size = 46
+text = "DESAFÍOS Y RECOMPENSAS"
+
+[node name="ChallengesToggle" type="Button" parent="UI/Root/Margin/VBox/RulesContent/RewardPanel/Reward"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+toggle_mode = true
+text = "DESAFÍOS: ACTIVADOS"
+
+[node name="RewardName" type="Label" parent="UI/Root/Margin/VBox/RulesContent/RewardPanel/Reward"]
+layout_mode = 2
+text = "Al acertar un desafío"
+
+[node name="RewardRow" type="HBoxContainer" parent="UI/Root/Margin/VBox/RulesContent/RewardPanel/Reward"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RewardStepper" type="HBoxContainer" parent="UI/Root/Margin/VBox/RulesContent/RewardPanel/Reward"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="RewardHint" type="Label" parent="UI/Root/Margin/VBox/RulesContent/RewardPanel/Reward"]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 26
+text = "Cada acierto da estrellas según la dificultad (1 a 3). Además puedes elegir un premio de juego."
+autowrap_mode = 3
+
+[node name="PenaltyPanel" type="PanelContainer" parent="UI/Root/Margin/VBox/RulesContent"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Penalty" type="VBoxContainer" parent="UI/Root/Margin/VBox/RulesContent/PenaltyPanel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="PenaltyTitle" type="Label" parent="UI/Root/Margin/VBox/RulesContent/PenaltyPanel/Penalty"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+theme_override_font_sizes/font_size = 46
+text = "PENALIZACIÓN Y META"
+
+[node name="PenaltyName" type="Label" parent="UI/Root/Margin/VBox/RulesContent/PenaltyPanel/Penalty"]
+layout_mode = 2
+text = "Al fallar un desafío"
+
+[node name="PenaltyRow" type="HBoxContainer" parent="UI/Root/Margin/VBox/RulesContent/PenaltyPanel/Penalty"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PenaltyStepper" type="HBoxContainer" parent="UI/Root/Margin/VBox/RulesContent/PenaltyPanel/Penalty"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="ExactToggle" type="Button" parent="UI/Root/Margin/VBox/RulesContent/PenaltyPanel/Penalty"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+toggle_mode = true
+text = "TIRADA EXACTA EN LA META: NO"
+
+[node name="ExactHint" type="Label" parent="UI/Root/Margin/VBox/RulesContent/PenaltyPanel/Penalty"]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 26
+text = "Si la activas, hay que sacar justo el número que falta para llegar a la casilla final."
+autowrap_mode = 3
+
+[node name="Spacer" type="Control" parent="UI/Root/Margin/VBox/RulesContent/PenaltyPanel/Penalty"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="RulesResetButton" type="Button" parent="UI/Root/Margin/VBox/RulesContent/PenaltyPanel/Penalty"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "RESTABLECER REGLAS"

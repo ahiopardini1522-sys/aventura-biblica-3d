@@ -9,6 +9,9 @@ const START_COLOR := Color(0.30, 0.72, 0.40)
 const GOAL_COLOR := Color(0.96, 0.77, 0.33)
 const LADDER_TINT := Color(0.50, 0.78, 0.35)
 const SNAKE_TINT := Color(0.88, 0.36, 0.30)
+const CHALLENGE_TINT := Color(0.55, 0.52, 0.92)
+const CHALLENGE_GOLD := Color(0.98, 0.80, 0.30)
+const LADDER_LIFT := 0.14
 const WOOD_COLOR := Color(0.58, 0.38, 0.19)
 const LADDER_WIDTH := 0.44
 const SHADOW_REACH := 1.6
@@ -30,6 +33,7 @@ var _tiles_root: Node3D
 var _ladders_root: Node3D
 var _snakes_root: Node3D
 var _dice_area: Node3D
+var _challenge_disc: CylinderMesh
 
 
 ## Crea todo el tablero. Si ya había uno construido, lo reemplaza.
@@ -56,6 +60,7 @@ func clear() -> void:
 	_ladders_root = null
 	_snakes_root = null
 	_dice_area = null
+	_challenge_disc = null
 
 
 # ---------------------------------------------------------------- Consultas
@@ -82,6 +87,38 @@ func tile_node(tile: int) -> MeshInstance3D:
 ## Centro de la cara superior de una casilla, en el espacio del tablero.
 func tile_position(tile: int) -> Vector3:
 	return layout.tile_center(tile)
+
+
+## Camino que recorre una ficha al subir por una escalera (de la casilla de abajo a la de arriba).
+func ladder_path(from_tile: int, to_tile: int) -> PackedVector3Array:
+	var lift := Vector3(0.0, LADDER_LIFT, 0.0)
+	return PackedVector3Array([layout.tile_center(from_tile) + lift, layout.tile_center(to_tile) + lift])
+
+
+## Peldaños de una escalera (también sirve para saber cuántos saltitos da la ficha al subir).
+func ladder_rungs(from_tile: int, to_tile: int) -> int:
+	var length: float = layout.tile_center(from_tile).distance_to(layout.tile_center(to_tile))
+	return maxi(2, int(length / 0.42))
+
+
+## Camino de una ficha que resbala por una serpiente: sigue el lomo de la serpiente
+## desde la cabeza hasta la cola, el mismo que se dibuja en el tablero.
+func snake_path(head_tile: int, tail_tile: int) -> PackedVector3Array:
+	var geometry: Dictionary = _snake_geometry(head_tile, tail_tile)
+	var points: PackedVector3Array = geometry["points"]
+	var radii: PackedFloat32Array = geometry["radii"]
+	var path := PackedVector3Array()
+	for i in points.size():
+		path.append(Vector3(points[i].x, BoardLayout.TILE_HEIGHT + radii[i] * 2.0, points[i].z))
+	return path
+
+
+## Nodo de la cabeza de la serpiente que empieza en esa casilla (para animar su mordisco).
+func snake_head_node(head_tile: int) -> Node3D:
+	if _snakes_root == null:
+		return null
+	var tail_tile: int = layout.jump_target(head_tile)
+	return _snakes_root.get_node_or_null("Snake_%03d_%03d/Head" % [head_tile, tail_tile]) as Node3D
 
 
 ## Punto donde se apoya el dado (sobre su pedestal).
@@ -168,6 +205,8 @@ func _build_tiles() -> void:
 		instance.set_meta(&"tile", tile)
 		_tiles_root.add_child(instance)
 		instance.add_child(_make_number(tile, color))
+		if layout.is_challenge_tile(tile):
+			_add_challenge_marker(instance)
 
 
 ## Color de una casilla: normal, inicio, meta o el matiz de escalera/serpiente.
@@ -181,6 +220,8 @@ func _tile_color(tile: int, base: Color) -> Color:
 			return base.lerp(LADDER_TINT, 0.5)
 		"snake_head", "snake_tail":
 			return base.lerp(SNAKE_TINT, 0.45)
+		"challenge":
+			return base.lerp(CHALLENGE_TINT, 0.38)
 	return base
 
 
@@ -195,6 +236,8 @@ func _tile_role(tile: int) -> String:
 			return "snake_head"
 		if pair.y == tile:
 			return "snake_tail"
+	if layout.is_challenge_tile(tile):
+		return "challenge"
 	return ""
 
 
@@ -212,6 +255,43 @@ func _make_number(tile: int, tile_color: Color) -> Label3D:
 	label.rotation = Vector3(-PI * 0.5, 0.0, 0.0)
 	label.position = Vector3(-0.17, BoardLayout.TILE_HEIGHT * 0.5 + 0.01, 0.2)
 	return label
+
+
+## Disco dorado con un signo de pregunta en una esquina de la casilla: ahí hay un desafío.
+func _add_challenge_marker(tile_node_3d: Node3D) -> void:
+	var top: float = BoardLayout.TILE_HEIGHT * 0.5
+	var disc_mesh: CylinderMesh = _challenge_disc_mesh()
+	var disc := MeshInstance3D.new()
+	disc.name = "ChallengeDisc"
+	disc.mesh = disc_mesh
+	disc.material_override = _material("challenge_gold", CHALLENGE_GOLD, 0.35, 0.3)
+	disc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	disc.position = Vector3(0.25, top + 0.006, -0.25)
+	tile_node_3d.add_child(disc)
+
+	var mark := Label3D.new()
+	mark.name = "ChallengeMark"
+	mark.text = "?"
+	mark.font_size = 64
+	mark.pixel_size = 0.0046
+	mark.shaded = false
+	mark.double_sided = false
+	mark.modulate = Color(0.30, 0.14, 0.02)
+	mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mark.rotation = Vector3(-PI * 0.5, 0.0, 0.0)
+	mark.position = Vector3(0.25, top + 0.016, -0.25)
+	tile_node_3d.add_child(mark)
+
+
+func _challenge_disc_mesh() -> CylinderMesh:
+	if _challenge_disc == null:
+		_challenge_disc = CylinderMesh.new()
+		_challenge_disc.top_radius = 0.15
+		_challenge_disc.bottom_radius = 0.15
+		_challenge_disc.height = 0.012
+		_challenge_disc.radial_segments = 20
+		_challenge_disc.rings = 1
+	return _challenge_disc
 
 
 # ---------------------------------------------------------------- Escaleras
@@ -275,24 +355,11 @@ func _build_snakes() -> void:
 ## hasta la cola, en la casilla baja, más cabeza, ojos y lengua.
 func _make_snake(head_tile: int, tail_tile: int, color: Color) -> Node3D:
 	var head_pos: Vector3 = layout.tile_center(head_tile)
-	var tail_pos: Vector3 = layout.tile_center(tail_tile)
-	var flat := Vector3(tail_pos.x - head_pos.x, 0.0, tail_pos.z - head_pos.z)
-	var length: float = flat.length()
-	var direction: Vector3 = flat / length
-	var side := Vector3(-direction.z, 0.0, direction.x)
-	var segments: int = clampi(int(length * 5.0), 14, 80)
-	var waves: float = maxf(1.0, roundf(length / 2.4))
-
-	var points := PackedVector3Array()
-	var radii := PackedFloat32Array()
+	var geometry: Dictionary = _snake_geometry(head_tile, tail_tile)
+	var points: PackedVector3Array = geometry["points"]
+	var radii: PackedFloat32Array = geometry["radii"]
 	var colors := PackedColorArray()
-	for i in segments + 1:
-		var t: float = float(i) / float(segments)
-		var along: Vector3 = head_pos.lerp(tail_pos, t)
-		var wiggle: float = sin(t * TAU * waves) * 0.34 * sin(t * PI)
-		var radius: float = 0.13 * lerpf(1.0, 0.2, pow(t, 1.4))
-		points.append(Vector3(along.x, BoardLayout.TILE_HEIGHT + radius, along.z) + side * wiggle)
-		radii.append(radius)
+	for i in points.size():
 		var band: int = int(float(i) / 2.0) % 2
 		colors.append(color if band == 0 else color.darkened(0.28))
 
@@ -313,6 +380,29 @@ func _make_snake(head_tile: int, tail_tile: int, color: Color) -> Node3D:
 	snake.add_child(head)
 	_add_snake_head_parts(head, color)
 	return snake
+
+
+## Línea central ondulada del cuerpo de una serpiente (cabeza -> cola) y el radio en cada punto.
+func _snake_geometry(head_tile: int, tail_tile: int) -> Dictionary:
+	var head_pos: Vector3 = layout.tile_center(head_tile)
+	var tail_pos: Vector3 = layout.tile_center(tail_tile)
+	var flat := Vector3(tail_pos.x - head_pos.x, 0.0, tail_pos.z - head_pos.z)
+	var length: float = flat.length()
+	var direction: Vector3 = flat / length
+	var side := Vector3(-direction.z, 0.0, direction.x)
+	var segments: int = clampi(int(length * 5.0), 14, 80)
+	var waves: float = maxf(1.0, roundf(length / 2.4))
+
+	var points := PackedVector3Array()
+	var radii := PackedFloat32Array()
+	for i in segments + 1:
+		var t: float = float(i) / float(segments)
+		var along: Vector3 = head_pos.lerp(tail_pos, t)
+		var wiggle: float = sin(t * TAU * waves) * 0.34 * sin(t * PI)
+		var radius: float = 0.13 * lerpf(1.0, 0.2, pow(t, 1.4))
+		points.append(Vector3(along.x, BoardLayout.TILE_HEIGHT + radius, along.z) + side * wiggle)
+		radii.append(radius)
+	return {"points": points, "radii": radii}
 
 
 func _add_snake_head_parts(head: Node3D, color: Color) -> void:

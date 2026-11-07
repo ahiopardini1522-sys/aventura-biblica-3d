@@ -1,5 +1,5 @@
 extends Node
-## Autoload "SettingsManager": ajustes del jugador (volumen, calidad, FPS).
+## Autoload "SettingsManager": ajustes del jugador (volumen, calidad, FPS y reglas de la partida).
 ## Se guardan en user://settings.cfg y se aplican al iniciar.
 
 signal settings_changed
@@ -18,6 +18,13 @@ var music_volume: float = DEFAULT_MUSIC
 var sfx_volume: float = DEFAULT_SFX
 var quality: int = Quality.MEDIUM
 var show_fps: bool = false
+## Reglas de la partida (ver GameRules): desafíos, premio por acertar y castigo por fallar.
+var challenges_enabled: bool = true
+var reward_mode: int = GameRules.REWARD_ADVANCE
+var reward_steps: int = 2
+var penalty_mode: int = GameRules.PENALTY_BACK
+var penalty_steps: int = 2
+var exact_finish: bool = false
 
 var _fps_layer: CanvasLayer
 var _fps_label: Label
@@ -74,14 +81,68 @@ func set_show_fps(value: bool) -> void:
 	_changed(true)
 
 
+func set_challenges_enabled(value: bool) -> void:
+	challenges_enabled = value
+	_changed(true)
+
+
+func set_reward_mode(value: int) -> void:
+	reward_mode = clampi(value, GameRules.REWARD_STARS_ONLY, GameRules.REWARD_EXTRA_ROLL)
+	_changed(true)
+
+
+func set_reward_steps(value: int) -> void:
+	reward_steps = clampi(value, GameRules.MIN_SHIFT, GameRules.MAX_SHIFT)
+	_changed(true)
+
+
+func set_penalty_mode(value: int) -> void:
+	penalty_mode = clampi(value, GameRules.PENALTY_NONE, GameRules.PENALTY_SKIP_TURN)
+	_changed(true)
+
+
+func set_penalty_steps(value: int) -> void:
+	penalty_steps = clampi(value, GameRules.MIN_SHIFT, GameRules.MAX_SHIFT)
+	_changed(true)
+
+
+func set_exact_finish(value: bool) -> void:
+	exact_finish = value
+	_changed(true)
+
+
+## Opciones de juego para MatchState.create().
+func game_options() -> Dictionary:
+	return GameRules.normalize_options({
+		"challenges": challenges_enabled,
+		"reward_mode": reward_mode,
+		"reward_steps": reward_steps,
+		"penalty_mode": penalty_mode,
+		"penalty_steps": penalty_steps,
+		"exact_finish": exact_finish,
+	})
+
+
 func reset_to_defaults() -> void:
 	master_volume = DEFAULT_MASTER
 	music_volume = DEFAULT_MUSIC
 	sfx_volume = DEFAULT_SFX
 	quality = Quality.MEDIUM
 	show_fps = false
+	reset_game_rules()
 	apply_all()
 	_changed(true)
+
+
+## Vuelve las reglas de la partida a sus valores iniciales (sin tocar sonido ni gráficos).
+func reset_game_rules() -> void:
+	var defaults: Dictionary = GameRules.default_options()
+	challenges_enabled = bool(defaults["challenges"])
+	reward_mode = int(defaults["reward_mode"])
+	reward_steps = int(defaults["reward_steps"])
+	penalty_mode = int(defaults["penalty_mode"])
+	penalty_steps = int(defaults["penalty_steps"])
+	exact_finish = bool(defaults["exact_finish"])
 
 
 func save() -> void:
@@ -91,6 +152,12 @@ func save() -> void:
 	cfg.set_value("audio", "sfx", sfx_volume)
 	cfg.set_value("video", "quality", quality)
 	cfg.set_value("video", "show_fps", show_fps)
+	cfg.set_value("game", "challenges", challenges_enabled)
+	cfg.set_value("game", "reward_mode", reward_mode)
+	cfg.set_value("game", "reward_steps", reward_steps)
+	cfg.set_value("game", "penalty_mode", penalty_mode)
+	cfg.set_value("game", "penalty_steps", penalty_steps)
+	cfg.set_value("game", "exact_finish", exact_finish)
 	var err: int = cfg.save(SETTINGS_PATH)
 	if err != OK:
 		push_warning("SettingsManager: no se pudo guardar los ajustes (error %d)" % err)
@@ -121,6 +188,34 @@ func play_confirm() -> void:
 
 func play_dice() -> void:
 	_play(AudioSynth.dice_roll(), -2.0)
+
+
+func play_step() -> void:
+	_play(AudioSynth.step(), -9.0)
+
+
+func play_ladder() -> void:
+	_play(AudioSynth.ladder(), -3.0)
+
+
+func play_snake() -> void:
+	_play(AudioSynth.snake(), -3.0)
+
+
+func play_correct() -> void:
+	_play(AudioSynth.correct(), -3.0)
+
+
+func play_wrong() -> void:
+	_play(AudioSynth.wrong(), -4.0)
+
+
+func play_star() -> void:
+	_play(AudioSynth.star(), -5.0)
+
+
+func play_win() -> void:
+	_play(AudioSynth.win(), -2.0)
 
 
 func _play(stream: AudioStream, volume_db: float) -> void:
@@ -186,6 +281,20 @@ func _load() -> void:
 	sfx_volume = clampf(float(cfg.get_value("audio", "sfx", DEFAULT_SFX)), 0.0, 1.0)
 	quality = clampi(int(cfg.get_value("video", "quality", Quality.MEDIUM)), Quality.LOW, Quality.HIGH)
 	show_fps = bool(cfg.get_value("video", "show_fps", false))
+	var saved_rules: Dictionary = GameRules.normalize_options({
+		"challenges": cfg.get_value("game", "challenges", true),
+		"reward_mode": cfg.get_value("game", "reward_mode", GameRules.REWARD_ADVANCE),
+		"reward_steps": cfg.get_value("game", "reward_steps", 2),
+		"penalty_mode": cfg.get_value("game", "penalty_mode", GameRules.PENALTY_BACK),
+		"penalty_steps": cfg.get_value("game", "penalty_steps", 2),
+		"exact_finish": cfg.get_value("game", "exact_finish", false),
+	})
+	challenges_enabled = bool(saved_rules["challenges"])
+	reward_mode = int(saved_rules["reward_mode"])
+	reward_steps = int(saved_rules["reward_steps"])
+	penalty_mode = int(saved_rules["penalty_mode"])
+	penalty_steps = int(saved_rules["penalty_steps"])
+	exact_finish = bool(saved_rules["exact_finish"])
 
 
 func _build_fps_overlay() -> void:

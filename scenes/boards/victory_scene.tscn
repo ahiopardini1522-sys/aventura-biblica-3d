@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/game/victory_scene.gd" id="1_scene"]
+[ext_resource type="PackedScene" path="res://scenes/maps/map_environment.tscn" id="2_env"]
+[ext_resource type="PackedScene" path="res://scenes/interfaces/victory_hud.tscn" id="3_hud"]
+
+[node name="VictoryScene" type="Node"]
+script = ExtResource("1_scene")
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="MapEnvironment" parent="World" instance=ExtResource("2_env")]
+unique_name_in_owner = true
+
+[node name="Stage" type="Node3D" parent="World"]
+unique_name_in_owner = true
+
+[node name="Effects" type="Node3D" parent="World"]
+unique_name_in_owner = true
+
+[node name="Camera" type="Camera3D" parent="World"]
+unique_name_in_owner = true
+current = true
+fov = 45.0
+far = 400.0
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Hud" parent="UI" instance=ExtResource("3_hud")]
+unique_name_in_owner = true

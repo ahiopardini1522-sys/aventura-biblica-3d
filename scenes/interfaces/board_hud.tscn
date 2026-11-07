@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/board_hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://scripts/ui/progress_track.gd" id="2_progress"]
 
 [node name="BoardHud" type="Control"]
 layout_mode = 3
@@ -12,6 +13,17 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_hud")
 
+[node name="Flash" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
 [node name="Margin" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -21,55 +33,71 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 96
-theme_override_constants/margin_top = 36
+theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 96
-theme_override_constants/margin_bottom = 36
+theme_override_constants/margin_bottom = 28
 
 [node name="Layout" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
 mouse_filter = 2
+theme_override_constants/separation = 10
 
 [node name="TopBar" type="HBoxContainer" parent="Margin/Layout"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 24
 
-[node name="BackButton" type="Button" parent="Margin/Layout/TopBar"]
+[node name="PauseButton" type="Button" parent="Margin/Layout/TopBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(220, 88)
+custom_minimum_size = Vector2(230, 92)
 layout_mode = 2
-text = "MENÚ"
+size_flags_vertical = 4
+text = "PAUSAR"
 
-[node name="TitleBox" type="VBoxContainer" parent="Margin/Layout/TopBar"]
+[node name="TurnPanel" type="PanelContainer" parent="Margin/Layout/TopBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 92)
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
+
+[node name="TurnBox" type="HBoxContainer" parent="Margin/Layout/TopBar/TurnPanel"]
+layout_mode = 2
+mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="TurnDot" type="Panel" parent="Margin/Layout/TopBar/TurnPanel/TurnBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(46, 46)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+
+[node name="TurnText" type="VBoxContainer" parent="Margin/Layout/TopBar/TurnPanel/TurnBox"]
+layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 0
 
-[node name="MapTitleLabel" type="Label" parent="Margin/Layout/TopBar/TitleBox"]
+[node name="TurnLabel" type="Label" parent="Margin/Layout/TopBar/TurnPanel/TurnBox/TurnText"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"HeadingLabel"
-theme_override_colors/font_color = Color(1, 0.9, 0.62, 1)
-theme_override_colors/font_outline_color = Color(0.12, 0.06, 0.01, 1)
-theme_override_constants/outline_size = 14
-theme_override_font_sizes/font_size = 44
-text = "Mapa"
+theme_override_font_sizes/font_size = 46
+text = "Turno de Jugador"
 horizontal_alignment = 1
 
-[node name="MapRefLabel" type="Label" parent="Margin/Layout/TopBar/TitleBox"]
+[node name="MapLine" type="Label" parent="Margin/Layout/TopBar/TurnPanel/TurnBox/TurnText"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"DimLabel"
-theme_override_colors/font_color = Color(1, 1, 1, 0.95)
-theme_override_colors/font_outline_color = Color(0.12, 0.06, 0.01, 1)
-theme_override_constants/outline_size = 10
-theme_override_font_sizes/font_size = 28
-text = "Referencia"
+theme_override_font_sizes/font_size = 24
+text = "Mapa  ·  Referencia"
 horizontal_alignment = 1
 
 [node name="ViewButtons" type="HBoxContainer" parent="Margin/Layout/TopBar"]
 layout_mode = 2
+size_flags_vertical = 4
 mouse_filter = 2
 theme_override_constants/separation = 14
 
@@ -93,30 +121,47 @@ custom_minimum_size = Vector2(190, 88)
 layout_mode = 2
 text = "VISTA"
 
+[node name="ProgressMargin" type="MarginContainer" parent="Margin/Layout"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 160
+theme_override_constants/margin_right = 160
+
+[node name="Progress" type="Control" parent="Margin/Layout/ProgressMargin"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("2_progress")
+
 [node name="Middle" type="HBoxContainer" parent="Margin/Layout"]
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
 [node name="PlayersPanel" type="PanelContainer" parent="Margin/Layout/Middle"]
-custom_minimum_size = Vector2(440, 0)
+unique_name_in_owner = true
+custom_minimum_size = Vector2(470, 0)
 layout_mode = 2
-size_flags_vertical = 4
+size_flags_vertical = 0
+mouse_filter = 2
 
 [node name="PlayersBox" type="VBoxContainer" parent="Margin/Layout/Middle/PlayersPanel"]
 layout_mode = 2
-theme_override_constants/separation = 12
+mouse_filter = 2
+theme_override_constants/separation = 8
 
 [node name="PlayersTitle" type="Label" parent="Margin/Layout/Middle/PlayersPanel/PlayersBox"]
 layout_mode = 2
 theme_type_variation = &"DimLabel"
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 26
 text = "JUGADORES"
 
 [node name="PlayersList" type="VBoxContainer" parent="Margin/Layout/Middle/PlayersPanel/PlayersBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 10
+mouse_filter = 2
+theme_override_constants/separation = 8
 
 [node name="BottomBar" type="HBoxContainer" parent="Margin/Layout"]
 layout_mode = 2
@@ -124,6 +169,7 @@ mouse_filter = 2
 theme_override_constants/separation = 24
 
 [node name="HintLabel" type="Label" parent="Margin/Layout/BottomBar"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 8
@@ -131,28 +177,98 @@ theme_type_variation = &"DimLabel"
 theme_override_colors/font_color = Color(1, 1, 1, 0.95)
 theme_override_colors/font_outline_color = Color(0.12, 0.06, 0.01, 1)
 theme_override_constants/outline_size = 10
-theme_override_font_sizes/font_size = 26
-text = "Arrastra para girar el tablero  ·  Pellizca para acercar o alejar  ·  Etapa 1: las fichas todavía no avanzan"
+theme_override_font_sizes/font_size = 30
+text = "Toca LANZAR DADO"
 autowrap_mode = 3
 
-[node name="RollBox" type="VBoxContainer" parent="Margin/Layout/BottomBar"]
+[node name="RollBox" type="HBoxContainer" parent="Margin/Layout/BottomBar"]
 layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 22
+
+[node name="DieBadge" type="PanelContainer" parent="Margin/Layout/BottomBar/RollBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(132, 132)
+layout_mode = 2
+size_flags_vertical = 8
+mouse_filter = 2
+
+[node name="DieLabel" type="Label" parent="Margin/Layout/BottomBar/RollBox/DieBadge"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.13, 0.07, 0.01, 1)
+theme_override_font_sizes/font_size = 92
+text = "?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RollColumn" type="VBoxContainer" parent="Margin/Layout/BottomBar/RollBox"]
+layout_mode = 2
+size_flags_vertical = 8
 mouse_filter = 2
 theme_override_constants/separation = 8
 
-[node name="ResultLabel" type="Label" parent="Margin/Layout/BottomBar/RollBox"]
+[node name="ResultLabel" type="Label" parent="Margin/Layout/BottomBar/RollBox/RollColumn"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 theme_type_variation = &"ValueLabel"
 theme_override_colors/font_color = Color(1, 0.9, 0.58, 1)
 theme_override_colors/font_outline_color = Color(0.12, 0.06, 0.01, 1)
 theme_override_constants/outline_size = 12
+theme_override_font_sizes/font_size = 40
 horizontal_alignment = 2
 
-[node name="RollButton" type="Button" parent="Margin/Layout/BottomBar/RollBox"]
+[node name="RollButton" type="Button" parent="Margin/Layout/BottomBar/RollBox/RollColumn"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(520, 124)
+custom_minimum_size = Vector2(500, 120)
 layout_mode = 2
 theme_type_variation = &"PrimaryButton"
 text = "LANZAR DADO"
+
+[node name="Toast" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -520.0
+offset_top = 236.0
+offset_right = 520.0
+offset_bottom = 336.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="ToastLabel" type="Label" parent="Toast"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 38
+text = "Mensaje"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Splash" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -700.0
+offset_top = -90.0
+offset_right = 700.0
+offset_bottom = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"TitleLabel"
+theme_override_font_sizes/font_size = 120
+text = "TURNO"
+horizontal_alignment = 1
+vertical_alignment = 1

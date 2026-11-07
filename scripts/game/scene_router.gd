@@ -12,6 +12,7 @@ const SCENES: Dictionary = {
 	"characters": "res://scenes/menus/characters_screen.tscn",
 	"settings": "res://scenes/menus/settings_screen.tscn",
 	"board": "res://scenes/boards/board_scene.tscn",
+	"victory": "res://scenes/boards/victory_scene.tscn",
 }
 const FADE_TIME := 0.22
 const FADE_COLOR := Color(0.03, 0.04, 0.09)
