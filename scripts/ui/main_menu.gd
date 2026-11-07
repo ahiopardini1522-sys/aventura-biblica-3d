@@ -13,6 +13,8 @@ func _ready() -> void:
 	%VersionLabel.text = "v%s  ·  Etapa 1" % version
 	UiFx.fade_scale_in([%TitleBlock, %PlayButton, %MapsButton, %MultiplayerButton,
 			%CharactersButton, %SettingsButton], 0.08, 0.5)
+	# Mensaje de arranque: sirve para comprobar el inicio en CI y con "adb logcat".
+	print("Aventura Bíblica 3D v%s: menú principal listo" % version)
 
 
 func _on_play_pressed() -> void:

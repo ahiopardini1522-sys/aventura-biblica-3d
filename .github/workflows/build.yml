@@ -97,6 +97,13 @@ jobs:
             --script res://tools/capture_screens.gd 2>&1 | tee logs/capture.log
           ls -la shots
 
+      - name: Medir la luz (sonda de iluminación)
+        continue-on-error: true
+        run: |
+          LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1600x720x24" \
+            godot --path . --rendering-driver opengl3 --resolution 640x360 \
+            --script res://tools/lighting_probe.gd 2>&1 | tee logs/lighting-probe.log
+
       - name: Guardar capturas y registros
         if: always()
         uses: actions/upload-artifact@v4
@@ -215,7 +222,11 @@ jobs:
             echo "::error::El juego empaquetado tiene errores al arrancar"
             exit 1
           fi
-          echo "El juego empaquetado arrancó sin errores de scripts ni de recursos."
+          if ! grep -q "menú principal listo" "$GITHUB_WORKSPACE/logs/pack-run.log"; then
+            echo "::error::El juego empaquetado no llegó a mostrar el menú principal"
+            exit 1
+          fi
+          echo "El juego empaquetado arrancó, mostró el menú principal y no tuvo errores de scripts ni de recursos."
 
       - name: Guardar APK
         uses: actions/upload-artifact@v4

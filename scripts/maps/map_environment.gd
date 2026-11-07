@@ -8,9 +8,10 @@ const GROUND_Y := -0.4
 const PROP_MIN_RADIUS := 11.0
 const PROP_MAX_RADIUS := 46.0
 # Luz de la escena del tablero. El sol y la luz ambiente se suman sobre las superficies
-# horizontales; si la suma pasa de 1.2 aproximadamente, los colores claros se queman.
-const SUN_ENERGY := 0.95
-const AMBIENT_ENERGY := 0.5
+# horizontales y el resultado ideal es cercano a 1.0 (los colores del mapa se ven tal cual).
+# Valores a afinar con las mediciones de tools/lighting_probe.gd.
+const SUN_ENERGY := 0.26
+const AMBIENT_ENERGY := 0.28
 const FOG_DENSITY := 0.003
 const GROUND_DARKEN := 0.18
 
@@ -38,8 +39,11 @@ func apply_theme(theme_data: Dictionary, seed_value: int, keep_out: Array = []) 
 	var ground: Color = _color(theme_data, "ground", Color(0.80, 0.64, 0.40))
 	var ambient: Color = _color(theme_data, "ambient", Color(1.0, 0.94, 0.84))
 	var fog: Color = _color(theme_data, "fog", Color(0.95, 0.84, 0.64))
-	_world_env.environment = EnvFactory.create(sky_top, sky_horizon, ground, ambient, fog,
+	var environment: Environment = EnvFactory.create(sky_top, sky_horizon, ground, ambient, fog,
 			FOG_DENSITY, AMBIENT_ENERGY)
+	# Tono lineal: los colores del tablero salen como están definidos en maps.json.
+	environment.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	_world_env.environment = environment
 	_sun.light_color = _color(theme_data, "sun", Color(1.0, 0.95, 0.82))
 	# El suelo es algo más oscuro que las casillas para que el tablero destaque.
 	_ground.material_override = MeshFactory.material(ground.darkened(GROUND_DARKEN), 1.0)
