@@ -1,0 +1,11 @@
+# Normaliza los finales de línea para todos los archivos de texto.
+* text=auto eol=lf
+
+# Binarios
+*.png binary
+*.jpg binary
+*.ogg binary
+*.wav binary
+*.glb binary
+*.ttf binary
+*.otf binary

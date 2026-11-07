@@ -1,0 +1,21 @@
+# Godot 4+
+.godot/
+*.translation
+
+# Exportaciones y claves (nunca subir llaves de firma)
+build/
+*.apk
+*.aab
+*.idsig
+*.keystore
+*.jks
+export_credentials.cfg
+
+# Editor / sistema
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Resultados de las pruebas automáticas
+logs/
+shots/
