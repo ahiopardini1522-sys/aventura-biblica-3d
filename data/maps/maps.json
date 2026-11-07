@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "note": "Catálogo de mapas bíblicos. En la Etapa 1 solo 'desierto_sinai' es jugable; los demás reservan su lugar en la estructura y se completarán en etapas posteriores.",
+  "maps": [
+    {
+      "id": "betel",
+      "order": 1,
+      "name": "Betel",
+      "reference": "Génesis 28:10-22",
+      "description": "Jacob sueña con una escalera que une la tierra con el cielo.",
+      "status": "coming_soon",
+      "theme": {
+        "tile_a": "#cdbfe0",
+        "tile_b": "#a995c9",
+        "frame": "#3d2f55",
+        "ground": "#7e6fa0",
+        "sky_top": "#1d2a5c",
+        "sky_horizon": "#d9a7c0",
+        "ambient": "#e6d8f2",
+        "fog": "#cfa8c4",
+        "sun": "#ffd9c2",
+        "props": ["rock", "dune"]
+      },
+      "board": { "columns": 10, "rows": 10, "ladders": [], "snakes": [] }
+    },
+    {
+      "id": "egipto",
+      "order": 2,
+      "name": "Egipto y el Mar Rojo",
+      "reference": "Éxodo 12-14",
+      "description": "El pueblo de Israel sale de Egipto y cruza el mar en seco.",
+      "status": "coming_soon",
+      "theme": {
+        "tile_a": "#f1dca4",
+        "tile_b": "#d9b56a",
+        "frame": "#5b3b1e",
+        "ground": "#d8b673",
+        "sky_top": "#3a7bc8",
+        "sky_horizon": "#fbe3b0",
+        "ambient": "#fff0d6",
+        "fog": "#f3dcae",
+        "sun": "#fff1d2",
+        "props": ["palm", "rock", "dune"]
+      },
+      "board": { "columns": 10, "rows": 10, "ladders": [], "snakes": [] }
+    },
+    {
+      "id": "desierto_sinai",
+      "order": 3,
+      "name": "Desierto del Sinaí",
+      "reference": "Éxodo 19-20",
+      "description": "En el desierto, Dios da su ley a Israel por medio de Moisés.",
+      "status": "available",
+      "theme": {
+        "tile_a": "#ead29a",
+        "tile_b": "#d6a766",
+        "frame": "#6b4426",
+        "ground": "#cfa467",
+        "sky_top": "#3f78c4",
+        "sky_horizon": "#f6d9a2",
+        "ambient": "#fff0d6",
+        "fog": "#f1d6a4",
+        "sun": "#fff1d2",
+        "props": ["palm", "rock", "dune"]
+      },
+      "board": {
+        "columns": 10,
+        "rows": 10,
+        "ladders": [[3, 22], [8, 30], [28, 56], [39, 60], [51, 72], [71, 92]],
+        "snakes": [[98, 78], [94, 67], [85, 64], [62, 44], [54, 34], [46, 15], [36, 6]]
+      }
+    },
+    {
+      "id": "rio_jordan",
+      "order": 4,
+      "name": "Cruce del Jordán",
+      "reference": "Josué 3",
+      "description": "Israel cruza el río Jordán para entrar a la tierra prometida.",
+      "status": "coming_soon",
+      "theme": {
+        "tile_a": "#c9e3c0",
+        "tile_b": "#8fbf8a",
+        "frame": "#4a3a22",
+        "ground": "#6f9a58",
+        "sky_top": "#3c82cf",
+        "sky_horizon": "#d8ecf5",
+        "ambient": "#eef6e8",
+        "fog": "#cfe3d6",
+        "sun": "#fff6dc",
+        "props": ["palm", "rock"]
+      },
+      "board": { "columns": 10, "rows": 10, "ladders": [], "snakes": [] }
+    },
+    {
+      "id": "jerusalen",
+      "order": 5,
+      "name": "Jerusalén",
+      "reference": "2 Samuel 5; 1 Reyes 6",
+      "description": "La ciudad de David y el templo que construyó Salomón.",
+      "status": "coming_soon",
+      "theme": {
+        "tile_a": "#efe6d2",
+        "tile_b": "#cfc0a0",
+        "frame": "#5a4630",
+        "ground": "#c9b48a",
+        "sky_top": "#4a86cf",
+        "sky_horizon": "#f8e7c4",
+        "ambient": "#fff3dc",
+        "fog": "#f1e1bf",
+        "sun": "#fff3d6",
+        "props": ["rock", "dune"]
+      },
+      "board": { "columns": 10, "rows": 10, "ladders": [], "snakes": [] }
+    },
+    {
+      "id": "mar_galilea",
+      "order": 6,
+      "name": "Mar de Galilea",
+      "reference": "Marcos 4:35-41; Mateo 14:22-33",
+      "description": "Jesús calma la tormenta y camina sobre el agua.",
+      "status": "coming_soon",
+      "theme": {
+        "tile_a": "#c4def2",
+        "tile_b": "#7fb3d9",
+        "frame": "#3f4f66",
+        "ground": "#5b8fb0",
+        "sky_top": "#2f6fbd",
+        "sky_horizon": "#d7ecfa",
+        "ambient": "#e8f3fb",
+        "fog": "#c9e1f1",
+        "sun": "#fff8e6",
+        "props": ["rock"]
+      },
+      "board": { "columns": 10, "rows": 10, "ladders": [], "snakes": [] }
+    }
+  ]
+}

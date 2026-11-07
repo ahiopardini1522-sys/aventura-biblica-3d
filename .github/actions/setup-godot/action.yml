@@ -1,0 +1,54 @@
+name: Preparar Godot
+description: Descarga Godot (y, si se pide, las plantillas de exportación) y lo deja disponible como "godot".
+
+inputs:
+  version:
+    description: Versión de Godot (por ejemplo 4.7.2)
+    required: false
+    default: "4.7.2"
+  templates:
+    description: Instalar también las plantillas de exportación ("true" o "false")
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Recuperar Godot guardado
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/godot-bin
+          ~/.local/share/godot/export_templates
+        key: godot-${{ inputs.version }}-plantillas-${{ inputs.templates }}
+
+    - name: Descargar Godot
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        version="${{ inputs.version }}"
+        base="https://github.com/godotengine/godot-builds/releases/download/${version}-stable"
+        mkdir -p "$HOME/godot-bin"
+        curl -fL --retry 4 --retry-delay 3 -o /tmp/godot.zip "$base/Godot_v${version}-stable_linux.x86_64.zip"
+        unzip -q -o /tmp/godot.zip -d "$HOME/godot-bin"
+        if [ "${{ inputs.templates }}" = "true" ]; then
+          curl -fL --retry 4 --retry-delay 3 -o /tmp/templates.tpz "$base/Godot_v${version}-stable_export_templates.tpz"
+          mkdir -p /tmp/templates "$HOME/.local/share/godot/export_templates/${version}.stable"
+          unzip -q -o /tmp/templates.tpz -d /tmp/templates
+          cp -r /tmp/templates/templates/. "$HOME/.local/share/godot/export_templates/${version}.stable/"
+        fi
+
+    - name: Dejar Godot en el PATH
+      shell: bash
+      run: |
+        set -euo pipefail
+        bin="$(ls "$HOME"/godot-bin/Godot_v*_linux.x86_64 | head -n 1)"
+        chmod +x "$bin"
+        ln -sf "$bin" "$HOME/godot-bin/godot"
+        echo "$HOME/godot-bin" >> "$GITHUB_PATH"
+        "$bin" --version
+        if [ "${{ inputs.templates }}" = "true" ]; then
+          ls -la "$HOME/.local/share/godot/export_templates/${{ inputs.version }}.stable/"
+        fi

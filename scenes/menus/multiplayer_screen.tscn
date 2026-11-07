@@ -1,0 +1,159 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/multiplayer_screen.gd" id="1_multi"]
+[ext_resource type="PackedScene" path="res://scenes/menus/menu_backdrop.tscn" id="2_backdrop"]
+[ext_resource type="PackedScene" path="res://scenes/interfaces/screen_header.tscn" id="3_header"]
+
+[node name="MultiplayerScreen" type="Node"]
+script = ExtResource("1_multi")
+
+[node name="Backdrop" parent="." instance=ExtResource("2_backdrop")]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Root" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Shade" type="ColorRect" parent="UI/Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.04, 0.1, 0.45)
+
+[node name="Margin" type="MarginContainer" parent="UI/Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 96
+theme_override_constants/margin_top = 44
+theme_override_constants/margin_right = 96
+theme_override_constants/margin_bottom = 44
+
+[node name="VBox" type="VBoxContainer" parent="UI/Root/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Header" parent="UI/Root/Margin/VBox" instance=ExtResource("3_header")]
+layout_mode = 2
+title = "MULTIJUGADOR"
+
+[node name="Content" type="HBoxContainer" parent="UI/Root/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 32
+
+[node name="LocalPanel" type="PanelContainer" parent="UI/Root/Margin/VBox/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.3
+
+[node name="Local" type="VBoxContainer" parent="UI/Root/Margin/VBox/Content/LocalPanel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="LocalTitle" type="Label" parent="UI/Root/Margin/VBox/Content/LocalPanel/Local"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+theme_override_font_sizes/font_size = 46
+text = "PARTIDA LOCAL"
+
+[node name="LocalHint" type="Label" parent="UI/Root/Margin/VBox/Content/LocalPanel/Local"]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "Juega por turnos en este mismo dispositivo."
+
+[node name="CountRow" type="HBoxContainer" parent="UI/Root/Margin/VBox/Content/LocalPanel/Local"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="CountTitle" type="Label" parent="UI/Root/Margin/VBox/Content/LocalPanel/Local/CountRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Jugadores"
+
+[node name="MinusButton" type="Button" parent="UI/Root/Margin/VBox/Content/LocalPanel/Local/CountRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+theme_override_font_sizes/font_size = 56
+text = "-"
+
+[node name="CountLabel" type="Label" parent="UI/Root/Margin/VBox/Content/LocalPanel/Local/CountRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlusButton" type="Button" parent="UI/Root/Margin/VBox/Content/LocalPanel/Local/CountRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+theme_override_font_sizes/font_size = 56
+text = "+"
+
+[node name="PlayerList" type="VBoxContainer" parent="UI/Root/Margin/VBox/Content/LocalPanel/Local"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="PlayersHint" type="Label" parent="UI/Root/Margin/VBox/Content/LocalPanel/Local"]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 26
+text = "Elige tu personaje en PERSONAJES; los demás se asignan solos."
+autowrap_mode = 3
+
+[node name="PlayLocalButton" type="Button" parent="UI/Root/Margin/VBox/Content/LocalPanel/Local"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 116)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "JUGAR"
+
+[node name="OnlinePanel" type="PanelContainer" parent="UI/Root/Margin/VBox/Content"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Online" type="VBoxContainer" parent="UI/Root/Margin/VBox/Content/OnlinePanel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="OnlineTitle" type="Label" parent="UI/Root/Margin/VBox/Content/OnlinePanel/Online"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+theme_override_font_sizes/font_size = 46
+text = "PARTIDA EN LÍNEA"
+
+[node name="SoonLabel" type="Label" parent="UI/Root/Margin/VBox/Content/OnlinePanel/Online"]
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+text = "PRÓXIMAMENTE"
+
+[node name="OnlineText" type="Label" parent="UI/Root/Margin/VBox/Content/OnlinePanel/Online"]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "Aquí podrás jugar con amigos por internet. La estructura del juego ya está preparada para conectarlo en una etapa posterior."
+autowrap_mode = 3

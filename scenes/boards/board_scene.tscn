@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/game/board_scene.gd" id="1_scene"]
+[ext_resource type="PackedScene" path="res://scenes/maps/map_environment.tscn" id="2_env"]
+[ext_resource type="Script" path="res://scripts/maps/board_builder.gd" id="3_builder"]
+[ext_resource type="PackedScene" path="res://scenes/boards/dice.tscn" id="4_dice"]
+[ext_resource type="Script" path="res://scripts/maps/board_camera.gd" id="5_camera"]
+[ext_resource type="PackedScene" path="res://scenes/interfaces/board_hud.tscn" id="6_hud"]
+
+[node name="BoardScene" type="Node"]
+script = ExtResource("1_scene")
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="MapEnvironment" parent="World" instance=ExtResource("2_env")]
+unique_name_in_owner = true
+
+[node name="Board" type="Node3D" parent="World"]
+unique_name_in_owner = true
+script = ExtResource("3_builder")
+
+[node name="Tokens" type="Node3D" parent="World"]
+unique_name_in_owner = true
+
+[node name="Dice" parent="World" instance=ExtResource("4_dice")]
+unique_name_in_owner = true
+
+[node name="BoardCamera" type="Camera3D" parent="World"]
+unique_name_in_owner = true
+current = true
+fov = 45.0
+far = 400.0
+script = ExtResource("5_camera")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Hud" parent="UI" instance=ExtResource("6_hud")]
+unique_name_in_owner = true

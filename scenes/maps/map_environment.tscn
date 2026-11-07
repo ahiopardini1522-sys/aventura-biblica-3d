@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/maps/map_environment.gd" id="1_env"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ground"]
+top_radius = 70.0
+bottom_radius = 70.0
+height = 0.2
+radial_segments = 48
+rings = 1
+
+[node name="MapEnvironment" type="Node3D"]
+script = ExtResource("1_env")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+unique_name_in_owner = true
+
+[node name="Sun" type="DirectionalLight3D" parent="." groups=["sun_light"]]
+unique_name_in_owner = true
+light_energy = 1.25
+shadow_enabled = true
+directional_shadow_mode = 0
+directional_shadow_max_distance = 45.0
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+unique_name_in_owner = true
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_ground")
+
+[node name="Props" type="Node3D" parent="."]
+unique_name_in_owner = true

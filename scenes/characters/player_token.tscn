@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/players/player_token.gd" id="1_token"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_base"]
+top_radius = 0.22
+bottom_radius = 0.26
+height = 0.08
+radial_segments = 24
+rings = 1
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_body"]
+top_radius = 0.09
+bottom_radius = 0.2
+height = 0.4
+radial_segments = 24
+rings = 1
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+radius = 0.14
+height = 0.28
+radial_segments = 24
+rings = 12
+
+[node name="PlayerToken" type="Node3D"]
+script = ExtResource("1_token")
+
+[node name="Visual" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="Base" type="MeshInstance3D" parent="Visual"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
+mesh = SubResource("CylinderMesh_base")
+
+[node name="Body" type="MeshInstance3D" parent="Visual"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0)
+mesh = SubResource("CylinderMesh_body")
+
+[node name="Head" type="MeshInstance3D" parent="Visual"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.62, 0)
+mesh = SubResource("SphereMesh_head")
+
+[node name="Initial" type="Label3D" parent="Visual"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.97, 0)
+pixel_size = 0.006
+billboard = 1
+no_depth_test = true
+font_size = 72
+outline_size = 18
+text = "?"

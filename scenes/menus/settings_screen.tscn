@@ -1,0 +1,227 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/settings_screen.gd" id="1_settings"]
+[ext_resource type="PackedScene" path="res://scenes/menus/menu_backdrop.tscn" id="2_backdrop"]
+[ext_resource type="PackedScene" path="res://scenes/interfaces/screen_header.tscn" id="3_header"]
+
+[node name="SettingsScreen" type="Node"]
+script = ExtResource("1_settings")
+
+[node name="Backdrop" parent="." instance=ExtResource("2_backdrop")]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Root" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Shade" type="ColorRect" parent="UI/Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.04, 0.1, 0.45)
+
+[node name="Margin" type="MarginContainer" parent="UI/Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 96
+theme_override_constants/margin_top = 44
+theme_override_constants/margin_right = 96
+theme_override_constants/margin_bottom = 44
+
+[node name="VBox" type="VBoxContainer" parent="UI/Root/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Header" parent="UI/Root/Margin/VBox" instance=ExtResource("3_header")]
+layout_mode = 2
+title = "CONFIGURACIÓN"
+
+[node name="Content" type="HBoxContainer" parent="UI/Root/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 32
+
+[node name="AudioPanel" type="PanelContainer" parent="UI/Root/Margin/VBox/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Audio" type="VBoxContainer" parent="UI/Root/Margin/VBox/Content/AudioPanel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="AudioTitle" type="Label" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+theme_override_font_sizes/font_size = 46
+text = "SONIDO"
+
+[node name="MasterBox" type="VBoxContainer" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="MasterHeader" type="HBoxContainer" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio/MasterBox"]
+layout_mode = 2
+
+[node name="MasterName" type="Label" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio/MasterBox/MasterHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Volumen general"
+
+[node name="MasterValue" type="Label" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio/MasterBox/MasterHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 36
+text = "80%"
+
+[node name="MasterSlider" type="HSlider" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio/MasterBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="MusicBox" type="VBoxContainer" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="MusicHeader" type="HBoxContainer" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio/MusicBox"]
+layout_mode = 2
+
+[node name="MusicName" type="Label" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio/MusicBox/MusicHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Música"
+
+[node name="MusicValue" type="Label" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio/MusicBox/MusicHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 36
+text = "80%"
+
+[node name="MusicSlider" type="HSlider" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio/MusicBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="SfxBox" type="VBoxContainer" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SfxHeader" type="HBoxContainer" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio/SfxBox"]
+layout_mode = 2
+
+[node name="SfxName" type="Label" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio/SfxBox/SfxHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Efectos de sonido"
+
+[node name="SfxValue" type="Label" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio/SfxBox/SfxHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 36
+text = "90%"
+
+[node name="SfxSlider" type="HSlider" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio/SfxBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 0.9
+
+[node name="Spacer" type="Control" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="TestSoundButton" type="Button" parent="UI/Root/Margin/VBox/Content/AudioPanel/Audio"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+text = "PROBAR SONIDO"
+
+[node name="VideoPanel" type="PanelContainer" parent="UI/Root/Margin/VBox/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Video" type="VBoxContainer" parent="UI/Root/Margin/VBox/Content/VideoPanel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="VideoTitle" type="Label" parent="UI/Root/Margin/VBox/Content/VideoPanel/Video"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+theme_override_font_sizes/font_size = 46
+text = "GRÁFICOS"
+
+[node name="QualityName" type="Label" parent="UI/Root/Margin/VBox/Content/VideoPanel/Video"]
+layout_mode = 2
+text = "Calidad"
+
+[node name="QualityRow" type="HBoxContainer" parent="UI/Root/Margin/VBox/Content/VideoPanel/Video"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="QualityHint" type="Label" parent="UI/Root/Margin/VBox/Content/VideoPanel/Video"]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 26
+text = "Controla el suavizado de bordes y las sombras. Si el juego va lento, elige BAJA."
+autowrap_mode = 3
+
+[node name="FpsName" type="Label" parent="UI/Root/Margin/VBox/Content/VideoPanel/Video"]
+layout_mode = 2
+text = "Mostrar FPS"
+
+[node name="FpsButton" type="Button" parent="UI/Root/Margin/VBox/Content/VideoPanel/Video"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+toggle_mode = true
+text = "DESACTIVADO"
+
+[node name="Spacer" type="Control" parent="UI/Root/Margin/VBox/Content/VideoPanel/Video"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="ResetButton" type="Button" parent="UI/Root/Margin/VBox/Content/VideoPanel/Video"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+text = "RESTABLECER AJUSTES"
+
+[node name="InfoLabel" type="Label" parent="UI/Root/Margin/VBox/Content/VideoPanel/Video"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 24
+text = "Información del juego"
+autowrap_mode = 3

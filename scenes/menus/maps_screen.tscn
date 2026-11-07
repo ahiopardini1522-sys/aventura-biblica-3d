@@ -1,0 +1,125 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/maps_screen.gd" id="1_maps"]
+[ext_resource type="PackedScene" path="res://scenes/menus/menu_backdrop.tscn" id="2_backdrop"]
+[ext_resource type="PackedScene" path="res://scenes/interfaces/screen_header.tscn" id="3_header"]
+
+[node name="MapsScreen" type="Node"]
+script = ExtResource("1_maps")
+
+[node name="Backdrop" parent="." instance=ExtResource("2_backdrop")]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Root" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Shade" type="ColorRect" parent="UI/Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.04, 0.1, 0.45)
+
+[node name="Margin" type="MarginContainer" parent="UI/Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 96
+theme_override_constants/margin_top = 44
+theme_override_constants/margin_right = 96
+theme_override_constants/margin_bottom = 44
+
+[node name="VBox" type="VBoxContainer" parent="UI/Root/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Header" parent="UI/Root/Margin/VBox" instance=ExtResource("3_header")]
+layout_mode = 2
+title = "MAPAS BÍBLICOS"
+
+[node name="Content" type="HBoxContainer" parent="UI/Root/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 32
+
+[node name="ListPanel" type="PanelContainer" parent="UI/Root/Margin/VBox/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(680, 0)
+layout_mode = 2
+
+[node name="MapList" type="VBoxContainer" parent="UI/Root/Margin/VBox/Content/ListPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="DetailPanel" type="PanelContainer" parent="UI/Root/Margin/VBox/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Details" type="VBoxContainer" parent="UI/Root/Margin/VBox/Content/DetailPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="MapNameLabel" type="Label" parent="UI/Root/Margin/VBox/Content/DetailPanel/Details"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "Mapa"
+
+[node name="MapRefLabel" type="Label" parent="UI/Root/Margin/VBox/Content/DetailPanel/Details"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "Referencia"
+
+[node name="MapStatusLabel" type="Label" parent="UI/Root/Margin/VBox/Content/DetailPanel/Details"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "ESTADO"
+
+[node name="MapDescLabel" type="Label" parent="UI/Root/Margin/VBox/Content/DetailPanel/Details"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 2
+size_flags_vertical = 3
+text = "Descripción"
+autowrap_mode = 3
+
+[node name="MapBoardLabel" type="Label" parent="UI/Root/Margin/VBox/Content/DetailPanel/Details"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "Tablero"
+
+[node name="SwatchTitle" type="Label" parent="UI/Root/Margin/VBox/Content/DetailPanel/Details"]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "Colores del tablero"
+
+[node name="Swatches" type="HBoxContainer" parent="UI/Root/Margin/VBox/Content/DetailPanel/Details"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="PlayMapButton" type="Button" parent="UI/Root/Margin/VBox/Content/DetailPanel/Details"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 116)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "JUGAR ESTE MAPA"

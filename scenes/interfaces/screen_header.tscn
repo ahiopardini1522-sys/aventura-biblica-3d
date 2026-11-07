@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/screen_header.gd" id="1_header"]
+
+[node name="ScreenHeader" type="HBoxContainer"]
+custom_minimum_size = Vector2(0, 92)
+theme_override_constants/separation = 32
+script = ExtResource("1_header")
+title = "TÍTULO"
+
+[node name="BackButton" type="Button" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 88)
+layout_mode = 2
+text = "VOLVER"
+
+[node name="TitleLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HeadingLabel"
+text = "TÍTULO"
+vertical_alignment = 1
