@@ -41,14 +41,17 @@ var _state: Node
 var _settings: Node
 
 # Piezas del tablero que está abierto (las toma _bind_board).
-var _board: BoardBuilder
+# OJO: se declaran sin tipo de clase a propósito. Este script se compila ANTES de que existan los
+# autoloads (--script), y las clases del juego que usan SettingsManager no compilarían si el script
+# las nombrara de forma estática (tipos, "as Clase" o enumeraciones). Se las llama dinámicamente.
+var _board: Node
 var _tokens_root: Node
-var _camera: BoardCamera
-var _dice: Dice
-var _hud: BoardHud
-var _flow: GameFlow
-var _panel: ChallengePanel
-var _pause: PauseMenu
+var _camera: Node
+var _dice: Node
+var _hud: Node
+var _flow: Node
+var _panel: Node
+var _pause: Node
 var _effects_root: Node
 var _events: Array = []
 var _samples: Array[Vector3] = []
@@ -1123,14 +1126,14 @@ func _bind_board() -> bool:
 	if scene == null or scene.scene_file_path != str(_router.SCENES["board"]):
 		_check(false, "hay un tablero abierto")
 		return false
-	_board = scene.get_node_or_null("%Board") as BoardBuilder
+	_board = scene.get_node_or_null("%Board")
 	_tokens_root = scene.get_node_or_null("%Tokens")
-	_camera = scene.get_node_or_null("%BoardCamera") as BoardCamera
-	_dice = scene.get_node_or_null("%Dice") as Dice
-	_hud = scene.get_node_or_null("%Hud") as BoardHud
-	_flow = scene.get_node_or_null("%Flow") as GameFlow
-	_panel = scene.get_node_or_null("%ChallengePanel") as ChallengePanel
-	_pause = scene.get_node_or_null("%PauseMenu") as PauseMenu
+	_camera = scene.get_node_or_null("%BoardCamera")
+	_dice = scene.get_node_or_null("%Dice")
+	_hud = scene.get_node_or_null("%Hud")
+	_flow = scene.get_node_or_null("%Flow")
+	_panel = scene.get_node_or_null("%ChallengePanel")
+	_pause = scene.get_node_or_null("%PauseMenu")
 	_effects_root = scene.get_node_or_null("%Effects")
 	var ok: bool = _board != null and _tokens_root != null and _camera != null and _dice != null \
 			and _hud != null and _flow != null and _panel != null and _pause != null and _effects_root != null
@@ -1155,8 +1158,8 @@ func _player_name(index: int) -> String:
 	return str(_flow.state.get_player(index)["name"])
 
 
-func _token(index: int) -> PlayerToken:
-	return _tokens_root.get_child(index) as PlayerToken
+func _token(index: int) -> Node3D:
+	return _tokens_root.get_child(index) as Node3D
 
 
 ## Casilla "tranquila": no es inicio ni meta y no tiene escalera, serpiente ni desafío.
@@ -1204,7 +1207,7 @@ func _sync_problems() -> Array[String]:
 		var info: Dictionary = entry
 		var index: int = int(info["index"])
 		var tile: int = int(info["tile"])
-		var token: PlayerToken = _token(index)
+		var token: Node3D = _token(index)
 		var spot: Vector3 = _flow.token_spot(index, tile)
 		if token.position.distance_to(spot) > 0.05:
 			problems.append("la ficha %d está en %s y debía estar en %s (casilla %d)" % [index, str(token.position), str(spot), tile])
@@ -1281,7 +1284,7 @@ func _test_board_scene() -> void:
 
 func _test_board_structure() -> void:
 	print("-- Tablero: casillas, escaleras, serpientes y fichas")
-	var board: BoardBuilder = _board
+	var board: Node = _board
 	_check(board.tile_count() == 100, "el tablero tiene 100 casillas")
 	_check(board.ladder_count() == 6, "el tablero tiene 6 escaleras")
 	_check(board.snake_count() == 7, "el tablero tiene 7 serpientes")
@@ -1665,7 +1668,7 @@ func _challenge_case(type: String, answer_right: bool, case_number: int) -> void
 	var item: Challenge = (_events_of("challenge_shown")[0] as Array)[2] as Challenge
 	_check(item != null and item.type == type, "[%s] el desafío es del tipo pedido" % label)
 	_check(_panel.is_open() and not _panel.is_answered(), "[%s] el panel se abre y espera la respuesta" % label)
-	_check(_flow.phase == GameFlow.Phase.CHALLENGE and not _hud.is_roll_enabled(), "[%s] mientras responde no se puede tirar" % label)
+	_check(_flow.is_in_challenge() and not _hud.is_roll_enabled(), "[%s] mientras responde no se puede tirar" % label)
 	_check(not _flow.try_roll(player) and not _flow.try_roll((player + 1) % 4), "[%s] nadie puede tirar durante el desafío" % label)
 	var expected_options: int = 2 if type == Challenge.TYPE_TRUE_FALSE else 4
 	_check(_panel.option_count() == expected_options and item.options.size() == expected_options,
@@ -1971,7 +1974,7 @@ func _test_victory_and_replay() -> void:
 		return
 
 	var scene: Node = current_scene
-	var hud := scene.get_node_or_null("%Hud") as VictoryHud
+	var hud: Node = scene.get_node_or_null("%Hud")
 	_check(hud != null, "la pantalla de victoria tiene su interfaz")
 	if hud == null:
 		return
@@ -2124,7 +2127,7 @@ func _solo_rules_and_victory() -> void:
 	_check(await _wait_until(_arrived.bind("victory"), 30.0), "al llegar a la meta se abre la victoria")
 	if not _arrived("victory"):
 		return
-	var hud := current_scene.get_node_or_null("%Hud") as VictoryHud
+	var hud: Node = current_scene.get_node_or_null("%Hud")
 	_check(hud != null and hud.winner_text().contains("llegó a la meta") and hud.row_count() == 1,
 			"la victoria de un solo jugador lo felicita por llegar a la meta (%s)" % (hud.winner_text() if hud != null else ""))
 	await _go_to_menu()

@@ -98,6 +98,11 @@ func is_finished() -> bool:
 	return phase == Phase.FINISHED
 
 
+## Verdadero mientras el jugador del turno tiene un desafío bíblico abierto en el panel.
+func is_in_challenge() -> bool:
+	return phase == Phase.CHALLENGE
+
+
 func current_player() -> int:
 	return state.current if state != null else -1
 

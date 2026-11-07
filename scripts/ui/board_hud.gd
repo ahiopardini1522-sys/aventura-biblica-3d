@@ -11,11 +11,16 @@ signal zoom_out_pressed
 signal reset_view_pressed
 
 const ROW_HEIGHT := 92.0
+## Ancho máximo del texto de un aviso; si es más largo se parte en líneas.
+const TOAST_MAX_TEXT_WIDTH := 980.0
+## Distancia entre el borde superior de la pantalla y el aviso.
+const TOAST_TOP := 236.0
 
 var _rows: Dictionary = {}
 var _roster: Array = []
 var _current: int = -1
 var _toast_tween: Tween
+var _toast_source: String = ""
 var _flash_tween: Tween
 var _die_tween: Tween
 var _splash_tween: Tween
@@ -177,10 +182,21 @@ func show_toast(text: String, accent: Color = UiTheme.GOLD, seconds: float = 2.8
 		return
 	if _toast_tween != null and _toast_tween.is_valid():
 		_toast_tween.kill()
-	%ToastLabel.text = text
+	_toast_source = text
+	var label := %ToastLabel as Label
+	# El texto se parte en líneas aquí mismo: una etiqueta con ajuste automático no tiene ancho
+	# propio dentro del panel y se encogía hasta mostrar una letra por renglón.
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.text = _wrap_lines(text, label.get_theme_font("font"),
+			label.get_theme_font_size("font_size"), TOAST_MAX_TEXT_WIDTH)
 	%Toast.add_theme_stylebox_override("panel",
 			UiTheme.box(Color(0.04, 0.06, 0.14, 0.9), Color(accent, 0.95), 30, 4, 36.0, 18.0, true))
-	%Toast.reset_size()
+	# Se centra arriba con el tamaño exacto del texto.
+	var panel_size: Vector2 = (%Toast as Control).get_combined_minimum_size()
+	(%Toast as Control).offset_left = -panel_size.x * 0.5
+	(%Toast as Control).offset_right = panel_size.x * 0.5
+	(%Toast as Control).offset_top = TOAST_TOP
+	(%Toast as Control).offset_bottom = TOAST_TOP + panel_size.y
 	%Toast.visible = true
 	%Toast.modulate.a = 0.0
 	_toast_tween = create_tween()
@@ -197,7 +213,7 @@ func hide_toast() -> void:
 
 
 func toast_text() -> String:
-	return (%ToastLabel as Label).text if (%Toast as Control).visible else ""
+	return _toast_source if (%Toast as Control).visible else ""
 
 
 func is_toast_visible() -> bool:
@@ -393,6 +409,22 @@ func _pulse(control: Control, amount: float = 1.18) -> void:
 func _hide_toast() -> void:
 	%Toast.visible = false
 	%Toast.modulate.a = 0.0
+
+
+## Parte el texto en líneas de como máximo max_width píxeles, respetando los saltos que ya trae.
+static func _wrap_lines(text: String, font: Font, font_size: int, max_width: float) -> String:
+	var lines: PackedStringArray = PackedStringArray()
+	for paragraph in text.split("\n"):
+		var line: String = ""
+		for word in paragraph.split(" ", false):
+			var candidate: String = word if line.is_empty() else line + " " + word
+			if line.is_empty() or font.get_string_size(candidate, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size).x <= max_width:
+				line = candidate
+			else:
+				lines.append(line)
+				line = word
+		lines.append(line)
+	return "\n".join(lines)
 
 
 func _hide_splash() -> void:
