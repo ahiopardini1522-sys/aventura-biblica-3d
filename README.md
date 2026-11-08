@@ -9,7 +9,8 @@ Orientación horizontal, interfaz táctil y recursos provisionales creados por c
 
 ## Capturas
 
-Generadas automáticamente por GitHub Actions con render por software (en un teléfono se verá más fluido y con otra resolución).
+Generadas automáticamente por GitHub Actions con render por software (en un teléfono se verá más fluido y con otra resolución). Las de cada mundo muestran
+la **entrada del tablero**: la cámara empieza baja y con ángulo ancho para enseñar el paisaje y luego sube sola a la vista de juego.
 
 | MUNDO BÍBLICO (vista general) | Región elegida: su ficha y JUGAR |
 | --- | --- |
@@ -21,11 +22,15 @@ Generadas automáticamente por GitHub Actions con render por software (en un tel
 | --- | --- |
 | ![Edén](docs/screenshots/scenery_eden.jpg) | ![Arca de Noé](docs/screenshots/scenery_arca_noe.jpg) |
 | **Egipto y el Éxodo** | **Desierto del Sinaí** |
-| ![Egipto](docs/screenshots/scenery_egipto_exodo.jpg) | ![Desierto del Sinaí](docs/screenshots/board.jpg) |
+| ![Egipto](docs/screenshots/scenery_egipto_exodo.jpg) | ![Desierto del Sinaí](docs/screenshots/scenery_desierto_sinai.jpg) |
 | **Monte Sinaí** | **Jerusalén** |
 | ![Monte Sinaí](docs/screenshots/scenery_monte_sinai.jpg) | ![Jerusalén](docs/screenshots/scenery_jerusalen.jpg) |
-| **Belén** | **Desafío bíblico** |
-| ![Belén](docs/screenshots/scenery_belen.jpg) | ![Desafío](docs/screenshots/challenge_question.jpg) |
+| **Belén** | **Tablero en la vista de juego** |
+| ![Belén](docs/screenshots/scenery_belen.jpg) | ![Tablero](docs/screenshots/board.jpg) |
+
+| Desafío bíblico | Victoria y premios del mundo |
+| --- | --- |
+| ![Desafío](docs/screenshots/challenge_question.jpg) | ![Victoria](docs/screenshots/victory.jpg) |
 
 ## Cómo se juega
 
@@ -78,7 +83,7 @@ El objetivo es un **Motorola Moto G84 5G**. Estas cifras salen de las pruebas au
 | Mapa mundial (calidad media) | 46 625 (tope de la prueba: 110 mil) | 94 (tope: 170) |
 | Paisaje de un mundo | de 10 316 (Arca de Noé) a 27 775 (Jerusalén); tope 90 mil | de 17 a 31 |
 | Tablero de 100 casillas | de 9 010 (Desierto del Sinaí) a 18 389 (Belén) | de 30 a 33 |
-| Escena completa de un tablero | tope de la prueba: 120 mil | tope: 300 |
+| Escena completa de un tablero (paisaje + tablero + fichas) | de 11 548 (Desierto del Sinaí) a 43 417 (Jerusalén); tope de la prueba: 120 mil | de 63 (Belén) a 195 (Desierto del Sinaí, cuyo paisaje es el de la Etapa 2); tope: 300 |
 
 * El mapa mundial no usa sombras; el terreno se calcula una sola vez por sesión y se reutiliza.
 * La calidad **baja** quita decorado, luces dinámicas y sombras; en cada paisaje las pruebas comprueban que usa menos triángulos que la alta.
