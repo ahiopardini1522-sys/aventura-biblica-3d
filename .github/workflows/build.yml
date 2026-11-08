@@ -395,7 +395,16 @@ jobs:
           set -o pipefail
           node e2e/e2e.mjs http://127.0.0.1:8787 2>&1 | tee ../logs/servidor-e2e.log
 
+      - name: Sondeo del cierre por saludo atrasado (diagnóstico, no bloquea)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        working-directory: server
+        run: |
+          node e2e/probe_close.mjs http://127.0.0.1:8787 2>&1 | tee ../logs/servidor-sondeo.log
+
       - name: Pruebas de extremo a extremo del juego contra el servidor (Godot, WebSocket real)
+        # Se ejecuta aunque fallen las pruebas de Node, para ver todos los problemas en una sola vuelta.
+        if: ${{ !cancelled() }}
         run: |
           set -o pipefail
           godot --headless --path . --script res://tools/online_e2e.gd -- --url=http://127.0.0.1:8787 2>&1 | tee logs/cliente-e2e.log
