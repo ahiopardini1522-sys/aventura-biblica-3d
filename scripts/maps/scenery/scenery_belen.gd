@@ -9,9 +9,9 @@ const FAR_Y := -0.6
 const LANE_X := 0.0
 const STABLE := Vector2(0.0, -46.0)
 const STAR_POS := Vector3(0.0, 40.0, -50.0)
-const CAMPFIRE := Vector2(15.5, -9.0)
+const CAMPFIRE := Vector2(15.0, -6.5)
 ## Casas que se colocan a mano, cerca del tablero, para que se vean desde la cámara normal.
-const NEAR_HOUSES := [Vector2(-12.0, -13.0), Vector2(20.0, -21.0), Vector2(-15.0, -25.0)]
+const NEAR_HOUSES := [Vector2(-6.0, -11.5), Vector2(9.5, -12.0), Vector2(23.0, 3.0), Vector2(-11.0, 2.5)]
 
 
 ## Altura del terreno: explanada plana en la aldea y colinas de Judea alrededor.

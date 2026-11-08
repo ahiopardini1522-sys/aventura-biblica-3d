@@ -16,6 +16,11 @@ const WALL_HEIGHT := 7.0
 const CROSS_Z := -42.0
 const TEMPLE := Vector2(2.0, -66.0)
 const OLIVES := Vector2(82.0, -8.0)
+## Casas pegadas al tablero (x, z, giro), para que se vean desde la cámara normal.
+const NEAR_HOUSES := [Vector3(-5.5, -11.5, 0.05), Vector3(10.5, -12.0, -0.12), Vector3(18.0, -7.5, 0.3),
+		Vector3(22.0, 1.5, 1.45), Vector3(16.0, 9.0, 0.1)]
+## Puestos del mercado junto al tablero (x, z, giro).
+const NEAR_STALLS := [Vector3(13.0, -4.0, 0.25), Vector3(15.5, 3.5, -0.2), Vector3(-9.0, -8.0, 0.1)]
 const LIMESTONE := Color(0.90, 0.84, 0.70)
 const GOLD := Color(0.96, 0.80, 0.32)
 
@@ -43,6 +48,9 @@ static func _terrain_color(x: float, z: float, y: float, ground: Color) -> Color
 	base = base.lerp(Color(0.44, 0.52, 0.30), grove * 0.7)
 	if x > WALL_LEFT and x < WALL_RIGHT and z < WALL_Z and z > WALL_BACK:
 		base = base.lerp(Color(0.84, 0.78, 0.66), 0.55)
+	# Plaza de losas de piedra caliza alrededor del tablero.
+	var plaza: float = 1.0 - smoothstep(13.0, 30.0, Vector2(x - 2.0, z + 4.0).length())
+	base = base.lerp(Color(0.86, 0.79, 0.66), plaza * 0.8)
 	return base.lerp(ground, SceneryKit.edge_fade(x, z, HALF))
 
 
@@ -71,7 +79,7 @@ static func build(root: Node3D, seed_value: int, quality: int, ground: Color) ->
 	var density: float = SceneryKit.density(quality)
 
 	SceneryKit.far_ground(root, ground, FAR_Y)
-	SceneryKit.terrain(root, HALF, 64, height_at, _terrain_color.bind(ground), "dirt", 0.25)
+	SceneryKit.terrain(root, HALF, 64, height_at, _terrain_color.bind(ground), "stone", 0.45)
 	SceneryKit.far_mountains(root, rng, 7, Color(0.66, 0.60, 0.54), FAR_Y)
 
 	_add_city(root, rng, density)
@@ -125,6 +133,10 @@ static func _add_city(root: Node3D, rng: RandomNumberGenerator, density: float) 
 
 	_add_temple(stone, trim)
 	_add_roads(stone)
+	for i in NEAR_HOUSES.size():
+		var spot: Vector3 = NEAR_HOUSES[i]
+		PropKit.house_flat(stone, rng, Vector3(spot.x, height_at(spot.x, spot.y) - 0.05, spot.y), spot.z,
+				rng.randf_range(3.6, 5.0), rng.randf_range(3.2, 4.4), rng.randf_range(2.8, 4.2), tints[i % tints.size()])
 
 	# Mercado a los dos lados del camino, delante de la puerta.
 	var awnings: Array[Color] = [Color(0.80, 0.22, 0.18), Color(0.20, 0.45, 0.70), Color(0.92, 0.72, 0.20),
@@ -134,6 +146,11 @@ static func _add_city(root: Node3D, rng: RandomNumberGenerator, density: float) 
 		_stall(trim, Vector3(ROAD_X - 5.4, height_at(ROAD_X - 5.4, z) - 0.05, z), PI * 0.5, awnings[k % awnings.size()])
 		_stall(trim, Vector3(ROAD_X + 5.4, height_at(ROAD_X + 5.4, z - 2.0) - 0.05, z - 2.0), -PI * 0.5,
 				awnings[(k + 2) % awnings.size()])
+
+	for i in NEAR_STALLS.size():
+		var stall_spot: Vector3 = NEAR_STALLS[i]
+		_stall(trim, Vector3(stall_spot.x, height_at(stall_spot.x, stall_spot.y) - 0.05, stall_spot.y), stall_spot.z,
+				awnings[(i + 1) % awnings.size()])
 
 	root.add_child(stone.instance(TextureKit.material("sandstone", 0.9), "City"))
 	root.add_child(trim.instance(TextureKit.plain(0.8), "Trim"))
@@ -226,6 +243,14 @@ static func _add_nature(root: Node3D, rng: RandomNumberGenerator, density: float
 		for side in [-1.0, 1.0]:
 			var cx: float = ROAD_X + float(side) * 9.4
 			PropKit.cypress(kit, rng, Vector3(cx, height_at(cx, cz) - 0.1, cz), rng.randf_range(0.9, 1.3))
+	var near_trees: Array[Vector2] = [Vector2(12.0, -9.5), Vector2(-2.0, -14.5), Vector2(20.5, -3.5), Vector2(19.0, 6.5),
+			Vector2(-10.5, -4.0), Vector2(24.0, -9.0)]
+	for k in near_trees.size():
+		var tree: Vector2 = near_trees[k]
+		if k % 2 == 0:
+			PropKit.cypress(kit, rng, Vector3(tree.x, height_at(tree.x, tree.y) - 0.1, tree.y), rng.randf_range(1.0, 1.4))
+		else:
+			PropKit.olive(kit, rng, Vector3(tree.x, height_at(tree.x, tree.y) - 0.1, tree.y), rng.randf_range(1.1, 1.6))
 	for spot in SceneryKit.scatter(rng, int(22.0 * density), 14.0, 48.0, _nature_ok):
 		if rng.randf() < 0.5:
 			PropKit.olive(kit, rng, Vector3(spot.x, height_at(spot.x, spot.y) - 0.1, spot.y), rng.randf_range(0.9, 1.5))

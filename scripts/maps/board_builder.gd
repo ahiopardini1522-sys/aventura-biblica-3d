@@ -2,38 +2,32 @@ class_name BoardBuilder
 extends Node3D
 ## Construye el tablero 3D completo (marco, casillas con número, escaleras, serpientes,
 ## punto de inicio, meta y zona del dado) a partir de un BoardLayout y los colores del mapa.
-## Todo son primitivas creadas por código: cuando existan modelos reales en assets/models
-## solo habrá que sustituir las piezas correspondientes.
+## Cada mapa tiene su propio estilo (layout.style, ver BoardStyle): otras losas, otro borde, otras
+## puertas de salida y de meta, otras escaleras y serpientes. Todo son primitivas creadas por
+## código y, para que vaya fluido en un móvil de gama media, se juntan en pocas mallas:
+## todas las casillas en una, todos los números en otra, las marcas de desafío y de casillas
+## especiales en otra, cada escalera en una y cada serpiente en dos (cuerpo y cabeza).
 
 const START_COLOR := Color(0.30, 0.72, 0.40)
 const GOAL_COLOR := Color(0.96, 0.77, 0.33)
 const LADDER_TINT := Color(0.50, 0.78, 0.35)
 const SNAKE_TINT := Color(0.88, 0.36, 0.30)
 const CHALLENGE_TINT := Color(0.55, 0.52, 0.92)
-const CHALLENGE_GOLD := Color(0.98, 0.80, 0.30)
 const LADDER_LIFT := 0.14
-const WOOD_COLOR := Color(0.58, 0.38, 0.19)
 const LADDER_WIDTH := 0.44
 const SHADOW_REACH := 1.6
-const SNAKE_COLORS := [
-	Color(0.30, 0.65, 0.30),
-	Color(0.82, 0.50, 0.20),
-	Color(0.58, 0.36, 0.72),
-	Color(0.20, 0.60, 0.64),
-	Color(0.80, 0.28, 0.25),
-	Color(0.62, 0.64, 0.22),
-	Color(0.30, 0.40, 0.66),
-]
 
 var layout: BoardLayout
 
 var _theme: Dictionary = {}
+var _style: String = "sand"
 var _materials: Dictionary = {}
 var _tiles_root: Node3D
 var _ladders_root: Node3D
 var _snakes_root: Node3D
 var _dice_area: Node3D
-var _challenge_disc: CylinderMesh
+var _challenge_marks: Dictionary = {}
+var _special_marks: Dictionary = {}
 
 
 ## Crea todo el tablero. Si ya había uno construido, lo reemplaza.
@@ -41,6 +35,7 @@ func build(new_layout: BoardLayout, theme_data: Dictionary) -> void:
 	clear()
 	layout = new_layout
 	_theme = theme_data
+	_style = BoardStyle.normalize(layout.style)
 	_build_contact_shadow()
 	_build_frame()
 	_build_tiles()
@@ -60,7 +55,8 @@ func clear() -> void:
 	_ladders_root = null
 	_snakes_root = null
 	_dice_area = null
-	_challenge_disc = null
+	_challenge_marks.clear()
+	_special_marks.clear()
 
 
 # ---------------------------------------------------------------- Consultas
@@ -77,11 +73,28 @@ func snake_count() -> int:
 	return _snakes_root.get_child_count() if _snakes_root != null else 0
 
 
-## Nodo de una casilla (1 a N), o null si no existe.
-func tile_node(tile: int) -> MeshInstance3D:
+## Estilo con el que se construyó el tablero (garden, deck, causeway, sand, rock, city o village).
+func board_style() -> String:
+	return _style
+
+
+## Ancla de una casilla (1 a N), sobre el centro de su cara superior, o null si no existe.
+## La superficie de todas las casillas es una sola malla ("TileSurface"); el ancla sirve para
+## colgar efectos o resaltar una casilla.
+func tile_node(tile: int) -> Node3D:
 	if _tiles_root == null:
 		return null
-	return _tiles_root.get_node_or_null("Tile_%03d" % tile) as MeshInstance3D
+	return _tiles_root.get_node_or_null("Tile_%03d" % tile) as Node3D
+
+
+## Verdadero si la casilla lleva el disco dorado con "?" de un desafío.
+func has_challenge_mark(tile: int) -> bool:
+	return _challenge_marks.has(tile)
+
+
+## Verdadero si la casilla lleva el icono de una casilla especial (recompensa u obstáculo).
+func has_special_mark(tile: int) -> bool:
+	return _special_marks.has(tile)
 
 
 ## Centro de la cara superior de una casilla, en el espacio del tablero.
@@ -168,25 +181,43 @@ func _soft_shadow_texture() -> ImageTexture:
 
 func _build_frame() -> void:
 	var size: Vector2 = layout.board_size()
+	var frame_color: Color = _color("frame", Color(0.42, 0.27, 0.15))
 	var mesh := BoxMesh.new()
 	mesh.size = Vector3(size.x + BoardLayout.FRAME_MARGIN * 2.0, BoardLayout.FRAME_THICKNESS,
 			size.y + BoardLayout.FRAME_MARGIN * 2.0)
 	var frame := MeshInstance3D.new()
 	frame.name = "Frame"
 	frame.mesh = mesh
-	frame.material_override = _material("frame", _color("frame", Color(0.42, 0.27, 0.15)), 0.9)
+	frame.material_override = _material("frame", frame_color, 0.9)
 	frame.position = Vector3(0.0, -BoardLayout.FRAME_THICKNESS * 0.5, 0.0)
 	frame.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(frame)
 
+	# Decoración propia del estilo sobre el marco (seto, borda, muro, cerca...).
+	var decor := MeshKit.new()
+	var glow := MeshKit.new()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("marco:" + layout.map_id)
+	BoardStyle.add_frame_decor(decor, glow, _style, size, rng, frame_color)
+	if not decor.is_empty():
+		add_child(decor.instance(TextureKit.plain(0.85), "FrameDecor"))
+	if not glow.is_empty():
+		add_child(glow.instance(TextureKit.glow_vertex(true), "FrameGlow"))
 
+
+## Las casillas: un ancla por casilla ("Tile_001"...) y tres mallas para todo el tablero: la
+## superficie con su textura, las figuras de las marcas y los números (sin luz).
 func _build_tiles() -> void:
 	_tiles_root = Node3D.new()
 	_tiles_root.name = "Tiles"
 	add_child(_tiles_root)
 
-	var tile_mesh := BoxMesh.new()
-	tile_mesh.size = Vector3(BoardLayout.TILE_SIZE, BoardLayout.TILE_HEIGHT, BoardLayout.TILE_SIZE)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("casillas:" + layout.map_id)
+	var surface := MeshKit.new()
+	surface.uv_scale = BoardStyle.texture_scale(_style)
+	var marks := MeshKit.new()
+	var ink := MeshKit.new()
 	var color_a: Color = _color("tile_a", Color(0.92, 0.82, 0.60))
 	var color_b: Color = _color("tile_b", Color(0.84, 0.65, 0.40))
 
@@ -196,17 +227,35 @@ func _build_tiles() -> void:
 		var color: Color = _tile_color(tile, base)
 		var center: Vector3 = layout.tile_center(tile)
 
-		var instance := MeshInstance3D.new()
-		instance.name = "Tile_%03d" % tile
-		instance.mesh = tile_mesh
-		instance.material_override = _material("tile_" + color.to_html(false), color, 0.85)
-		instance.position = Vector3(center.x, BoardLayout.TILE_HEIGHT * 0.5, center.z)
-		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		instance.set_meta(&"tile", tile)
-		_tiles_root.add_child(instance)
-		instance.add_child(_make_number(tile, color))
+		var anchor := Node3D.new()
+		anchor.name = "Tile_%03d" % tile
+		anchor.position = center
+		anchor.set_meta(&"tile", tile)
+		_tiles_root.add_child(anchor)
+
+		BoardStyle.add_tile(surface, _style, center, color, rng)
+		TileMarks.add_number(ink, tile, center, color)
 		if layout.is_challenge_tile(tile):
-			_add_challenge_marker(instance)
+			TileMarks.add_challenge(marks, ink, center)
+			_challenge_marks[tile] = true
+		var special: Dictionary = layout.special_at(tile)
+		if not special.is_empty():
+			TileMarks.add_special(marks, ink, str(special.get("kind", "")), center)
+			_special_marks[tile] = true
+
+	add_child(surface.instance(TextureKit.material(BoardStyle.texture_kind(_style), 0.88), "TileSurface"))
+	add_child(marks.instance(TextureKit.plain(0.45), "TileMarks"))
+	add_child(ink.instance(_ink_material(), "TileInk"))
+
+
+## Material de los números: sin luz, para que se lean igual de día que de noche.
+func _ink_material() -> StandardMaterial3D:
+	if not _materials.has("ink"):
+		var m := StandardMaterial3D.new()
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.vertex_color_use_as_albedo = true
+		_materials["ink"] = m
+	return _materials["ink"]
 
 
 ## Color de una casilla: normal, inicio, meta o el matiz de escalera/serpiente.
@@ -241,59 +290,6 @@ func _tile_role(tile: int) -> String:
 	return ""
 
 
-## Número de la casilla, tendido sobre la cara superior y legible desde la cámara.
-func _make_number(tile: int, tile_color: Color) -> Label3D:
-	var label := Label3D.new()
-	label.name = "Number"
-	label.text = str(tile)
-	label.font_size = 56
-	label.pixel_size = 0.0042
-	label.shaded = false
-	label.double_sided = false
-	label.modulate = Color(0.16, 0.10, 0.05) if tile_color.get_luminance() > 0.42 else Color(0.97, 0.94, 0.86)
-	label.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	label.rotation = Vector3(-PI * 0.5, 0.0, 0.0)
-	label.position = Vector3(-0.17, BoardLayout.TILE_HEIGHT * 0.5 + 0.01, 0.2)
-	return label
-
-
-## Disco dorado con un signo de pregunta en una esquina de la casilla: ahí hay un desafío.
-func _add_challenge_marker(tile_node_3d: Node3D) -> void:
-	var top: float = BoardLayout.TILE_HEIGHT * 0.5
-	var disc_mesh: CylinderMesh = _challenge_disc_mesh()
-	var disc := MeshInstance3D.new()
-	disc.name = "ChallengeDisc"
-	disc.mesh = disc_mesh
-	disc.material_override = _material("challenge_gold", CHALLENGE_GOLD, 0.35, 0.3)
-	disc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	disc.position = Vector3(0.25, top + 0.006, -0.25)
-	tile_node_3d.add_child(disc)
-
-	var mark := Label3D.new()
-	mark.name = "ChallengeMark"
-	mark.text = "?"
-	mark.font_size = 64
-	mark.pixel_size = 0.0046
-	mark.shaded = false
-	mark.double_sided = false
-	mark.modulate = Color(0.30, 0.14, 0.02)
-	mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	mark.rotation = Vector3(-PI * 0.5, 0.0, 0.0)
-	mark.position = Vector3(0.25, top + 0.016, -0.25)
-	tile_node_3d.add_child(mark)
-
-
-func _challenge_disc_mesh() -> CylinderMesh:
-	if _challenge_disc == null:
-		_challenge_disc = CylinderMesh.new()
-		_challenge_disc.top_radius = 0.15
-		_challenge_disc.bottom_radius = 0.15
-		_challenge_disc.height = 0.012
-		_challenge_disc.radial_segments = 20
-		_challenge_disc.rings = 1
-	return _challenge_disc
-
-
 # ---------------------------------------------------------------- Escaleras
 
 func _build_ladders() -> void:
@@ -301,10 +297,8 @@ func _build_ladders() -> void:
 	_ladders_root.name = "Ladders"
 	add_child(_ladders_root)
 
-	var wood: StandardMaterial3D = _material("wood", WOOD_COLOR, 0.8)
-	var rung_mesh := BoxMesh.new()
-	rung_mesh.size = Vector3(LADDER_WIDTH + 0.08, 0.05, 0.07)
-
+	var tones: Array[Color] = BoardStyle.ladder_colors(_style)
+	var material: StandardMaterial3D = TextureKit.plain(0.8)
 	for pair in layout.ladders:
 		var from_pos: Vector3 = layout.tile_center(pair.x)
 		var to_pos: Vector3 = layout.tile_center(pair.y)
@@ -314,28 +308,21 @@ func _build_ladders() -> void:
 
 		var ladder := Node3D.new()
 		ladder.name = "Ladder_%03d_%03d" % [pair.x, pair.y]
-		ladder.transform = Transform3D(Basis.looking_at(delta / length, Vector3.UP), middle)
 		_ladders_root.add_child(ladder)
 
-		var rail_mesh := BoxMesh.new()
-		rail_mesh.size = Vector3(0.07, 0.09, length)
+		# Larguero y peldaños en una sola malla, con los colores del estilo.
+		var kit := MeshKit.new()
+		kit.push_xf(Transform3D(Basis.looking_at(delta / length, Vector3.UP), middle))
 		for side in [-1.0, 1.0]:
-			var rail := MeshInstance3D.new()
-			rail.name = "Rail"
-			rail.mesh = rail_mesh
-			rail.material_override = wood
-			rail.position = Vector3(float(side) * LADDER_WIDTH * 0.5, 0.0, 0.0)
-			ladder.add_child(rail)
-
+			kit.box(Vector3(float(side) * LADDER_WIDTH * 0.5, 0.0, 0.0), Vector3(0.07, 0.09, length), tones[0])
 		var rung_count: int = maxi(2, int(length / 0.42))
 		for i in rung_count:
-			var rung := MeshInstance3D.new()
-			rung.name = "Rung"
-			rung.mesh = rung_mesh
-			rung.material_override = wood
 			var t: float = (float(i) + 0.5) / float(rung_count)
-			rung.position = Vector3(0.0, 0.0, -length * 0.5 + t * length)
-			ladder.add_child(rung)
+			kit.box(Vector3(0.0, 0.0, -length * 0.5 + t * length), Vector3(LADDER_WIDTH + 0.08, 0.05, 0.07), tones[1])
+		kit.pop()
+		var body: MeshInstance3D = kit.instance(material, "Body")
+		body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		ladder.add_child(body)
 
 
 # ---------------------------------------------------------------- Serpientes
@@ -344,9 +331,10 @@ func _build_snakes() -> void:
 	_snakes_root = Node3D.new()
 	_snakes_root.name = "Snakes"
 	add_child(_snakes_root)
+	var palette: Array[Color] = BoardStyle.snake_colors(_style)
 	var index: int = 0
 	for pair in layout.snakes:
-		var color: Color = SNAKE_COLORS[index % SNAKE_COLORS.size()]
+		var color: Color = palette[index % palette.size()]
 		_snakes_root.add_child(_make_snake(pair.x, pair.y, color))
 		index += 1
 
@@ -405,67 +393,31 @@ func _snake_geometry(head_tile: int, tail_tile: int) -> Dictionary:
 	return {"points": points, "radii": radii}
 
 
+## La cabeza (cráneo, ojos pupilas y lengua) en una sola malla. Mira hacia -Z.
 func _add_snake_head_parts(head: Node3D, color: Color) -> void:
-	var skull_mesh := SphereMesh.new()
-	skull_mesh.radius = 0.19
-	skull_mesh.height = 0.38
-	skull_mesh.radial_segments = 14
-	skull_mesh.rings = 8
-	var skull := MeshInstance3D.new()
-	skull.name = "Skull"
-	skull.mesh = skull_mesh
-	skull.material_override = _material("snake_head_" + color.to_html(false), color.lightened(0.08), 0.5)
-	skull.position = Vector3(0.0, 0.17, -0.05)
-	skull.scale = Vector3(1.0, 0.8, 1.25)
-	head.add_child(skull)
-
-	var eye_mesh := SphereMesh.new()
-	eye_mesh.radius = 0.06
-	eye_mesh.height = 0.12
-	eye_mesh.radial_segments = 8
-	eye_mesh.rings = 4
-	var pupil_mesh := SphereMesh.new()
-	pupil_mesh.radius = 0.032
-	pupil_mesh.height = 0.064
-	pupil_mesh.radial_segments = 6
-	pupil_mesh.rings = 3
+	var kit := MeshKit.new()
+	kit.sphere(Vector3(0.0, 0.17, -0.05), Vector3(0.19, 0.152, 0.2375), color.lightened(0.08), 10, 6)
+	var white := Color(0.98, 0.98, 0.94)
+	var black := Color(0.05, 0.04, 0.04)
+	var red := Color(0.88, 0.12, 0.18)
 	for side in [-1.0, 1.0]:
-		var eye := MeshInstance3D.new()
-		eye.name = "Eye"
-		eye.mesh = eye_mesh
-		eye.material_override = _material("eye_white", Color(0.98, 0.98, 0.94), 0.3)
-		eye.position = Vector3(float(side) * 0.11, 0.28, -0.12)
-		head.add_child(eye)
-		var pupil := MeshInstance3D.new()
-		pupil.name = "Pupil"
-		pupil.mesh = pupil_mesh
-		pupil.material_override = _material("eye_black", Color(0.05, 0.04, 0.04), 0.3)
-		pupil.position = Vector3(float(side) * 0.11, 0.29, -0.17)
-		head.add_child(pupil)
-
-	var tongue_mat: StandardMaterial3D = _material("tongue", Color(0.88, 0.12, 0.18), 0.5)
-	var tongue_mesh := BoxMesh.new()
-	tongue_mesh.size = Vector3(0.035, 0.012, 0.26)
-	var tongue := MeshInstance3D.new()
-	tongue.name = "Tongue"
-	tongue.mesh = tongue_mesh
-	tongue.material_override = tongue_mat
-	tongue.position = Vector3(0.0, 0.1, -0.4)
-	head.add_child(tongue)
-	var prong_mesh := BoxMesh.new()
-	prong_mesh.size = Vector3(0.03, 0.012, 0.12)
+		var s: float = float(side)
+		kit.sphere(Vector3(s * 0.11, 0.28, -0.12), Vector3(0.06, 0.06, 0.06), white, 7, 4)
+		kit.sphere(Vector3(s * 0.11, 0.29, -0.17), Vector3(0.032, 0.032, 0.032), black, 5, 3)
+	kit.box(Vector3(0.0, 0.1, -0.4), Vector3(0.035, 0.012, 0.26), red)
 	for side in [-1.0, 1.0]:
-		var prong := MeshInstance3D.new()
-		prong.name = "TongueProng"
-		prong.mesh = prong_mesh
-		prong.material_override = tongue_mat
-		prong.position = Vector3(float(side) * 0.04, 0.1, -0.56)
-		prong.rotation = Vector3(0.0, float(side) * 0.45, 0.0)
-		head.add_child(prong)
+		var s: float = float(side)
+		kit.place(Vector3(s * 0.04, 0.1, -0.56), s * 0.45)
+		kit.box(Vector3.ZERO, Vector3(0.03, 0.012, 0.12), red)
+		kit.pop()
+	var skin: MeshInstance3D = kit.instance(TextureKit.plain(0.5), "HeadMesh")
+	skin.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	head.add_child(skin)
 
 
 # ---------------------------------------------------------------- Inicio, meta y dado
 
+## Puerta de salida, a la izquierda de la casilla 1, con el aspecto del escenario del mapa.
 func _build_start_marker() -> void:
 	var start: Vector3 = layout.tile_center(1)
 	var root := Node3D.new()
@@ -473,31 +425,18 @@ func _build_start_marker() -> void:
 	root.position = Vector3(start.x - (BoardLayout.TILE_SIZE * 0.5 + 0.2), 0.0, start.z + 0.1)
 	add_child(root)
 
-	var pole_mesh := CylinderMesh.new()
-	pole_mesh.top_radius = 0.04
-	pole_mesh.bottom_radius = 0.05
-	pole_mesh.height = 2.1
-	pole_mesh.radial_segments = 8
-	pole_mesh.rings = 1
-	var pole := MeshInstance3D.new()
-	pole.name = "Pole"
-	pole.mesh = pole_mesh
-	pole.material_override = _material("pole", Color(0.85, 0.82, 0.74), 0.5)
-	pole.position = Vector3(0.0, 1.05, 0.0)
-	root.add_child(pole)
-
-	var flag_mesh := BoxMesh.new()
-	flag_mesh.size = Vector3(0.62, 0.34, 0.04)
-	var flag := MeshInstance3D.new()
-	flag.name = "Flag"
-	flag.mesh = flag_mesh
-	flag.material_override = _material("flag", START_COLOR, 0.7)
-	flag.position = Vector3(0.33, 1.85, 0.0)
-	root.add_child(flag)
-
-	root.add_child(_make_billboard("INICIO", Vector3(0.3, 2.5, 0.0), Color(0.80, 1.0, 0.82)))
+	var kit := MeshKit.new()
+	var glow := MeshKit.new()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("salida:" + layout.map_id)
+	var label_y: float = BoardLandmarks.add_start(kit, glow, _style, rng, START_COLOR)
+	root.add_child(kit.instance(TextureKit.plain(0.7), "Body"))
+	if not glow.is_empty():
+		root.add_child(glow.instance(TextureKit.glow_vertex(true), "Glow"))
+	root.add_child(_make_billboard("INICIO", Vector3(0.0, label_y, 0.0), Color(0.80, 1.0, 0.82)))
 
 
+## Puerta de llegada, sobre la casilla de meta, con el aspecto del escenario del mapa.
 func _build_goal_marker() -> void:
 	var goal: Vector3 = layout.tile_center(layout.tile_count())
 	var root := Node3D.new()
@@ -505,44 +444,15 @@ func _build_goal_marker() -> void:
 	root.position = goal
 	add_child(root)
 
-	var gold: StandardMaterial3D = _material("gold", GOAL_COLOR, 0.35, 0.6)
-	var pillar_mesh := CylinderMesh.new()
-	pillar_mesh.top_radius = 0.08
-	pillar_mesh.bottom_radius = 0.1
-	pillar_mesh.height = 1.5
-	pillar_mesh.radial_segments = 10
-	pillar_mesh.rings = 1
-	for side in [-1.0, 1.0]:
-		var pillar := MeshInstance3D.new()
-		pillar.name = "Pillar"
-		pillar.mesh = pillar_mesh
-		pillar.material_override = gold
-		pillar.position = Vector3(float(side) * 0.42, 0.75, 0.0)
-		root.add_child(pillar)
-
-	var lintel_mesh := BoxMesh.new()
-	lintel_mesh.size = Vector3(1.1, 0.16, 0.2)
-	var lintel := MeshInstance3D.new()
-	lintel.name = "Lintel"
-	lintel.mesh = lintel_mesh
-	lintel.material_override = gold
-	lintel.position = Vector3(0.0, 1.58, 0.0)
-	root.add_child(lintel)
-
-	var orb_mesh := SphereMesh.new()
-	orb_mesh.radius = 0.17
-	orb_mesh.height = 0.34
-	orb_mesh.radial_segments = 12
-	orb_mesh.rings = 6
-	var orb := MeshInstance3D.new()
-	orb.name = "Orb"
-	orb.mesh = orb_mesh
-	orb.material_override = MeshFactory.glow_material(Color(1.0, 0.86, 0.45, 0.95))
-	orb.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	orb.position = Vector3(0.0, 1.92, 0.0)
-	root.add_child(orb)
-
-	root.add_child(_make_billboard("META", Vector3(0.0, 2.5, 0.0), Color(1.0, 0.92, 0.6)))
+	var kit := MeshKit.new()
+	var glow := MeshKit.new()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("meta:" + layout.map_id)
+	var label_y: float = BoardLandmarks.add_goal(kit, glow, _style, rng, GOAL_COLOR)
+	root.add_child(kit.instance(TextureKit.plain(0.45), "Body"))
+	if not glow.is_empty():
+		root.add_child(glow.instance(TextureKit.glow_vertex(true), "Glow"))
+	root.add_child(_make_billboard("META", Vector3(0.0, label_y, 0.0), Color(1.0, 0.92, 0.6)))
 
 
 ## Zona del dado: una plataforma redonda junto al tablero con un aro de luz.

@@ -119,7 +119,9 @@ func _run() -> void:
 	_test_character_roster()
 	_test_meshes()
 	_test_kits()
+	_test_stroke_font_and_marks()
 	_test_scenery()
+	_test_board_styles()
 	await _test_menu_and_screens()
 	await _test_board_scene()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_PROGRESS_PATH))
@@ -828,6 +830,114 @@ func _test_kits() -> void:
 	var beam: MeshInstance3D = FxKit.beam(holder, Vector3.ZERO, 10.0, 1.0, 0.4, Color(1, 1, 0.8, 0.5))
 	_check(_triangles_of(beam) > 0, "el haz de luz tiene geometría")
 	holder.free()
+
+
+## Las cifras de trazos y las marcas de las casillas: geometría plana, hacia arriba y dentro de la casilla.
+func _test_stroke_font_and_marks() -> void:
+	print("-- Números de trazos y marcas de casillas")
+	for glyph in "0123456789?":
+		var one := MeshKit.new()
+		StrokeFont.add_text(one, glyph, Vector3.ZERO, 0.3, 0.05, Color.BLACK)
+		_check(one.triangle_count() >= 6, "el glifo '%s' tiene trazos (%d triángulos)" % [glyph, one.triangle_count()])
+	_check(is_equal_approx(StrokeFont.text_width("100", 1.0), 2.0 * StrokeFont.ADVANCE + StrokeFont.GLYPH_WIDTH),
+			"el ancho de '100' suma tres glifos")
+	_check(StrokeFont.text_width("", 1.0) == 0.0, "un texto vacío no mide nada")
+	var center := Vector3(1.0, 0.2, 3.0)
+	var kit := MeshKit.new()
+	StrokeFont.add_text(kit, "100", center, 0.3, 0.05, Color.BLACK)
+	StrokeFont.add_text(kit, "x", center, 0.3, 0.05, Color.BLACK)
+	var arrays: Array = kit.commit().surface_get_arrays(0)
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var half_width: float = StrokeFont.text_width("100", 0.3) * 0.5 + 0.03
+	var inside: bool = true
+	var facing_up: bool = true
+	for i in verts.size():
+		if absf(verts[i].x - center.x) > half_width or absf(verts[i].z - center.z) > 0.15 + 0.03 or not is_equal_approx(verts[i].y, 0.2):
+			inside = false
+		if normals[i].y < 0.99:
+			facing_up = false
+	_check(verts.size() > 0 and inside, "el número queda dentro de su caja y a una sola altura")
+	_check(facing_up, "los trazos miran hacia arriba")
+	_check(StrokeFont.GLYPHS.size() == 11, "hay glifos para 0-9 y '?'")
+
+	var tile_center := Vector3(2.0, BoardLayout.TILE_HEIGHT, -1.0)
+	var marks := MeshKit.new()
+	var ink := MeshKit.new()
+	TileMarks.add_number(ink, 37, tile_center, Color(0.9, 0.9, 0.8))
+	_check(ink.triangle_count() > 20, "el número 37 tiene geometría")
+	for kind in ["advance", "extra_roll", "stars", "back", "skip"]:
+		var icon_marks := MeshKit.new()
+		var icon_ink := MeshKit.new()
+		TileMarks.add_special(icon_marks, icon_ink, str(kind), tile_center)
+		_check(icon_marks.triangle_count() > 20, "el icono '%s' tiene figuras (%d triángulos)" % [str(kind), icon_marks.triangle_count()])
+	TileMarks.add_challenge(marks, ink, tile_center)
+	_check(marks.triangle_count() == 14, "el disco de desafío tiene 14 triángulos")
+	var bright := MeshKit.new()
+	TileMarks.add_number(bright, 8, tile_center, Color(0.1, 0.1, 0.1))
+	var dark_ink := MeshKit.new()
+	TileMarks.add_number(dark_ink, 8, tile_center, Color(0.95, 0.95, 0.9))
+	var light_color: Color = (bright.commit().surface_get_arrays(0)[Mesh.ARRAY_COLOR] as PackedColorArray)[0]
+	var dark_color: Color = (dark_ink.commit().surface_get_arrays(0)[Mesh.ARRAY_COLOR] as PackedColorArray)[0]
+	_check(light_color.get_luminance() > 0.6 and dark_color.get_luminance() < 0.2,
+			"el número es claro sobre casillas oscuras y oscuro sobre casillas claras")
+
+
+## Cada mapa construye su propio tablero: casillas, borde, puertas, escaleras y serpientes del
+## estilo, con pocas mallas, y todo lo que el motor necesita (anclas, marcas, caminos).
+func _test_board_styles() -> void:
+	print("-- Tableros propios de cada mapa")
+	_check(BoardStyle.normalize("nada") == "sand" and BoardStyle.normalize("city") == "city",
+			"un estilo desconocido usa el del desierto")
+	var surface_triangles: Dictionary = {}
+	var landmark_triangles: Dictionary = {}
+	var ids: Array[String] = MapCatalog.ids_in_order()
+	_check(ids.size() == 7, "hay 7 mapas con tablero propio")
+	for id in ids:
+		var map_data: Dictionary = MapCatalog.find_map(id)
+		var layout: BoardLayout = BoardLayout.from_map(map_data)
+		var label: String = str(map_data.get("name", id))
+		var builder := BoardBuilder.new()
+		builder.build(layout, map_data.get("theme", {}))
+		_check(builder.board_style() == BoardStyle.normalize(layout.style), "%s: usa el estilo '%s'" % [label, layout.style])
+		_check(builder.tile_count() == 100 and builder.ladder_count() == 6 and builder.snake_count() == 7,
+				"%s: 100 casillas, 6 escaleras y 7 serpientes" % label)
+		for piece_name in ["TileSurface", "TileMarks", "TileInk", "FrameDecor", "StartMarker/Body", "GoalMarker/Body"]:
+			_check(builder.get_node_or_null(str(piece_name)) != null, "%s: tiene '%s'" % [label, str(piece_name)])
+		var surface := builder.get_node_or_null("TileSurface") as MeshInstance3D
+		var triangles: int = _triangles_of(surface) if surface != null else 0
+		surface_triangles[triangles] = true
+		_check(triangles >= 100 * 8, "%s: superficie con geometría (%d triángulos)" % [label, triangles])
+		var meshes: int = _count_nodes(builder, "MeshInstance3D")
+		_check(meshes <= 40, "%s: pocas llamadas de dibujo en el tablero (%d mallas)" % [label, meshes])
+		_check(_count_nodes(builder, "Label3D") == 2, "%s: solo hay dos rótulos de texto (INICIO y META)" % label)
+		_check(_triangles_of(builder) <= 70000, "%s: el tablero cabe en el presupuesto de triángulos (%d)" % [label, _triangles_of(builder)])
+		var landmarks: int = _triangles_of(builder.get_node_or_null("StartMarker")) + _triangles_of(builder.get_node_or_null("GoalMarker"))
+		landmark_triangles[landmarks] = true
+		var all_marked: bool = true
+		for tile in layout.challenge_tiles:
+			if not builder.has_challenge_mark(tile):
+				all_marked = false
+		_check(all_marked, "%s: todas las casillas de desafío tienen su marca" % label)
+		var specials_marked: bool = true
+		for tile in layout.special_tiles():
+			if not builder.has_special_mark(tile):
+				specials_marked = false
+		_check(specials_marked and layout.special_tiles().size() == 8, "%s: las 8 casillas especiales tienen su icono" % label)
+		var anchors_ok: bool = true
+		for tile in [1, 37, 100]:
+			var anchor: Node3D = builder.tile_node(tile)
+			if anchor == null or anchor.position.distance_to(builder.tile_position(tile)) > 0.001:
+				anchors_ok = false
+		_check(anchors_ok, "%s: las anclas están sobre sus casillas" % label)
+		var head: Node3D = builder.snake_head_node(layout.snakes[0].x)
+		_check(head != null and head.get_node_or_null("HeadMesh") != null, "%s: la cabeza de la serpiente es una malla" % label)
+		var ladder_body: Node = builder.get_node_or_null("Ladders/Ladder_%03d_%03d/Body" % [layout.ladders[0].x, layout.ladders[0].y])
+		_check(ladder_body != null, "%s: cada escalera es una malla" % label)
+		_check(builder.snake_path(layout.snakes[0].x, layout.snakes[0].y).size() > 10, "%s: las serpientes tienen camino" % label)
+		builder.free()
+	_check(surface_triangles.size() >= 6, "las superficies de los tableros son distintas entre sí (%d variantes)" % surface_triangles.size())
+	_check(landmark_triangles.size() >= 6, "las puertas de salida y meta son distintas entre sí (%d variantes)" % landmark_triangles.size())
 
 
 func _test_scenery() -> void:
@@ -2159,10 +2269,14 @@ func _test_board_structure() -> void:
 	_check(board.snake_count() == 7, "el tablero tiene 7 serpientes")
 	for tile in [1, 2, 11, 50, 100]:
 		var tile_node: Node = board.tile_node(tile)
-		var number: Label3D = null
-		if tile_node != null:
-			number = tile_node.get_node_or_null("Number") as Label3D
-		_check(number != null and number.text == str(tile), "la casilla %d existe y muestra su número" % tile)
+		_check(tile_node is Node3D and int(tile_node.get_meta(&"tile", 0)) == tile,
+				"la casilla %d existe y tiene su ancla" % tile)
+	var tile_surface := board.get_node_or_null("TileSurface") as MeshInstance3D
+	var tile_ink := board.get_node_or_null("TileInk") as MeshInstance3D
+	_check(tile_surface != null and _triangles_of(tile_surface) >= 100 * 8,
+			"las 100 casillas son una sola malla con geometría propia del estilo")
+	_check(tile_ink != null and _triangles_of(tile_ink) >= 100 * 12,
+			"los 100 números se dibujan como una sola malla de trazos")
 	_check(board.get_node_or_null("StartMarker") != null, "hay un punto de inicio")
 	_check(board.get_node_or_null("GoalMarker") != null, "hay una meta")
 	_check(board.get_node_or_null("DiceArea") != null, "hay una zona para el dado")
@@ -2175,12 +2289,17 @@ func _test_board_structure() -> void:
 	var challenge_tiles: Array[int] = _flow.layout.challenge_tiles
 	var marked: int = 0
 	for tile in challenge_tiles:
-		var tile_node: Node = board.tile_node(tile)
-		if tile_node != null and tile_node.get_node_or_null("ChallengeMark") != null:
+		if board.has_challenge_mark(tile):
 			marked += 1
 	_check(challenge_tiles.size() >= 10 and marked == challenge_tiles.size(),
 			"las %d casillas de desafío llevan su signo de pregunta" % challenge_tiles.size())
-	_check(board.tile_node(2).get_node_or_null("ChallengeMark") == null, "una casilla normal no lleva signo de pregunta")
+	_check(not board.has_challenge_mark(2), "una casilla normal no lleva signo de pregunta")
+	var special_marked: int = 0
+	for tile in _flow.layout.special_tiles():
+		if board.has_special_mark(tile):
+			special_marked += 1
+	_check(special_marked == _flow.layout.special_tiles().size() and special_marked > 0,
+			"las %d casillas especiales llevan su icono" % special_marked)
 
 	_check(_tokens_root.get_child_count() == 4, "hay una ficha por jugador (4)")
 	var start: Vector3 = board.tile_position(1)

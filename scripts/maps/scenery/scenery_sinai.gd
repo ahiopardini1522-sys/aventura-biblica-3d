@@ -62,7 +62,7 @@ static func build(root: Node3D, seed_value: int, quality: int, ground: Color) ->
 	var density: float = SceneryKit.density(quality)
 
 	SceneryKit.far_ground(root, ground, FAR_Y)
-	SceneryKit.terrain(root, HALF, 64, height_at, _terrain_color.bind(ground), "rock", 0.55)
+	SceneryKit.terrain(root, HALF, 64, height_at, _terrain_color.bind(ground), "dirt", 0.4)
 	SceneryKit.far_mountains(root, rng, 7, Color(0.62, 0.52, 0.50), FAR_Y)
 
 	_add_land(root, rng, density)
