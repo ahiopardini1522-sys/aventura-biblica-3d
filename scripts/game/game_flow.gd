@@ -274,7 +274,7 @@ func _blocked(player_index: int) -> void:
 	var token: PlayerToken = tokens[player_index]
 	hud.show_toast("Necesitas el número exacto para llegar a la meta", UiTheme.WARN_RED, 2.4)
 	SettingsManager.play_wrong()
-	await token.shake_head(0.5).finished
+	await token.shake_head(_anim(0.5)).finished
 	await _wait(0.4)
 
 
@@ -342,7 +342,7 @@ func _slide(player_index: int, head_tile: int, tail_tile: int) -> void:
 	var bottom: Vector3 = layout.tile_center(tail_tile)
 	Effects.dust_puff(fx, bottom, Color(0.85, 0.55, 0.45), 14, 0.9)
 	Effects.floating_text(fx, bottom + Vector3(0.0, 1.5, 0.0), "¡Ay!", Effects.RED)
-	token.shake_head(0.5)
+	token.shake_head(_anim(0.5))
 	await _settle(player_index, tail_tile)
 
 
@@ -421,12 +421,12 @@ func _apply_challenge_result(player_index: int, result: Dictionary) -> void:
 		Effects.star_shower(fx, token.position + Vector3(0.0, 0.4, 0.0), Effects.GOLD, 8 + stars * 4)
 		Effects.floating_text(fx, token.position + lift, "+%s" % _stars_text(stars), Effects.GOLD, 1.0, 1.4, 1.6)
 		hud.show_toast(MessageBank.pick("correct", _rng), Effects.GREEN, 2.6)
-		token.celebrate(2, 0.6)
+		token.celebrate(2, _anim(0.6))
 		await _wait(0.8)
 	else:
 		Effects.floating_text(fx, token.position + lift, "¡Casi!", Effects.RED, 1.0, 1.2, 1.4)
 		hud.show_toast(MessageBank.pick("wrong", _rng), Effects.RED, 2.6)
-		token.shake_head(0.5)
+		token.shake_head(_anim(0.5))
 		if bool(result["skip_next"]):
 			hud.set_player_note(player_index, "pierde su próximo turno")
 		await _wait(0.8)
@@ -468,7 +468,7 @@ func _run_special(player_index: int) -> void:
 	else:
 		SettingsManager.play_wrong()
 		hud.flash(Effects.RED, 0.14, 0.5)
-		token.shake_head(0.5)
+		token.shake_head(_anim(0.5))
 	Effects.ring_pulse(fx, token.position, accent, 1.5, 0.7)
 	await _wait(1.1)
 
@@ -478,7 +478,7 @@ func _run_special(player_index: int) -> void:
 		SettingsManager.play_star()
 		Effects.star_shower(fx, token.position + Vector3(0.0, 0.4, 0.0), Effects.GOLD, 8 + stars * 4)
 		Effects.floating_text(fx, token.position + lift, "+%s" % _stars_text(stars), Effects.GOLD, 1.0, 1.4, 1.6)
-		token.celebrate(2, 0.6)
+		token.celebrate(2, _anim(0.6))
 		await _wait(0.8)
 	if bool(result["skip_next"]):
 		hud.set_player_note(player_index, "pierde su próximo turno")
@@ -597,7 +597,7 @@ func _celebrate_goal(player_index: int) -> void:
 	Effects.confetti(fx, goal + Vector3(0.0, 5.0, 0.0), Vector3(3.0, 0.2, 3.0), 90, 3.0, false)
 	Effects.floating_text(fx, goal + Vector3(0.0, 2.0, 0.0), "¡META!", Effects.GOLD, 1.6, 1.6, 2.2)
 	hud.show_toast("¡%s llegó a la meta!" % str(state.get_player(player_index)["name"]), UiTheme.GOLD, 2.6)
-	token.celebrate(4, 1.6)
+	token.celebrate(4, _anim(1.6))
 	camera.focus_on(goal, 0.6)
 	await _wait(2.8)
 	match_finished.emit(state.summary())
@@ -623,6 +623,13 @@ func _wait(seconds: float) -> void:
 	var tween: Tween = create_tween()
 	tween.tween_interval(maxf(seconds / speed, 0.001))
 	await tween.finished
+
+
+## Duración de una animación de la ficha ajustada a la velocidad de la partida: así acaba
+## antes de que termine la espera que la acompaña (si no, a velocidad alta el turno seguiría
+## mientras la ficha todavía salta o mueve la cabeza).
+func _anim(seconds: float) -> float:
+	return maxf(seconds / speed, 0.02)
 
 
 ## Último recurso si un tramo del turno se atasca: coloca las fichas donde dicen las reglas

@@ -5,12 +5,14 @@ name: Compilar y verificar
 #   2. capturas    -> abre cada pantalla con una pantalla virtual y guarda imágenes.
 #   3. android     -> exporta el APK de depuración con las plantillas oficiales de Godot.
 #   4. resumen     -> publica registros e imágenes en la rama "ci-artifacts" para poder revisarlos.
+# Además, "validar" publica su resultado enseguida en la rama "ci-validar" (aviso rápido).
 # Al subir a la rama "main" se publica además el APK en el pre-lanzamiento "latest-debug".
 
 on:
   push:
     branches-ignore:
       - ci-artifacts
+      - ci-validar
   pull_request:
   workflow_dispatch:
 
@@ -65,6 +67,28 @@ jobs:
           name: registros-validar
           path: logs/
           if-no-files-found: warn
+
+      - name: Publicar el resultado de validar enseguida (rama ci-validar)
+        # Aviso rápido: no espera a las capturas ni al APK, que tardan bastante más.
+        if: always()
+        run: |
+          set -eo pipefail
+          mkdir -p /tmp/early
+          cp -r logs/. /tmp/early/ || true
+          cd /tmp/early
+          {
+            echo "# Resultado rápido (validar)"
+            echo
+            echo "- Commit: ${GITHUB_SHA}"
+            echo "- Rama: ${GITHUB_REF_NAME}"
+            echo "- validar: ${{ job.status }}"
+          } > STATUS.md
+          git init -q -b ci-validar
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "validar ${GITHUB_SHA::7} (${GITHUB_REF_NAME}): ${{ job.status }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-validar
 
   capturas:
     name: Capturas de pantalla (pantalla virtual)
