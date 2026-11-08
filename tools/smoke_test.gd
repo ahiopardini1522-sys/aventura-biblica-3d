@@ -838,6 +838,9 @@ func _test_scenery() -> void:
 	_test_scenery_style("arca", "arca_noe", "Arca de Noé", ["Sea", "Ark", "Animals", "Ararat", "Rainbow"])
 	_test_scenery_style("egipto", "egipto_exodo", "Egipto", ["Terrain", "WaterWall", "SeaVolume", "Monuments", "Flames", "Seabed"])
 	_test_scenery_style("sinai", "monte_sinai", "Monte Sinaí", ["Terrain", "Land", "Glow", "SummitCloud", "Beam"])
+	_test_scenery_style("jerusalen", "jerusalen", "Jerusalén", ["Terrain", "City", "Trim", "Nature"])
+	_test_scenery_style("belen", "belen", "Belén", ["Terrain", "Village", "VillageGlow", "Stable", "StableGlow", "BethlehemStar", "Nature"])
+	_test_scenery_city_and_night()
 
 
 ## Construye el escenario de un estilo con los datos reales de su mapa y revisa sus piezas, su
@@ -870,6 +873,41 @@ func _test_scenery_style(style: String, map_id: String, label: String, required_
 	_check(_triangles_of(again) == _triangles_of(first), "%s: con la misma semilla el escenario es idéntico" % label)
 	again.free()
 	first.free()
+
+
+## Detalles propios de Jerusalén y Belén: suelo bajo el tablero, calles libres y luces del establo.
+func _test_scenery_city_and_night() -> void:
+	_check(is_equal_approx(SceneryJerusalen.height_at(TerrainKit.PLATEAU_CENTER_X, 0.0), TerrainKit.PLATEAU_Y),
+			"Jerusalén: el suelo bajo el tablero está a la altura esperada")
+	_check(SceneryJerusalen.height_at(SceneryJerusalen.OLIVES.x, SceneryJerusalen.OLIVES.y) > 8.0,
+			"Jerusalén: el monte de los Olivos es alto")
+	_check(is_equal_approx(SceneryBelen.height_at(TerrainKit.PLATEAU_CENTER_X, 0.0), TerrainKit.PLATEAU_Y),
+			"Belén: el suelo bajo el tablero está a la altura esperada")
+	_check(SceneryBelen.height_at(0.0, -46.0) < 2.0, "Belén: el establo está sobre terreno casi plano")
+	var map_data: Dictionary = MapCatalog.find_map("belen")
+	var theme_data: Dictionary = map_data.get("theme", {})
+	var lit := Node3D.new()
+	SceneryFactory.build("belen", lit, 12345, 1, theme_data)
+	_check(_count_nodes(lit, "OmniLight3D") == 2, "Belén: la fogata y el establo tienen luz cálida (calidad media)")
+	lit.free()
+	var dark := Node3D.new()
+	SceneryFactory.build("belen", dark, 12345, 0, theme_data)
+	_check(_count_nodes(dark, "OmniLight3D") == 0, "Belén: la calidad baja no usa luces dinámicas")
+	dark.free()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var spots: Array[Vector2] = SceneryKit.scatter_rect(rng, 30, Rect2(Vector2(-40.0, -80.0), Vector2(80.0, 50.0)), 6.0)
+	_check(spots.size() > 10, "scatter_rect reparte puntos (%d)" % spots.size())
+	var spaced: bool = true
+	var clear: bool = true
+	for i in spots.size():
+		if SceneryKit.is_clear_zone(spots[i].x, spots[i].y):
+			clear = false
+		for j in range(i + 1, spots.size()):
+			if spots[i].distance_to(spots[j]) < 6.0 - 0.001:
+				spaced = false
+	_check(spaced, "scatter_rect separa los puntos al menos lo pedido")
+	_check(clear, "scatter_rect no pone nada en la zona del tablero")
 
 
 func _scenery_report(label: String, scenery: Node3D, max_triangles: int) -> void:

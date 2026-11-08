@@ -44,6 +44,31 @@ static func scatter(rng: RandomNumberGenerator, count: int, min_radius: float, m
 	return points
 
 
+## Puntos (x, z) al azar dentro de un rectángulo, separados al menos "min_gap" entre sí y fuera
+## de la zona libre del tablero. "accept(x, z) -> bool" puede rechazar sitios.
+static func scatter_rect(rng: RandomNumberGenerator, count: int, area: Rect2, min_gap: float,
+		accept: Callable = Callable()) -> Array[Vector2]:
+	var points: Array[Vector2] = []
+	var attempts: int = 0
+	while points.size() < count and attempts < count * 60:
+		attempts += 1
+		var x: float = rng.randf_range(area.position.x, area.end.x)
+		var z: float = rng.randf_range(area.position.y, area.end.y)
+		if is_clear_zone(x, z):
+			continue
+		if accept.is_valid() and not bool(accept.call(x, z)):
+			continue
+		var crowded: bool = false
+		for other in points:
+			if Vector2(x - other.x, z - other.y).length() < min_gap:
+				crowded = true
+				break
+		if crowded:
+			continue
+		points.append(Vector2(x, z))
+	return points
+
+
 ## Terreno con textura, listo para agregar a la escena.
 static func terrain(root: Node3D, half: float, cells: int, height_fn: Callable, color_fn: Callable,
 		texture_kind: String, uv_scale: float = 0.3) -> MeshInstance3D:
