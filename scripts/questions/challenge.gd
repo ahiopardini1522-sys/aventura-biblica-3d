@@ -25,6 +25,8 @@ const TYPE_TITLES := {
 	TYPE_EVENT: "¿QUÉ ACONTECIMIENTO ES?",
 }
 const BLANK := "____"
+## Valor de "map" para los desafíos que valen en cualquier mapa.
+const GENERAL_MAP := "general"
 const TRUE_FALSE_OPTIONS: Array[String] = ["Verdadero", "Falso"]
 const MIN_DIFFICULTY := 1
 const MAX_DIFFICULTY := 3
@@ -46,10 +48,14 @@ var reference: String = ""
 ## Solo "completar": id del versículo en data/verses (para mostrar su texto cuando se
 ## cuente con una versión autorizada).
 var verse_id: String = ""
+## Mapa al que pertenece el desafío ("eden", "belen", ...). Vacío = desafío general, que
+## puede salir en cualquier tablero.
+var map_id: String = ""
 
 
 ## Crea un desafío a partir de una entrada del JSON. Si es de verdadero o falso,
 ## "correct" puede ser true/false; en los demás tipos es la posición (0 a 3).
+## La etiqueta "map" ("general" o vacía = desafío general) elige el tablero donde sale primero.
 static func from_dict(data: Dictionary) -> Challenge:
 	var item := Challenge.new()
 	item.id = str(data.get("id", ""))
@@ -59,6 +65,9 @@ static func from_dict(data: Dictionary) -> Challenge:
 	item.explanation = str(data.get("explanation", ""))
 	item.reference = str(data.get("reference", ""))
 	item.verse_id = str(data.get("verse_id", ""))
+	item.map_id = str(data.get("map", ""))
+	if item.map_id == GENERAL_MAP:
+		item.map_id = ""
 	var raw_clues: Variant = data.get("clues", [])
 	if raw_clues is Array:
 		for clue in raw_clues:
@@ -82,6 +91,8 @@ func problems() -> PackedStringArray:
 	var label: String = id if not id.is_empty() else "(sin id)"
 	if id.is_empty():
 		found.append("%s: falta el id" % label)
+	if not map_id.is_empty() and MapCatalog.find_map(map_id).is_empty():
+		found.append("%s: el mapa '%s' no existe" % [label, map_id])
 	if not TYPES.has(type):
 		found.append("%s: tipo desconocido '%s'" % [label, type])
 		return found
@@ -157,6 +168,7 @@ func shuffled(rng: RandomNumberGenerator) -> Challenge:
 	copy.explanation = explanation
 	copy.reference = reference
 	copy.verse_id = verse_id
+	copy.map_id = map_id
 	if type == TYPE_TRUE_FALSE:
 		copy.options = options.duplicate()
 		copy.correct = correct

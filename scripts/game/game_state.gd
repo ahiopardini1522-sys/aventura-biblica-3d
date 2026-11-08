@@ -1,6 +1,6 @@
 extends Node
 ## Autoload "GameState": selección actual (mapa, personaje, jugadores) y su guardado.
-## Las reglas del juego se agregarán en etapas posteriores.
+## Solo se pueden elegir los mapas que el jugador ya tiene abiertos (ver ProgressManager).
 
 signal selection_changed
 
@@ -13,6 +13,9 @@ var selected_character_id: String = ""
 var player_count: int = 1
 ## Resumen de la última partida terminada (lo usa la pantalla de victoria).
 var last_summary: Dictionary = {}
+## Informe de progreso de esa partida (ProgressData.record_match): mapa completado, recompensa,
+## insignias y mapas que se abrieron. Vacío si la partida no se anotó.
+var last_progress: Dictionary = {}
 
 
 func _ready() -> void:
@@ -20,20 +23,28 @@ func _ready() -> void:
 	ensure_valid_selection()
 
 
-## Corrige la selección si apunta a algo que ya no existe o que aún no es jugable.
+## Corrige la selección si apunta a algo que ya no existe, que aún no es jugable o que el
+## jugador todavía no tiene abierto.
 func ensure_valid_selection() -> void:
-	if not MapCatalog.is_playable(selected_map_id):
+	if not can_select_map(selected_map_id):
 		selected_map_id = MapCatalog.default_map_id()
 	if CharacterCatalog.find_character(selected_character_id).is_empty():
 		selected_character_id = CharacterCatalog.default_character_id()
 	player_count = clampi(player_count, MIN_PLAYERS, MAX_PLAYERS)
 
 
-func select_map(id: String) -> void:
-	if not MapCatalog.is_playable(id):
-		return
+## Verdadero si el mapa existe, está hecho y el jugador ya lo desbloqueó.
+func can_select_map(id: String) -> bool:
+	return MapCatalog.is_playable(id) and ProgressManager.is_unlocked(id)
+
+
+## Elige el mapa donde se jugará. Un mapa bloqueado no se puede elegir. Devuelve si se eligió.
+func select_map(id: String) -> bool:
+	if not can_select_map(id):
+		return false
 	selected_map_id = id
 	_changed()
+	return true
 
 
 func select_character(id: String) -> void:

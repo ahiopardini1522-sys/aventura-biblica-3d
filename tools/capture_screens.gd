@@ -51,6 +51,11 @@ func _run() -> void:
 		quit(1)
 		return
 
+	# Las capturas no tocan el progreso real: se abren todos los mundos solo para esta sesión.
+	var progress: Node = root.get_node_or_null("ProgressManager")
+	if progress != null:
+		progress.save_path = "user://progress_capture.cfg"
+		progress.unlock_everything_for_session()
 	_state.select_map("desierto_sinai")
 	_state.select_character("david")
 	_state.set_player_count(3)

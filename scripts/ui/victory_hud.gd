@@ -5,6 +5,7 @@ extends Control
 
 signal play_again_pressed
 signal menu_pressed
+signal world_pressed
 
 var _rng := RandomNumberGenerator.new()
 
@@ -13,8 +14,11 @@ func _ready() -> void:
 	_rng.randomize()
 	%PlayAgainButton.pressed.connect(play_again_pressed.emit)
 	%MenuButton.pressed.connect(menu_pressed.emit)
+	%WorldButton.pressed.connect(world_pressed.emit)
 	%StatsPanel.add_theme_stylebox_override("panel",
 			UiTheme.box(Color(0.04, 0.06, 0.14, 0.86), Color(UiTheme.GOLD, 0.8), 32, 3, 34.0, 24.0, true))
+	%RewardBanner.add_theme_stylebox_override("panel",
+			UiTheme.box(Color(0.05, 0.07, 0.16, 0.90), Color(UiTheme.GOLD, 0.95), 30, 3, 30.0, 12.0, true))
 
 
 ## Rellena la pantalla con el resumen de MatchState.summary().
@@ -33,10 +37,65 @@ func show_summary(summary: Dictionary) -> void:
 			int(summary.get("total_correct", 0))]
 
 
+## Muestra lo que el jugador ganó en el viaje con el informe de ProgressManager.record_match():
+## mundo completado, estrellas, insignias nuevas y mapas que se abrieron. Si no hay nada nuevo
+## que contar, se queda el mensaje motivador de siempre.
+func show_progress(report: Dictionary) -> void:
+	var text: Dictionary = progress_text(report)
+	var banner := %RewardBanner as Control
+	banner.visible = not text.is_empty()
+	%MessageLabel.visible = text.is_empty()
+	if text.is_empty():
+		return
+	%RewardTitle.text = str(text["title"])
+	%RewardDetail.text = str(text["detail"])
+
+
+## Textos del informe de progreso ({title, detail}), o {} si no hay nada nuevo que contar.
+static func progress_text(report: Dictionary) -> Dictionary:
+	if report.is_empty() or not bool(report.get("ok", false)):
+		return {}
+	var new_badges: Array = report.get("new_badges", [])
+	var unlocked: Array = report.get("unlocked_maps", [])
+	var first: bool = bool(report.get("first_completion", false))
+	if not first and new_badges.is_empty() and unlocked.is_empty():
+		return {}
+	var map_name: String = MapCatalog.name_of(str(report.get("map_id", "")))
+	var title: String = "¡%s completado!" % map_name if first else "¡Nueva insignia!"
+	var parts: PackedStringArray = PackedStringArray()
+	if first and int(report.get("reward_stars", 0)) > 0:
+		parts.append("+%d estrellas del viaje" % int(report["reward_stars"]))
+	if not new_badges.is_empty():
+		var names: PackedStringArray = PackedStringArray()
+		for entry in new_badges:
+			names.append("«%s»" % str((entry as Dictionary).get("name", "")))
+		parts.append(("Insignia: " if names.size() == 1 else "Insignias: ") + ", ".join(names))
+	if not unlocked.is_empty():
+		var opened: PackedStringArray = PackedStringArray()
+		for id in unlocked:
+			opened.append(MapCatalog.name_of(str(id)))
+		parts.append(("Se abrió: " if opened.size() == 1 else "Se abrieron: ") + ", ".join(opened))
+	parts.append("Viaje: %d de %d mundos" % [int(report.get("completed", 0)), int(report.get("total", 0))])
+	return {"title": title, "detail": "  ·  ".join(parts)}
+
+
+func reward_visible() -> bool:
+	return (%RewardBanner as Control).visible
+
+
+func reward_title() -> String:
+	return (%RewardTitle as Label).text
+
+
+func reward_detail() -> String:
+	return (%RewardDetail as Label).text
+
+
 ## Entrada animada de los elementos principales.
 func play_intro() -> void:
-	UiFx.fade_scale_in([%TitleLabel, %WinnerLabel, %MessageLabel, %StatsPanel,
-			%PlayAgainButton, %MenuButton], 0.14, 0.5)
+	var items: Array = [%TitleLabel, %WinnerLabel, %StatsPanel, %PlayAgainButton, %WorldButton, %MenuButton]
+	items.insert(2, %RewardBanner if (%RewardBanner as Control).visible else %MessageLabel)
+	UiFx.fade_scale_in(items, 0.14, 0.5)
 
 
 func winner_text() -> String:

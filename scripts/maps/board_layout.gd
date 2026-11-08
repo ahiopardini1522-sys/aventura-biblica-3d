@@ -15,6 +15,23 @@ const PITCH := TILE_SIZE + TILE_GAP
 const KIND_LADDER := "ladder"
 const KIND_SNAKE := "snake"
 
+## Casillas especiales. Las de recompensa ayudan y las de obstáculo estorban:
+##   advance     avanza "steps" casillas          (recompensa)
+##   extra_roll  tira otra vez                    (recompensa)
+##   stars       da "stars" estrellas             (recompensa)
+##   back        retrocede "steps" casillas       (obstáculo)
+##   skip        pierde el próximo turno          (obstáculo; con un solo jugador retrocede 1)
+const SPECIAL_ADVANCE := "advance"
+const SPECIAL_EXTRA_ROLL := "extra_roll"
+const SPECIAL_STARS := "stars"
+const SPECIAL_BACK := "back"
+const SPECIAL_SKIP := "skip"
+const REWARD_KINDS: Array[String] = [SPECIAL_ADVANCE, SPECIAL_EXTRA_ROLL, SPECIAL_STARS]
+const OBSTACLE_KINDS: Array[String] = [SPECIAL_BACK, SPECIAL_SKIP]
+const MIN_SPECIAL_STEPS := 1
+const MAX_SPECIAL_STEPS := 4
+const MAX_SPECIAL_STARS := 3
+
 var columns: int = 10
 var rows: int = 10
 ## Cada entrada es (casilla de origen, casilla de destino).
@@ -22,14 +39,24 @@ var ladders: Array[Vector2i] = []
 var snakes: Array[Vector2i] = []
 ## Casillas donde se plantea un desafío bíblico (nunca inicio, meta, escaleras ni serpientes).
 var challenge_tiles: Array[int] = []
+## Id del mapa al que pertenece el trazado (vacío si se creó a mano, por ejemplo en pruebas).
+var map_id: String = ""
+## Estilo del tablero (cómo se construye en 3D: "garden", "deck", "causeway", ...).
+var style: String = ""
+## Casillas especiales en el orden del archivo (para validarlas) y por número de casilla.
+## Cada una: {tile, kind, name, ref, steps, stars, good}.
+var special_list: Array[Dictionary] = []
+var specials: Dictionary = {}
 
 
 ## Crea el trazado a partir de una entrada de MapCatalog.
 static func from_map(map_data: Dictionary) -> BoardLayout:
 	var layout := BoardLayout.new()
 	var board: Dictionary = map_data.get("board", {})
+	layout.map_id = str(map_data.get("id", ""))
 	layout.columns = maxi(2, int(board.get("columns", 10)))
 	layout.rows = maxi(2, int(board.get("rows", 10)))
+	layout.style = str(board.get("style", ""))
 	layout.ladders = _to_pairs(board.get("ladders", []))
 	layout.snakes = _to_pairs(board.get("snakes", []))
 	var tiles: Variant = board.get("challenge_tiles", [])
@@ -38,7 +65,28 @@ static func from_map(map_data: Dictionary) -> BoardLayout:
 			layout.challenge_tiles.append(int(tile))
 	else:
 		layout.challenge_tiles = layout.default_challenge_tiles()
+	layout._read_specials(board.get("rewards", []), true)
+	layout._read_specials(board.get("obstacles", []), false)
 	return layout
+
+
+func _read_specials(raw: Variant, good: bool) -> void:
+	if not (raw is Array):
+		return
+	for entry in raw:
+		if not (entry is Dictionary):
+			continue
+		var info: Dictionary = {
+			"tile": int(entry.get("tile", 0)),
+			"kind": str(entry.get("kind", "")),
+			"name": str(entry.get("name", "")),
+			"ref": str(entry.get("ref", "")),
+			"steps": int(entry.get("steps", 0)),
+			"stars": int(entry.get("stars", 0)),
+			"good": good,
+		}
+		special_list.append(info)
+		specials[int(info["tile"])] = info
 
 
 static func _to_pairs(raw: Variant) -> Array[Vector2i]:
@@ -106,6 +154,42 @@ func jump_kind(tile: int) -> String:
 
 func is_challenge_tile(tile: int) -> bool:
 	return challenge_tiles.has(tile)
+
+
+## La casilla especial de esa casilla ({} si es una casilla normal). Es una copia.
+func special_at(tile: int) -> Dictionary:
+	if specials.has(tile):
+		return (specials[tile] as Dictionary).duplicate()
+	return {}
+
+
+func is_special_tile(tile: int) -> bool:
+	return specials.has(tile)
+
+
+## Números de las casillas especiales, de menor a mayor.
+func special_tiles() -> Array[int]:
+	var result: Array[int] = []
+	for tile in specials:
+		result.append(int(tile))
+	result.sort()
+	return result
+
+
+## Cuántas casillas especiales hay: de recompensa (good = true) o de obstáculo (good = false).
+func special_count(good: bool) -> int:
+	var count: int = 0
+	for info in special_list:
+		if bool(info["good"]) == good:
+			count += 1
+	return count
+
+
+## Una casilla "tranquila" no es inicio ni meta y no tiene escalera, serpiente, desafío ni
+## casilla especial: caer en ella no provoca nada.
+func is_quiet(tile: int) -> bool:
+	return tile > 1 and tile < last_tile() and jump_kind(tile) == "" \
+			and not is_challenge_tile(tile) and not is_special_tile(tile)
 
 
 ## Casillas que no pueden llevar desafío: inicio, meta y los dos extremos de cada
@@ -183,6 +267,40 @@ func validate() -> PackedStringArray:
 	for pair in snakes:
 		problems.append_array(_check_pair("Serpiente", pair, total, false, used))
 	problems.append_array(_check_challenge_tiles(total))
+	problems.append_array(_check_specials(total))
+	return problems
+
+
+func _check_specials(total: int) -> PackedStringArray:
+	var problems := PackedStringArray()
+	var reserved: Dictionary = reserved_tiles()
+	var seen: Dictionary = {}
+	for info in special_list:
+		var tile: int = int(info["tile"])
+		var kind: String = str(info["kind"])
+		var label: String = "Casilla especial %d" % tile
+		if tile < 1 or tile > total:
+			problems.append("%s: fuera del tablero (1-%d)" % [label, total])
+		elif reserved.has(tile):
+			problems.append("%s: está reservada (inicio, meta, escalera o serpiente)" % label)
+		elif is_challenge_tile(tile):
+			problems.append("%s: ya es una casilla de desafío" % label)
+		if seen.has(tile):
+			problems.append("%s: está repetida" % label)
+		seen[tile] = true
+		if str(info["name"]).strip_edges().is_empty():
+			problems.append("%s: no tiene nombre" % label)
+		var allowed: Array[String] = REWARD_KINDS if bool(info["good"]) else OBSTACLE_KINDS
+		if not allowed.has(kind):
+			problems.append("%s: el tipo '%s' no es válido aquí" % [label, kind])
+		if kind == SPECIAL_ADVANCE or kind == SPECIAL_BACK:
+			var steps: int = int(info["steps"])
+			if steps < MIN_SPECIAL_STEPS or steps > MAX_SPECIAL_STEPS:
+				problems.append("%s: las casillas deben ser de %d a %d" % [label, MIN_SPECIAL_STEPS, MAX_SPECIAL_STEPS])
+		if kind == SPECIAL_STARS:
+			var stars: int = int(info["stars"])
+			if stars < 1 or stars > MAX_SPECIAL_STARS:
+				problems.append("%s: las estrellas deben ser de 1 a %d" % [label, MAX_SPECIAL_STARS])
 	return problems
 
 

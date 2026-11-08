@@ -7,10 +7,14 @@ extends SceneTree
 ## Comprueba, con el motor real:
 ##   - que todos los scripts compilan y todas las escenas se cargan,
 ##   - que no hay rutas res:// que apunten a archivos inexistentes,
-##   - que los datos (mapas, desafíos, versículos, mensajes) y las reglas del tablero son válidos,
-##   - las reglas del juego: turnos, dado, movimiento, las 6 escaleras, las 7 serpientes,
-##     premios, castigos, victoria y cientos de partidas simuladas completas,
-##   - que cada desafío bíblico tiene referencias válidas y que los cinco tipos funcionan,
+##   - que los datos (los 7 mapas, desafíos, versículos, mensajes) y las reglas de cada tablero
+##     son válidos,
+##   - las reglas del juego: turnos, dado, movimiento, escaleras, serpientes, casillas
+##     especiales, premios, castigos, victoria y cientos de partidas simuladas completas en
+##     cada uno de los 7 tableros,
+##   - el progreso: desbloqueo de mapas en orden, recompensas, insignias, estadísticas y guardado,
+##   - que cada desafío bíblico tiene referencias válidas, que los cinco tipos funcionan y que
+##     cada mapa tiene sus propios desafíos,
 ##   - que cada botón del menú abre su pantalla y que cada pantalla funciona (incluidas las
 ##     reglas del juego en Configuración),
 ##   - la partida REAL dentro de la escena del tablero, con el motor de verdad: turnos y bloqueo
@@ -27,7 +31,10 @@ const MENU_BUTTONS := {
 	"CharactersButton": "characters",
 	"SettingsButton": "settings",
 }
-const TIME_LIMIT := 420.0
+const TEST_PROGRESS_PATH := "user://progress_test.cfg"
+## Orden de los mundos bíblicos (cada uno se abre al completar el anterior).
+const MAP_ORDER: Array[String] = ["eden", "arca_noe", "egipto_exodo", "desierto_sinai", "monte_sinai", "jerusalen", "belen"]
+const TIME_LIMIT := 480.0
 ## Velocidad de las animaciones del juego durante las pruebas (1 = la normal).
 const GAME_SPEED := 10.0
 const JUMP_SPEED := 4.0
@@ -39,6 +46,7 @@ var _finished: bool = false
 var _router: Node
 var _state: Node
 var _settings: Node
+var _progress: Node
 
 # Piezas del tablero que está abierto (las toma _bind_board).
 # OJO: se declaran sin tipo de clase a propósito. Este script se compila ANTES de que existan los
@@ -85,10 +93,15 @@ func _run() -> void:
 	_router = root.get_node_or_null("SceneRouter")
 	_state = root.get_node_or_null("GameState")
 	_settings = root.get_node_or_null("SettingsManager")
-	_check(_router != null and _state != null and _settings != null, "autoloads cargados (SettingsManager, GameState, SceneRouter)")
-	if _router == null or _state == null or _settings == null:
+	_progress = root.get_node_or_null("ProgressManager")
+	_check(_router != null and _state != null and _settings != null and _progress != null,
+			"autoloads cargados (SettingsManager, ProgressManager, GameState, SceneRouter)")
+	if _router == null or _state == null or _settings == null or _progress == null:
 		_finish()
 		return
+	# Las pruebas no tocan el progreso real: guardan en otro archivo y empiezan de cero.
+	_progress.save_path = TEST_PROGRESS_PATH
+	_progress.reset(false)
 
 	_test_project_settings()
 	_test_scripts_compile()
@@ -98,13 +111,16 @@ func _run() -> void:
 	_test_board_layout()
 	_test_rules()
 	_test_match_state()
+	_test_special_tiles()
 	_test_simulated_games()
+	_test_progress()
 	_test_bible_references()
 	_test_challenge_bank()
 	_test_character_roster()
 	_test_meshes()
 	await _test_menu_and_screens()
 	await _test_board_scene()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_PROGRESS_PATH))
 	_finish()
 
 
@@ -261,31 +277,82 @@ func _test_resource_references() -> void:
 func _test_data() -> void:
 	print("-- Datos (mapas, preguntas, versículos)")
 	var maps: Array = MapCatalog.all_maps()
-	_check(maps.size() == 6, "el catálogo tiene 6 mapas")
-	_check(MapCatalog.playable_maps().size() >= 1, "hay al menos un mapa jugable")
-	_check(MapCatalog.is_playable(MapCatalog.default_map_id()), "el mapa por defecto es jugable")
+	_check(maps.size() == 7, "el catálogo tiene 7 mapas (%d)" % maps.size())
+	_check(MapCatalog.ids_in_order() == MAP_ORDER, "los mapas están en el orden del viaje %s" % str(MapCatalog.ids_in_order()))
+	_check(MapCatalog.playable_maps().size() == 7, "los 7 mapas están hechos y son jugables")
+	_check(MapCatalog.is_playable(MapCatalog.default_map_id()) and MapCatalog.default_map_id() == "eden",
+			"el primer mapa (Jardín del Edén) es el que está abierto desde el inicio")
 	var ids: Dictionary = {}
+	var styles: Dictionary = {}
+	var board_styles: Dictionary = {}
+	var positions: Dictionary = {}
+	var layouts: Dictionary = {}
+	var badges: Dictionary = {}
 	for entry in maps:
 		var map_data: Dictionary = entry
-		ids[str(map_data["id"])] = true
+		var map_id: String = str(map_data["id"])
+		ids[map_id] = true
 		var layout: BoardLayout = BoardLayout.from_map(map_data)
 		var problems: PackedStringArray = layout.validate()
-		_check(problems.is_empty(), "tablero válido: %s %s" % [map_data["id"], str(problems)])
+		_check(problems.is_empty(), "tablero válido: %s %s" % [map_id, str(problems)])
+		_check(layout.tile_count() == 100 and layout.map_id == map_id,
+				"%s: tablero de 100 casillas (inicio, meta y recorrido en zigzag)" % map_id)
+		_check(layout.ladders.size() == 6 and layout.snakes.size() == 7,
+				"%s: 6 escaleras y 7 serpientes (%d y %d)" % [map_id, layout.ladders.size(), layout.snakes.size()])
+		_check(layout.challenge_tiles.size() == 20, "%s: 20 casillas de desafío bíblico (%d)" % [map_id, layout.challenge_tiles.size()])
+		_check(layout.special_count(true) == 4 and layout.special_count(false) == 4,
+				"%s: 4 recompensas y 4 obstáculos (%d y %d)" % [map_id, layout.special_count(true), layout.special_count(false)])
 		var theme_data: Dictionary = map_data["theme"]
 		for key in ["tile_a", "tile_b", "frame", "ground", "sky_top", "sky_horizon", "ambient", "fog", "sun"]:
 			if not (theme_data.get(key) is Color):
-				_check(false, "el tema de %s tiene el color '%s'" % [map_data["id"], key])
+				_check(false, "el tema de %s tiene el color '%s'" % [map_id, key])
+		# Identidad propia: estilo de escenario y de tablero, lugar en el mapa mundial, recompensa y sonido.
+		var style: String = str(map_data["style"])
+		var board_style: String = str(map_data["board"]["style"])
+		_check(not style.is_empty() and not board_style.is_empty() and layout.style == board_style,
+				"%s: tiene estilo de escenario (%s) y de tablero (%s)" % [map_id, style, board_style])
+		styles[style] = true
+		board_styles[board_style] = true
+		var world_spot: Vector2 = MapCatalog.world_position(map_id)
+		positions["%.0f,%.0f" % [world_spot.x, world_spot.y]] = true
+		_check(not str(map_data["world"]["icon"]).is_empty(), "%s: tiene icono 3D en el mapa mundial (%s)" % [map_id, map_data["world"]["icon"]])
+		var badge: Dictionary = MapCatalog.badge_of(map_id)
+		_check(not badge.is_empty() and not str(badge["name"]).is_empty() and not str(badge["text"]).is_empty()
+				and MapCatalog.reward_stars_of(map_id) > 0, "%s: da una insignia y estrellas del viaje al completarse" % map_id)
+		badges[str(badge.get("id", ""))] = true
+		_check(not str(map_data["ambience"]["sound"]).is_empty(), "%s: tiene sonido ambiente (%s)" % [map_id, map_data["ambience"]["sound"]])
+		var lighting: Dictionary = map_data["lighting"]
+		var sun_dir: Variant = lighting.get("sun_dir", [])
+		_check(float(lighting.get("sun_energy", 0.0)) >= 0.1 and float(lighting.get("sun_energy", 9.0)) <= 0.6
+				and float(lighting.get("ambient_energy", 0.0)) >= 0.1 and float(lighting.get("ambient_energy", 9.0)) <= 0.6
+				and float(lighting.get("fog_density", 0.0)) >= 0.0005 and float(lighting.get("fog_density", 9.0)) <= 0.02
+				and sun_dir is Array and (sun_dir as Array).size() == 3,
+				"%s: tiene su propia iluminación (sol, ambiente, niebla y dirección)" % map_id)
+		layouts["%s|%s" % [str(layout.ladders), str(layout.snakes)]] = true
 	_check(ids.size() == maps.size(), "los ids de mapa no se repiten")
+	_check(styles.size() == 7 and board_styles.size() == 7, "cada mapa tiene su propio estilo de escenario y de tablero (no es el mismo tablero con otros colores)")
+	_check(positions.size() == 7, "cada mapa tiene su propio lugar en el mapa mundial")
+	_check(layouts.size() == 7, "cada mapa tiene sus propias escaleras y serpientes")
+	_check(badges.size() == 7, "cada mapa tiene su propia insignia")
+
+	# Desbloqueo progresivo: el primero libre y cada uno pide completar el anterior.
+	_check(MapCatalog.requirement_of(MAP_ORDER[0]).is_empty(), "el primer mapa no pide nada para abrirse")
+	for i in range(1, MAP_ORDER.size()):
+		_check(MapCatalog.requirement_of(MAP_ORDER[i]) == MAP_ORDER[i - 1],
+				"%s se abre al completar %s" % [MAP_ORDER[i], MAP_ORDER[i - 1]])
+		_check(str(MapCatalog.unlocked_by(MAP_ORDER[i - 1])) == str([MAP_ORDER[i]]),
+				"completar %s abre solo %s" % [MAP_ORDER[i - 1], MAP_ORDER[i]])
+	_check(MapCatalog.unlocked_by(MAP_ORDER[MAP_ORDER.size() - 1]).is_empty(), "el último mapa no abre ninguno más")
 
 	var desert: Dictionary = MapCatalog.find_map("desierto_sinai")
-	_check(not desert.is_empty(), "existe el mapa Desierto del Sinaí")
+	_check(not desert.is_empty(), "se conserva el Desierto del Sinaí de la etapa anterior")
 	var board: Dictionary = desert.get("board", {})
-	_check((board.get("ladders", []) as Array).size() == 6, "el mapa jugable tiene 6 escaleras")
-	_check((board.get("snakes", []) as Array).size() == 7, "el mapa jugable tiene 7 serpientes")
+	_check((board.get("ladders", []) as Array).size() == 6, "el Desierto del Sinaí conserva sus 6 escaleras")
+	_check((board.get("snakes", []) as Array).size() == 7, "el Desierto del Sinaí conserva sus 7 serpientes")
 
 	var verses: Dictionary = JsonLoader.load_dictionary("res://data/verses/verse_references.json")
 	var verse_list: Array = verses.get("verses", [])
-	_check(verse_list.size() >= 10, "hay referencias bíblicas (%d)" % verse_list.size())
+	_check(verse_list.size() >= 40, "hay referencias bíblicas (%d)" % verse_list.size())
 	var verse_ids: Dictionary = {}
 	for verse in verse_list:
 		var entry: Dictionary = verse
@@ -335,6 +402,45 @@ func _test_board_layout() -> void:
 	broken.snakes.append(Vector2i(20, 30))
 	broken.snakes.append(Vector2i(40, 200))
 	_check(broken.validate().size() >= 3, "la validación detecta escaleras/serpientes mal definidas")
+
+	# Casillas especiales (recompensas y obstáculos) del Desierto del Sinaí.
+	_check(str(layout.special_tiles()) == "[17, 29, 43, 52, 66, 74, 83, 89]",
+			"el desierto tiene sus 8 casillas especiales %s" % str(layout.special_tiles()))
+	_check(layout.special_at(17)["kind"] == BoardLayout.SPECIAL_ADVANCE and int(layout.special_at(17)["steps"]) == 2 and bool(layout.special_at(17)["good"]),
+			"la casilla 17 es una recompensa que avanza 2 casillas")
+	_check(layout.special_at(66)["kind"] == BoardLayout.SPECIAL_EXTRA_ROLL and layout.special_at(83)["kind"] == BoardLayout.SPECIAL_STARS,
+			"hay recompensas de tirada extra (66) y de estrellas (83)")
+	_check(layout.special_at(52)["kind"] == BoardLayout.SPECIAL_BACK and not bool(layout.special_at(52)["good"])
+			and layout.special_at(74)["kind"] == BoardLayout.SPECIAL_SKIP,
+			"hay obstáculos que retroceden (52) y que hacen perder el turno (74)")
+	_check(layout.special_at(2).is_empty() and not layout.is_special_tile(2) and layout.is_special_tile(43), "una casilla normal no es especial")
+	_check(layout.is_quiet(2) and layout.is_quiet(4) and not layout.is_quiet(5) and not layout.is_quiet(17)
+			and not layout.is_quiet(3) and not layout.is_quiet(1) and not layout.is_quiet(100),
+			"una casilla tranquila no tiene desafío, escalera, serpiente ni casilla especial")
+	var bad_cases: Array = [
+		["en el inicio", 1, BoardLayout.SPECIAL_ADVANCE, true, 2, 0, "Prueba"],
+		["fuera del tablero", 101, BoardLayout.SPECIAL_ADVANCE, true, 2, 0, "Prueba"],
+		["sobre una escalera", 3, BoardLayout.SPECIAL_ADVANCE, true, 2, 0, "Prueba"],
+		["sobre un desafío", 5, BoardLayout.SPECIAL_ADVANCE, true, 2, 0, "Prueba"],
+		["tipo de obstáculo en una recompensa", 20, BoardLayout.SPECIAL_BACK, true, 2, 0, "Prueba"],
+		["tipo de recompensa en un obstáculo", 20, BoardLayout.SPECIAL_STARS, false, 0, 2, "Prueba"],
+		["avanzar 0 casillas", 20, BoardLayout.SPECIAL_ADVANCE, true, 0, 0, "Prueba"],
+		["retroceder 9 casillas", 20, BoardLayout.SPECIAL_BACK, false, 9, 0, "Prueba"],
+		["0 estrellas", 20, BoardLayout.SPECIAL_STARS, true, 0, 0, "Prueba"],
+		["sin nombre", 20, BoardLayout.SPECIAL_ADVANCE, true, 2, 0, ""],
+	]
+	for bad in bad_cases:
+		var probe: BoardLayout = _desert_layout()
+		probe.special_list.clear()
+		probe.specials.clear()
+		var info: Dictionary = {"tile": int(bad[1]), "kind": str(bad[2]), "name": str(bad[6]), "ref": "",
+				"steps": int(bad[4]), "stars": int(bad[5]), "good": bool(bad[3])}
+		probe.special_list.append(info)
+		probe.specials[int(bad[1])] = info
+		_check(not probe.validate().is_empty(), "la validación detecta una casilla especial %s" % str(bad[0]))
+	var repeated: BoardLayout = _desert_layout()
+	repeated.special_list.append(repeated.special_list[0].duplicate())
+	_check(not repeated.validate().is_empty(), "la validación detecta una casilla especial repetida")
 
 	for count in range(1, 5):
 		var seen: Dictionary = {}
@@ -527,6 +633,18 @@ func _test_rules() -> void:
 	_check(int(normalized["reward_steps"]) == GameRules.MAX_SHIFT and int(normalized["penalty_mode"]) == 0,
 			"las opciones de juego se corrigen si vienen fuera de rango")
 
+	var advance_effect: Dictionary = GameRules.special_effect({"kind": "advance", "steps": 3, "name": "Prueba", "good": true}, 2)
+	_check(str(advance_effect["kind"]) == "advance" and int(advance_effect["steps"]) == 3 and not bool(advance_effect["converted"]),
+			"una casilla especial de avanzar avanza lo indicado")
+	var skip_effect: Dictionary = GameRules.special_effect({"kind": "skip", "name": "Prueba", "good": false}, 3)
+	_check(str(skip_effect["kind"]) == "skip" and not bool(skip_effect["converted"]), "con varios jugadores perder el turno se mantiene")
+	var solo_effect: Dictionary = GameRules.special_effect({"kind": "skip", "name": "Prueba", "good": false}, 1)
+	_check(str(solo_effect["kind"]) == "back" and int(solo_effect["steps"]) == 1 and bool(solo_effect["converted"]),
+			"con un solo jugador perder el turno se convierte en retroceder 1 casilla")
+	var clamped: Dictionary = GameRules.special_effect({"kind": "back", "steps": 99, "stars": 99, "name": "Prueba"}, 2)
+	_check(int(clamped["steps"]) == BoardLayout.MAX_SPECIAL_STEPS and int(clamped["stars"]) == BoardLayout.MAX_SPECIAL_STARS,
+			"los valores de una casilla especial se limitan a lo permitido")
+
 
 func _test_match_state() -> void:
 	print("-- Partida: turnos, premios, castigos y victoria")
@@ -641,85 +759,314 @@ func _test_match_state() -> void:
 			"con tirada exacta la ficha espera el número justo")
 
 
+## Casillas especiales: solo actúan al caer en ellas y cada tipo hace lo que dice, en los 7 mapas.
+func _test_special_tiles() -> void:
+	print("-- Casillas especiales: recompensas y obstáculos")
+	var desert: BoardLayout = _desert_layout()
+	var landing: MatchState = MatchState.create(desert, _roster(2), {"challenges": false})
+	landing.players[0]["tile"] = 16
+	var on_special: Dictionary = landing.apply_roll(0, 1)
+	_check(int(on_special["final"]) == 17 and str((on_special["special"] as Dictionary)["kind"]) == "advance" and not bool(on_special["challenge"]),
+			"caer en la casilla 17 activa su recompensa")
+	var passing: MatchState = MatchState.create(desert, _roster(2), {"challenges": false})
+	passing.players[0]["tile"] = 14
+	_check((passing.apply_roll(0, 4)["special"] as Dictionary).is_empty(), "pasar por encima de una casilla especial no la activa")
+	var plain: MatchState = MatchState.create(desert, _roster(2), {"challenges": false})
+	_check((plain.apply_roll(0, 1)["special"] as Dictionary).is_empty(), "una casilla normal no activa nada")
+	var nothing: MatchState = MatchState.create(desert, _roster(2), {})
+	_check(not bool(nothing.apply_special(0)["ok"]), "sin casilla especial en la casilla actual no pasa nada")
+	nothing.players[0]["tile"] = 17
+	_check(not bool(nothing.apply_special(1)["ok"]), "solo el jugador que tiene el turno recibe el efecto")
+	_check(bool(nothing.apply_special(0)["ok"]), "el jugador en turno sí recibe el efecto")
+
+	var no_chain: bool = true
+	var kinds_seen: Dictionary = {}
+	var failures: Array[String] = []
+	var effects_checked: int = 0
+	for map_id in MAP_ORDER:
+		var layout: BoardLayout = BoardLayout.from_map(MapCatalog.find_map(map_id))
+		# Las escaleras y las serpientes no activan casillas especiales (no hay cadenas).
+		for pair in layout.ladders:
+			var ladder_state: MatchState = MatchState.create(layout, _roster(2), {"challenges": false})
+			ladder_state.players[0]["tile"] = pair.x - 1
+			var ladder_plan: Dictionary = ladder_state.apply_roll(0, 1)
+			if (ladder_plan["jump"] as Dictionary).is_empty() or not (ladder_plan["special"] as Dictionary).is_empty():
+				no_chain = false
+		for pair in layout.snakes:
+			var snake_state: MatchState = MatchState.create(layout, _roster(2), {"challenges": false})
+			snake_state.players[0]["tile"] = pair.x - 1
+			var snake_plan: Dictionary = snake_state.apply_roll(0, 1)
+			if (snake_plan["jump"] as Dictionary).is_empty() or not (snake_plan["special"] as Dictionary).is_empty():
+				no_chain = false
+		for tile in layout.special_tiles():
+			var special: Dictionary = layout.special_at(tile)
+			kinds_seen[str(special["kind"])] = true
+			for count in [1, 2]:
+				var state: MatchState = MatchState.create(layout, _roster(count), {"challenges": false})
+				state.players[0]["tile"] = tile
+				var result: Dictionary = state.apply_special(0)
+				var info: Dictionary = state.get_player(0)
+				var stats: Dictionary = info["stats"]
+				var effect: Dictionary = GameRules.special_effect(special, count)
+				var label: String = "%s casilla %d (%d jugador/es)" % [map_id, tile, count]
+				var ok: bool = bool(result["ok"]) and str(result["kind"]) == str(effect["kind"]) \
+						and int(stats["specials"]) == 1 and bool(result["good"]) == bool(special["good"]) \
+						and int(stats["special_rewards" if bool(special["good"]) else "special_obstacles"]) == 1
+				match str(effect["kind"]):
+					"advance":
+						ok = ok and int(info["tile"]) == tile + int(special["steps"]) and not bool(result["extra_roll"])
+					"back":
+						ok = ok and int(info["tile"]) == maxi(1, tile - int(effect["steps"]))
+					"stars":
+						ok = ok and int(info["stars"]) == int(special["stars"]) and int(stats["special_stars"]) == int(special["stars"]) \
+								and int(info["tile"]) == tile
+					"extra_roll":
+						var again: Dictionary = state.end_turn()
+						ok = ok and bool(result["extra_roll"]) and bool(again["extra"]) and state.current == 0 and int(info["tile"]) == tile
+					"skip":
+						ok = ok and bool(info["skip_next"]) and bool(result["skip_next"]) and int(info["tile"]) == tile
+					_:
+						ok = false
+				if not ok:
+					failures.append(label)
+				effects_checked += 1
+	_check(failures.is_empty(), "cada casilla especial de los 7 mapas hace lo que dice (%d comprobaciones) %s" % [effects_checked, str(failures.slice(0, 3))])
+	_check(no_chain, "caer por una escalera o una serpiente no activa casillas especiales")
+	_check(kinds_seen.size() == 5, "los mapas usan los 5 tipos de casilla especial (%s)" % str(kinds_seen.keys()))
+
+	var solo: MatchState = MatchState.create(desert, _roster(1), {"challenges": false})
+	solo.players[0]["tile"] = 74
+	var solo_result: Dictionary = solo.apply_special(0)
+	_check(str(solo_result["kind"]) == "back" and bool(solo_result["converted"]) and int(solo.get_player(0)["tile"]) == 73
+			and not bool(solo.get_player(0)["skip_next"]), "con un solo jugador la casilla de perder turno retrocede 1 casilla")
+	var skipper: MatchState = MatchState.create(desert, _roster(3), {"challenges": false})
+	skipper.players[0]["tile"] = 74
+	skipper.apply_special(0)
+	var order: Array[int] = []
+	for _turn in 3:
+		order.append(int(skipper.end_turn()["next"]))
+	_check(str(order) == "[1, 2, 1]", "la casilla de perder turno salta al jugador una sola vez (%s)" % str(order))
+
+
 func _test_simulated_games() -> void:
-	print("-- Partidas simuladas completas")
-	var layout: BoardLayout = _desert_layout()
+	print("-- Partidas simuladas completas en los 7 tableros")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 20261107
-	var games: int = 400
-	var completed: int = 0
-	var invariants: bool = true
-	var longest: int = 0
-	var shortest: int = 1 << 30
-	var ladder_hits: Dictionary = {}
-	var snake_hits: Dictionary = {}
-	var challenges_seen: int = 0
-	var total_rolls: int = 0
+	var games: int = 120
 	var winners: Dictionary = {}
-	for _game in games:
-		var count: int = rng.randi_range(1, 4)
-		var options: Dictionary = {
-			"challenges": rng.randf() < 0.85,
-			"reward_mode": rng.randi_range(0, 2),
-			"reward_steps": rng.randi_range(1, 4),
-			"penalty_mode": rng.randi_range(0, 2),
-			"penalty_steps": rng.randi_range(1, 4),
-			"exact_finish": rng.randf() < 0.3,
-		}
-		var state: MatchState = MatchState.create(layout, _roster(count), options)
-		var guard: int = 0
-		var rolls: int = 0
-		while not state.finished and guard < 5000:
-			guard += 1
-			var who: int = state.current
-			var plan: Dictionary = state.apply_roll(who, rng.randi_range(1, 6))
-			rolls += 1
-			if not bool(plan["ok"]):
-				invariants = false
-				break
-			var jump: Dictionary = plan["jump"]
-			if not jump.is_empty():
-				if str(jump["kind"]) == "ladder":
-					ladder_hits[int(jump["from"])] = true
-				else:
-					snake_hits[int(jump["from"])] = true
-			if bool(plan["challenge"]) and not state.finished:
-				challenges_seen += 1
-				var answered: Dictionary = state.apply_challenge_result(who, rng.randf() < 0.6, rng.randi_range(1, 3))
-				if not bool(answered["ok"]):
+	var longest: int = 0
+	for map_id in MAP_ORDER:
+		var layout: BoardLayout = BoardLayout.from_map(MapCatalog.find_map(map_id))
+		var completed: int = 0
+		var invariants: bool = true
+		var shortest: int = 1 << 30
+		var ladder_hits: Dictionary = {}
+		var snake_hits: Dictionary = {}
+		var special_hits: Dictionary = {}
+		var special_kinds: Dictionary = {}
+		var challenges_seen: int = 0
+		var total_rolls: int = 0
+		for _game in games:
+			var count: int = rng.randi_range(1, 4)
+			var options: Dictionary = {
+				"challenges": rng.randf() < 0.85,
+				"reward_mode": rng.randi_range(0, 2),
+				"reward_steps": rng.randi_range(1, 4),
+				"penalty_mode": rng.randi_range(0, 2),
+				"penalty_steps": rng.randi_range(1, 4),
+				"exact_finish": rng.randf() < 0.3,
+			}
+			var state: MatchState = MatchState.create(layout, _roster(count), options)
+			var guard: int = 0
+			var rolls: int = 0
+			while not state.finished and guard < 5000:
+				guard += 1
+				var who: int = state.current
+				var plan: Dictionary = state.apply_roll(who, rng.randi_range(1, 6))
+				rolls += 1
+				if not bool(plan["ok"]):
 					invariants = false
-			for info in state.players:
-				var tile: int = int(info["tile"])
-				if tile < 1 or tile > 100:
+					break
+				var jump: Dictionary = plan["jump"]
+				if not jump.is_empty():
+					if str(jump["kind"]) == "ladder":
+						ladder_hits[int(jump["from"])] = true
+					else:
+						snake_hits[int(jump["from"])] = true
+				if bool(plan["challenge"]) and not state.finished:
+					challenges_seen += 1
+					var answered: Dictionary = state.apply_challenge_result(who, rng.randf() < 0.6, rng.randi_range(1, 3))
+					if not bool(answered["ok"]):
+						invariants = false
+				elif not (plan["special"] as Dictionary).is_empty() and not state.finished:
+					var special: Dictionary = plan["special"]
+					var applied: Dictionary = state.apply_special(who)
+					if not bool(applied["ok"]):
+						invariants = false
+					else:
+						special_hits[int(special["tile"])] = true
+						special_kinds[str(special["kind"])] = true
+				for info in state.players:
+					var tile: int = int(info["tile"])
+					if tile < 1 or tile > 100:
+						invariants = false
+				if not state.finished:
+					state.end_turn()
+			total_rolls += rolls
+			if state.finished:
+				completed += 1
+				longest = maxi(longest, rolls)
+				shortest = mini(shortest, rolls)
+				winners[state.winner] = int(winners.get(state.winner, 0)) + 1
+				var champion: Dictionary = state.get_player(state.winner)
+				if int(champion["tile"]) != 100:
 					invariants = false
-			if not state.finished:
-				state.end_turn()
-		total_rolls += rolls
-		if state.finished:
-			completed += 1
-			longest = maxi(longest, rolls)
-			shortest = mini(shortest, rolls)
-			winners[state.winner] = int(winners.get(state.winner, 0)) + 1
-			var champion: Dictionary = state.get_player(state.winner)
-			if int(champion["tile"]) != 100:
-				invariants = false
-			var finished_players: int = 0
-			for info in state.players:
-				if bool(info["finished"]):
-					finished_players += 1
-			if finished_players != 1:
-				invariants = false
-	_check(completed == games, "las %d partidas simuladas terminan con un ganador (%d)" % [games, completed])
-	_check(invariants, "en todas las partidas: casillas dentro del tablero, un solo ganador en la casilla 100 y turnos válidos")
-	_check(ladder_hits.size() == 6, "en las simulaciones se usaron las 6 escaleras (%d)" % ladder_hits.size())
-	_check(snake_hits.size() == 7, "en las simulaciones se usaron las 7 serpientes (%d)" % snake_hits.size())
-	_check(challenges_seen > 500, "en las simulaciones se plantearon desafíos (%d)" % challenges_seen)
-	var average_rolls: float = float(total_rolls) / float(games)
-	_check(shortest >= 6 and average_rolls >= 20.0 and average_rolls <= 600.0,
-			"la duración de las partidas es razonable (media %.0f tiradas, la más corta %d)" % [average_rolls, shortest])
+				var finished_players: int = 0
+				for info in state.players:
+					if bool(info["finished"]):
+						finished_players += 1
+				if finished_players != 1:
+					invariants = false
+		_check(completed == games, "%s: las %d partidas simuladas terminan con un ganador (%d)" % [map_id, games, completed])
+		_check(invariants, "%s: casillas dentro del tablero, un solo ganador en la casilla 100 y turnos válidos" % map_id)
+		_check(ladder_hits.size() == layout.ladders.size() and snake_hits.size() == layout.snakes.size(),
+				"%s: se usaron sus %d escaleras y sus %d serpientes (%d y %d)" % [map_id, layout.ladders.size(), layout.snakes.size(), ladder_hits.size(), snake_hits.size()])
+		_check(special_hits.size() >= 7 and special_kinds.size() >= _kind_count(layout) - 1,
+				"%s: se activaron sus casillas especiales (%d de 8, %d tipos)" % [map_id, special_hits.size(), special_kinds.size()])
+		_check(challenges_seen > 60, "%s: se plantearon desafíos (%d)" % [map_id, challenges_seen])
+		var average_rolls: float = float(total_rolls) / float(games)
+		_check(shortest >= 6 and average_rolls >= 20.0 and average_rolls <= 600.0,
+				"%s: la duración de las partidas es razonable (media %.0f tiradas, la más corta %d)" % [map_id, average_rolls, shortest])
 	_check(winners.size() >= 2, "ganan jugadores distintos según la suerte (%s)" % str(winners))
 	print("      (la partida más larga tuvo %d tiradas)" % longest)
 
+
+## Cuántos tipos distintos de casilla especial tiene un tablero.
+func _kind_count(layout: BoardLayout) -> int:
+	var kinds: Dictionary = {}
+	for info in layout.special_list:
+		kinds[str(info["kind"])] = true
+	return kinds.size()
+
+
+func _fake_summary(duration: float, turns: int, correct: int, stars_first: int, stars_second: int) -> Dictionary:
+	return {
+		"finished": true, "winner": 0, "winner_name": "Jugador 1", "turns": turns, "duration": duration,
+		"total_rolls": turns * 2, "total_challenges": correct + 2, "total_correct": correct,
+		"players": [
+			{"index": 0, "name": "Jugador 1", "tile": 100, "stars": stars_first, "rank": 1, "winner": true,
+				"stats": {"rolls": turns, "ladders": 2, "snakes": 1, "specials": 3}},
+			{"index": 1, "name": "Jugador 2", "tile": 60, "stars": stars_second, "rank": 2, "winner": false,
+				"stats": {"rolls": turns, "ladders": 1, "snakes": 2, "specials": 1}},
+		],
+		"options": {},
+	}
+
+
+## Progreso: mapas bloqueados y abiertos, recompensas, insignias, estadísticas y guardado.
+func _test_progress() -> void:
+	print("-- Progreso: desbloqueo, recompensas, insignias, estadísticas y guardado")
+	var data: ProgressData = ProgressData.new_game()
+	_check(data.is_unlocked("eden") and data.status_of("eden") == "available", "el primer mapa está disponible desde el comienzo")
+	var locked_ok: bool = true
+	for i in range(1, MAP_ORDER.size()):
+		if data.is_unlocked(MAP_ORDER[i]) or data.status_of(MAP_ORDER[i]) != "locked":
+			locked_ok = false
+	_check(locked_ok and data.unlocked_count() == 1 and data.completed_count() == 0 and data.map_total() == 7,
+			"los otros 6 mapas empiezan bloqueados")
+	_check(data.completion_ratio() == 0.0 and data.badge_counts() == Vector2i(0, 11) and data.all_badges().size() == 11,
+			"empieza sin avance y con 11 insignias por ganar (7 de mapa y 4 generales)")
+	data.record_start("eden")
+	data.record_start("mapa_que_no_existe")
+	_check(int(data.region("eden")["plays"]) == 1 and not data.regions.has("mapa_que_no_existe"), "se cuentan las partidas empezadas de un mapa que existe")
+	var unfinished: Dictionary = data.record_match("eden", {"finished": false})
+	_check(not bool(unfinished["ok"]) and not data.is_completed("eden"), "una partida sin terminar no completa el mapa")
+	_check(not bool(data.record_match("mapa_que_no_existe", _fake_summary(100.0, 10, 1, 1, 1))["ok"]), "un mapa que no existe no se anota")
+
+	var journey: int = 0
+	var chain_ok: bool = true
+	var chain_notes: Array[String] = []
+	for i in MAP_ORDER.size():
+		var map_id: String = MAP_ORDER[i]
+		var report: Dictionary = data.record_match(map_id, _fake_summary(300.0 - float(i), 30 + i, 6, 9, 4))
+		journey += MapCatalog.reward_stars_of(map_id)
+		var expected_unlocks: Array = [MAP_ORDER[i + 1]] if i + 1 < MAP_ORDER.size() else []
+		var badge: Dictionary = report["badge"]
+		if not bool(report["ok"]) or not bool(report["first_completion"]) or int(report["reward_stars"]) != MapCatalog.reward_stars_of(map_id) \
+				or str(badge.get("id", "")) != str(MapCatalog.badge_of(map_id)["id"]) or str(report["unlocked_maps"]) != str(expected_unlocks) \
+				or int(report["journey_stars"]) != journey or int(report["completed"]) != i + 1 or int(report["total"]) != 7:
+			chain_ok = false
+			chain_notes.append(map_id)
+		if data.status_of(map_id) != "completed" or not data.has_badge(str(badge.get("id", ""))):
+			chain_ok = false
+		if i + 2 < MAP_ORDER.size() and data.is_unlocked(MAP_ORDER[i + 2]):
+			chain_ok = false
+			chain_notes.append("%s abrió dos mapas" % map_id)
+		if i == 1:
+			_check(not data.has_badge("viajero"), "con 2 mapas completados aún no se gana la insignia Viajero")
+		if i == 2:
+			_check(data.has_badge("viajero") and report["new_badges"].size() == 2, "al completar el tercer mapa se gana Viajero junto con la insignia del mapa")
+		if i == 3:
+			_check(not data.has_badge("sabio") and not data.has_badge("coleccionista"), "con 24 aciertos y 52 estrellas aún no se ganan Sabio ni Coleccionista")
+		if i == 4:
+			_check(data.has_badge("sabio") and data.has_badge("coleccionista"), "con 30 aciertos y 65 estrellas se ganan Sabio y Coleccionista")
+	_check(chain_ok, "los 7 mapas se completan en orden: cada uno da su recompensa, su insignia y abre el siguiente %s" % str(chain_notes))
+	_check(data.has_badge("peregrino") and data.completed_count() == 7 and data.completion_ratio() == 1.0 and data.journey_stars == journey,
+			"al completar los 7 mundos se gana la insignia Peregrino (estrellas del viaje: %d)" % data.journey_stars)
+	_check(data.badge_counts() == Vector2i(11, 11), "se ganan las 11 insignias")
+	var eden_stats: Dictionary = data.region("eden")
+	_check(int(eden_stats["plays"]) == 1 and int(eden_stats["completions"]) == 1 and float(eden_stats["best_time"]) == 300.0 \
+			and int(eden_stats["best_turns"]) == 30 and int(eden_stats["correct"]) == 6 and int(eden_stats["challenges"]) == 8 \
+			and int(eden_stats["stars"]) == 13 and int(eden_stats["best_stars"]) == 9 and int(eden_stats["ladders"]) == 3 \
+			and int(eden_stats["snakes"]) == 3 and int(eden_stats["specials"]) == 4, "las estadísticas de la región suman la partida %s" % str(eden_stats))
+	var again: Dictionary = data.record_match("eden", _fake_summary(200.0, 25, 3, 2, 1))
+	_check(bool(again["ok"]) and not bool(again["first_completion"]) and int(again["reward_stars"]) == 0 and (again["badge"] as Dictionary).is_empty()
+			and (again["unlocked_maps"] as Array).is_empty() and data.journey_stars == journey, "repetir un mapa no repite la recompensa")
+	var better: Dictionary = data.region("eden")
+	_check(int(better["completions"]) == 2 and float(better["best_time"]) == 200.0 and int(better["best_turns"]) == 25 and int(better["best_stars"]) == 9,
+			"se guarda el mejor tiempo y los mejores turnos de la región")
+	data.record_match("eden", _fake_summary(900.0, 90, 0, 0, 0))
+	_check(float(data.region("eden")["best_time"]) == 200.0 and int(data.region("eden")["best_turns"]) == 25, "una partida peor no cambia los récords")
+
+	var copy: ProgressData = ProgressData.from_dict(data.to_dict())
+	_check(copy.unlocked == data.unlocked and copy.completed == data.completed and copy.badges == data.badges
+			and copy.journey_stars == data.journey_stars and copy.regions == data.regions, "el progreso se guarda y se vuelve a leer igual")
+	var damaged: ProgressData = ProgressData.from_dict({"unlocked": "mal", "completed": [5, ""], "badges": 7, "regions": {"eden": 3, "arca_noe": {"plays": -4, "best_time": -1.0}}, "journey_stars": -9})
+	_check(damaged.journey_stars == 0 and damaged.is_unlocked("eden") and int(damaged.region("arca_noe")["plays"]) == 0 and float(damaged.region("arca_noe")["best_time"]) == 0.0,
+			"un archivo dañado no rompe el progreso")
+	_check(ProgressData.from_dict({"completed": ["eden"]}).is_unlocked("arca_noe"), "completar un mapa deja abierto el siguiente aunque el archivo no lo diga")
+	var everything: ProgressData = ProgressData.new_game()
+	everything.unlock_everything()
+	_check(everything.unlocked_count() == 7 and everything.completed_count() == 0, "abrir todos los mapas no los marca como completados")
+
+	# El gestor guarda en un archivo de prueba y recupera el progreso al "reiniciar".
+	_progress.reset(false)
+	_check(_state.can_select_map("eden") and not _state.can_select_map("arca_noe") and not _state.can_select_map("belen"),
+			"el jugador solo puede elegir el mapa que tiene abierto")
+	_check(not _state.select_map("arca_noe") and str(_state.selected_map_id) == "eden", "elegir un mapa bloqueado no cambia la selección")
+	_state.selected_map_id = "belen"
+	_state.ensure_valid_selection()
+	_check(str(_state.selected_map_id) == "eden", "si la selección apunta a un mapa bloqueado vuelve al primero")
+	_progress.record_start("eden")
+	var manager_report: Dictionary = _progress.record_match("eden", _fake_summary(250.0, 28, 5, 6, 3))
+	_check(bool(manager_report["ok"]) and bool(manager_report["first_completion"]) and _progress.is_completed("eden") and _progress.is_unlocked("arca_noe"),
+			"el gestor anota el mapa completado y abre el siguiente")
+	_check(FileAccess.file_exists(TEST_PROGRESS_PATH), "el progreso se guarda en un archivo del teléfono")
+	_check(_state.select_map("arca_noe") and str(_state.selected_map_id) == "arca_noe", "al completar un mapa se puede elegir el siguiente")
+	_progress.unlock_everything_for_session()
+	_check(_progress.is_unlocked("belen"), "se pueden abrir todos los mapas solo en esta sesión")
+	_progress.load_progress()
+	_check(_progress.is_completed("eden") and _progress.is_unlocked("arca_noe") and not _progress.is_unlocked("belen")
+			and int(_progress.region("eden")["plays"]) == 1 and int(_progress.region("eden")["completions"]) == 1,
+			"al volver a abrir el juego el progreso sigue ahí y los mapas abiertos de prueba no se guardaron")
+	var broken_file := FileAccess.open(TEST_PROGRESS_PATH, FileAccess.WRITE)
+	if broken_file != null:
+		broken_file.store_string("esto no es un archivo de progreso ][")
+		broken_file.close()
+	_progress.load_progress()
+	_check(_progress.is_unlocked("eden") and not _progress.is_completed("eden"), "un archivo de progreso dañado empieza una partida nueva sin fallar")
+	_progress.reset(false)
+	_state.selected_map_id = "eden"
 
 # ---------------------------------------------------------------- Referencias y desafíos
 
@@ -751,7 +1098,7 @@ func _test_challenge_bank() -> void:
 	var problems: PackedStringArray = ChallengeBank.load_problems()
 	_check(problems.is_empty(), "todos los desafíos del banco son válidos %s" % str(problems))
 	var counts: Dictionary = ChallengeBank.count_by_type()
-	_check(ChallengeBank.all().size() >= 80, "el banco tiene 80 desafíos o más (%d)" % ChallengeBank.all().size())
+	_check(ChallengeBank.all().size() >= 240, "el banco tiene 240 desafíos o más (%d)" % ChallengeBank.all().size())
 	for type in Challenge.TYPES:
 		_check(int(counts[type]) >= 10, "hay 10 o más desafíos de tipo %s (%d)" % [type, counts[type]])
 
@@ -811,6 +1158,38 @@ func _test_challenge_bank() -> void:
 				shuffle_ok = false
 	_check(shuffle_ok, "mezclar las opciones conserva cuál es la respuesta correcta")
 
+	# Cada mapa tiene sus propios desafíos bíblicos (20: 4 de cada tipo) además de los generales.
+	var general_total: int = 0
+	for type in Challenge.TYPES:
+		general_total += ChallengeBank.general_by_type(type).size()
+	_check(general_total >= 100, "se conservan los desafíos generales de la etapa anterior (%d)" % general_total)
+	for map_id in MAP_ORDER:
+		var own: Array[Challenge] = ChallengeBank.for_map(map_id)
+		var per_type: Dictionary = ChallengeBank.count_for_map(map_id)
+		var even: bool = true
+		for type in Challenge.TYPES:
+			if int(per_type[type]) != 4:
+				even = false
+		_check(own.size() == 20 and even, "%s: tiene 20 desafíos propios, 4 de cada tipo %s" % [map_id, str(per_type)])
+		var tagged: bool = true
+		var verses_ok: bool = true
+		for item in own:
+			if item.map_id != map_id or not item.problems().is_empty():
+				tagged = false
+			if item.type == Challenge.TYPE_COMPLETE_VERSE:
+				var verse_entry: Dictionary = VerseProvider.references().get(item.verse_id, {})
+				if str(verse_entry.get("map", "")) != map_id:
+					verses_ok = false
+		_check(tagged and verses_ok, "%s: sus desafíos son válidos, llevan la etiqueta del mapa y sus versículos están enlazados" % map_id)
+	_check(ChallengeBank.for_map("").is_empty() and ChallengeBank.for_map("mapa_que_no_existe").is_empty(), "un mapa sin desafíos propios no devuelve ninguno")
+	var general_item: Challenge = Challenge.from_dict({"id": "x", "type": "true_false", "map": "general", "correct": true})
+	var mapped_item: Challenge = Challenge.from_dict({"id": "y", "type": "true_false", "map": "belen", "correct": true})
+	var ghost_item: Challenge = Challenge.from_dict({"id": "z", "type": "true_false", "map": "no_existe", "prompt": "p",
+			"explanation": "e", "reference": "Juan 3:16", "correct": true})
+	_check(general_item.map_id == "" and mapped_item.map_id == "belen" and mapped_item.shuffled(rng).map_id == "belen",
+			"la etiqueta 'general' vale para todos los mapas y la de un mapa se conserva al mezclar")
+	_check(" ".join(ghost_item.problems()).contains("no existe"), "un desafío de un mapa que no existe se detecta")
+
 	var deck_a := ChallengeDeck.new(4242)
 	var deck_b := ChallengeDeck.new(4242)
 	var same_sequence: bool = true
@@ -837,6 +1216,28 @@ func _test_challenge_bank() -> void:
 	_check(not repeats, "el mazo no repite desafíos mientras quedan sin salir (60 sacados)")
 	var forced: Challenge = ChallengeDeck.new(7).draw(Challenge.TYPE_EVENT)
 	_check(forced != null and forced.type == Challenge.TYPE_EVENT, "se puede pedir un tipo concreto de desafío")
+	for map_id in MAP_ORDER:
+		var map_deck := ChallengeDeck.new(2026, map_id)
+		var first_ids: Dictionary = {}
+		var own_first: bool = true
+		var foreign: bool = false
+		for n in 100:
+			var drawn: Challenge = map_deck.draw()
+			if drawn == null:
+				foreign = true
+				continue
+			if n < 20:
+				first_ids[drawn.id] = true
+				if drawn.map_id != map_id:
+					own_first = false
+			if not drawn.map_id.is_empty() and drawn.map_id != map_id:
+				foreign = true
+		_check(first_ids.size() == 20 and own_first, "%s: los primeros 20 desafíos de una partida son los propios del mapa, sin repetir" % map_id)
+		_check(not foreign, "%s: el mazo nunca saca desafíos de otro mapa (100 sacados)" % map_id)
+	var typed_map_deck := ChallengeDeck.new(5, "belen")
+	var typed_pick: Challenge = typed_map_deck.draw(Challenge.TYPE_COMPLETE_VERSE)
+	_check(typed_pick != null and typed_pick.type == Challenge.TYPE_COMPLETE_VERSE and typed_pick.map_id == "belen",
+			"se puede pedir un tipo concreto dentro de un mapa y sale uno de ese mapa")
 
 	# El texto bíblico solo aparece si hay una versión autorizada; hoy no la hay.
 	_check(VerseProvider.active_translation().is_empty(), "ninguna versión con derechos está activa (RVR1960 requiere autorización)")
@@ -902,7 +1303,7 @@ func _test_menu_and_screens() -> void:
 		var arrived: bool = await _wait_until(_arrived.bind(key))
 		_check(arrived, "%s abre la pantalla '%s'" % [button_name, key])
 		if arrived:
-			_test_screen(key)
+			await _test_screen(key)
 			var back := current_scene.find_child("BackButton", true, false) as Button
 			_check(back != null, "la pantalla '%s' tiene botón VOLVER" % key)
 			if back != null:
@@ -935,7 +1336,7 @@ func _test_menu_and_screens() -> void:
 func _test_screen(key: String) -> void:
 	match key:
 		"maps":
-			_test_maps_screen()
+			await _test_maps_screen()
 		"multiplayer":
 			_test_multiplayer_screen()
 		"characters":
@@ -947,27 +1348,51 @@ func _test_screen(key: String) -> void:
 func _test_maps_screen() -> void:
 	var list := _node("%MapList")
 	var play := _node("%PlayMapButton") as Button
-	if list == null or play == null:
+	var status := _node("%MapStatusLabel") as Label
+	if list == null or play == null or status == null:
 		return
+	_progress.reset(false)
+	_state.selected_map_id = "eden"
 	var maps: Array = MapCatalog.all_maps()
 	_check(list.get_child_count() == maps.size(), "la lista de mapas muestra los %d mapas" % maps.size())
-	var playable_index: int = -1
-	var locked_index: int = -1
-	for i in maps.size():
-		if MapCatalog.is_playable(str(maps[i]["id"])):
-			playable_index = i
-		else:
-			locked_index = i
-	if locked_index >= 0:
-		(list.get_child(locked_index) as Button).pressed.emit()
-		_check(play.disabled, "un mapa 'próximamente' no se puede jugar")
-		_check(MapCatalog.is_playable(str(_state.selected_map_id)), "elegir un mapa no disponible no cambia la selección")
-	if playable_index >= 0:
-		(list.get_child(playable_index) as Button).pressed.emit()
-		_check(not play.disabled, "el mapa disponible se puede jugar")
-		_check(str(_state.selected_map_id) == str(maps[playable_index]["id"]), "el mapa elegido queda guardado")
-		_check(not (_node("%MapNameLabel") as Label).text.is_empty(), "se muestra el nombre del mapa")
-		_check((_node("%Swatches") as Node).get_child_count() == 4, "se muestran los 4 colores del tablero")
+	var buttons: Array = list.get_children()
+	_check((buttons[0] as Button).text.contains("1. Jardín del Edén") and not (buttons[0] as Button).text.contains("bloqueado"),
+			"el primer mapa aparece abierto (%s)" % (buttons[0] as Button).text)
+	var locked_marked: bool = true
+	for i in range(1, buttons.size()):
+		if not (buttons[i] as Button).text.contains("(bloqueado)"):
+			locked_marked = false
+	_check(locked_marked, "los otros 6 mapas aparecen bloqueados")
+	(buttons[1] as Button).pressed.emit()
+	_check(play.disabled and status.text.begins_with("BLOQUEADO") and status.text.contains("Jardín del Edén"),
+			"un mapa bloqueado explica qué hay que completar (%s)" % status.text)
+	_check(str(_state.selected_map_id) == "eden", "elegir un mapa bloqueado no cambia la selección")
+	(buttons[0] as Button).pressed.emit()
+	_check(not play.disabled and str(_state.selected_map_id) == "eden", "el primer mapa se puede jugar y queda elegido")
+	_check(not (_node("%MapNameLabel") as Label).text.is_empty(), "se muestra el nombre del mapa")
+	_check((_node("%Swatches") as Node).get_child_count() == 4, "se muestran los 4 colores del tablero")
+	_check((_node("%MapBadgeLabel") as Label).text.contains("pendiente"), "se muestra la insignia pendiente del mapa")
+
+	# Al completar un mapa se abre el siguiente (la lista se reconstruye al volver a abrirla).
+	_progress.record_match("eden", _fake_summary(240.0, 27, 5, 6, 2))
+	_router.go_to("maps")
+	if not await _wait_until(_arrived.bind("maps"), 10.0):
+		_check(false, "la lista de mapas se vuelve a abrir")
+		return
+	list = _node("%MapList")
+	play = _node("%PlayMapButton") as Button
+	if list == null or play == null:
+		return
+	buttons = list.get_children()
+	_check((buttons[0] as Button).text.contains("(completado)") and not (buttons[1] as Button).text.contains("(bloqueado)")
+			and (buttons[2] as Button).text.contains("(bloqueado)"), "el primer mapa aparece completado y el segundo se abre")
+	(buttons[1] as Button).pressed.emit()
+	_check(not play.disabled and str(_state.selected_map_id) == "arca_noe", "el segundo mapa ya se puede elegir")
+	(buttons[0] as Button).pressed.emit()
+	_check((_node("%MapBadgeLabel") as Label).text.contains("ganada") and (_node("%MapStatsLabel") as Label).text.contains("Completado: 1"),
+			"el mapa completado muestra su insignia ganada y sus estadísticas")
+	_progress.reset(false)
+	_state.selected_map_id = "eden"
 
 
 func _test_multiplayer_screen() -> void:
@@ -1094,6 +1519,10 @@ func _on_turn_ended(player_index: int) -> void:
 	_events.append(["turn_ended", player_index])
 
 
+func _on_special_triggered(player_index: int, result: Dictionary) -> void:
+	_events.append(["special", player_index, result])
+
+
 func _on_match_finished(summary: Dictionary) -> void:
 	_events.append(["match_finished", summary])
 
@@ -1105,6 +1534,8 @@ func _sample_frame() -> void:
 
 ## Abre el tablero desde el menú con ese número de jugadores y toma sus piezas.
 func _enter_board(player_count: int) -> bool:
+	# El tablero de pruebas es el del Desierto del Sinaí (4.º mapa): se abren todos solo en esta sesión.
+	_progress.unlock_everything_for_session()
 	_state.select_map("desierto_sinai")
 	_state.select_character(CharacterCatalog.all_ids()[0])
 	_state.set_player_count(player_count)
@@ -1154,6 +1585,7 @@ func _bind_board() -> bool:
 	_flow.challenge_shown.connect(_on_challenge_shown)
 	_flow.challenge_resolved.connect(_on_challenge_resolved)
 	_flow.turn_ended.connect(_on_turn_ended)
+	_flow.special_triggered.connect(_on_special_triggered)
 	_flow.match_finished.connect(_on_match_finished)
 	return true
 
@@ -1166,10 +1598,9 @@ func _token(index: int) -> Node3D:
 	return _tokens_root.get_child(index) as Node3D
 
 
-## Casilla "tranquila": no es inicio ni meta y no tiene escalera, serpiente ni desafío.
+## Casilla "tranquila": no es inicio ni meta y no tiene escalera, serpiente, desafío ni casilla especial.
 func _is_quiet(layout: BoardLayout, tile: int) -> bool:
-	return tile > 1 and tile < layout.last_tile() and layout.jump_kind(tile) == "" \
-			and not layout.is_challenge_tile(tile)
+	return layout.is_quiet(tile)
 
 
 ## Una casilla de salida tal que "salida + tirada" sea tranquila, buscando desde "from_tile".
@@ -1987,6 +2418,25 @@ func _test_victory_and_replay() -> void:
 	var summary: Dictionary = _state.last_summary
 	_check(bool(summary.get("finished", false)) and int(summary.get("winner", -1)) == winner and str(summary.get("winner_name", "")) == names[winner],
 			"el resumen de la partida nombra al ganador (%s)" % str(summary.get("winner_name", "")))
+	var progress_report: Dictionary = _state.last_progress
+	_check(bool(progress_report.get("ok", false)) and str(progress_report.get("map_id", "")) == "desierto_sinai"
+			and bool(progress_report.get("first_completion", false)) and int(progress_report.get("reward_stars", 0)) == 25,
+			"la victoria completa el mapa por primera vez y da +25 estrellas del viaje")
+	_check(_progress.is_completed("desierto_sinai") and int(_progress.region("desierto_sinai")["completions"]) == 1
+			and int(_progress.region("desierto_sinai")["plays"]) >= 1, "el progreso anota la partida del Desierto del Sinaí")
+	_check(hud.reward_visible() and hud.reward_title() == "¡Desierto del Sinaí completado!"
+			and hud.reward_detail().contains("+25 estrellas del viaje") and hud.reward_detail().contains("Peregrino del Desierto")
+			and hud.reward_detail().contains("de 7 mundos"),
+			"la pantalla de victoria muestra el mapa completado, la recompensa y la insignia (%s)" % hud.reward_detail())
+	var world_button := hud.get_node_or_null("%WorldButton") as Button
+	_check(world_button != null and world_button.text == "MUNDO BÍBLICO", "la victoria tiene el botón MUNDO BÍBLICO")
+	_check(hud.progress_text({}).is_empty() and hud.progress_text({"ok": true, "first_completion": false, "new_badges": [], "unlocked_maps": []}).is_empty(),
+			"si no hay nada nuevo no se muestra recompensa")
+	var sample_text: Dictionary = hud.progress_text({"ok": true, "map_id": "eden", "first_completion": true, "reward_stars": 10,
+			"new_badges": [{"name": "Guardián del Huerto"}], "unlocked_maps": ["arca_noe"], "completed": 1, "total": 7})
+	_check(str(sample_text.get("title", "")) == "¡Jardín del Edén completado!" and str(sample_text.get("detail", "")).contains("«Guardián del Huerto»")
+			and str(sample_text.get("detail", "")).contains("Se abrió: Arca de Noé") and str(sample_text.get("detail", "")).contains("Viaje: 1 de 7 mundos"),
+			"el texto de recompensa dice mapa, estrellas, insignia y mapa que se abre")
 	_check(hud.winner_text().contains(names[winner]), "la pantalla muestra el nombre del ganador (%s)" % hud.winner_text())
 	_check(hud.row_count() == 4, "la tabla muestra las estadísticas de los 4 jugadores")
 	_check(hud.summary_text().begins_with("Turnos:") and hud.summary_text().contains("Duración:") and hud.summary_text().contains("Desafíos:"),
@@ -2061,12 +2511,37 @@ func _test_full_match_with_bot() -> void:
 	_check(problems.is_empty(), "durante toda la partida las fichas, la lista y las reglas coinciden %s" % str(problems.slice(0, 3)))
 	var winner: int = _flow.state.winner
 	_check(winner >= 0 and winner < 4 and int(_flow.state.get_player(winner)["tile"]) == _flow.layout.last_tile(), "el ganador está en la meta")
+	# El orden es 1, 2, 3, 4, salvo lo que mandan las casillas especiales: una tirada extra repite
+	# al mismo jugador y perder el turno salta al jugador castigado una sola vez.
 	var order_ok: bool = true
-	var started: Array = _events_of("turn_started")
-	for i in range(1, started.size()):
-		if (int((started[i] as Array)[1]) - int((started[i - 1] as Array)[1]) + 4) % 4 != 1:
-			order_ok = false
-	_check(order_ok, "los turnos siguieron el orden 1, 2, 3, 4 durante toda la partida")
+	var skipping: Dictionary = {}
+	var extra_owed: bool = false
+	var previous_player: int = -1
+	var specials_played: int = 0
+	for entry in _events:
+		var event: Array = entry
+		var kind: String = str(event[0])
+		if kind == "special":
+			specials_played += 1
+			var special_result: Dictionary = event[2]
+			if bool(special_result["extra_roll"]):
+				extra_owed = true
+			if bool(special_result["skip_next"]):
+				skipping[int(event[1])] = true
+		elif kind == "turn_started":
+			var player_now: int = int(event[1])
+			if previous_player >= 0:
+				var expected_next: int = previous_player
+				if not extra_owed:
+					expected_next = (previous_player + 1) % 4
+					while skipping.has(expected_next):
+						skipping.erase(expected_next)
+						expected_next = (expected_next + 1) % 4
+				if player_now != expected_next:
+					order_ok = false
+			extra_owed = false
+			previous_player = player_now
+	_check(order_ok, "los turnos siguieron el orden 1, 2, 3, 4 durante toda la partida (con %d casillas especiales)" % specials_played)
 	var summary: Dictionary = _flow.state.summary()
 	_check(int(summary["total_rolls"]) == _events_of("rolled").size(), "las estadísticas cuentan las tiradas (%d)" % int(summary["total_rolls"]))
 	_check(int(summary["total_challenges"]) == _events_of("challenge_shown").size() \
@@ -2136,6 +2611,12 @@ func _solo_rules_and_victory() -> void:
 	var hud: Node = current_scene.get_node_or_null("%Hud")
 	_check(hud != null and hud.winner_text().contains("llegó a la meta") and hud.row_count() == 1,
 			"la victoria de un solo jugador lo felicita por llegar a la meta (%s)" % (hud.winner_text() if hud != null else ""))
+	var world_button: Button = null
+	if hud != null:
+		world_button = hud.get_node_or_null("%WorldButton") as Button
+	if world_button != null:
+		world_button.pressed.emit()
+		_check(await _wait_until(_arrived.bind("world"), 15.0), "el botón MUNDO BÍBLICO de la victoria abre el mundo bíblico")
 	await _go_to_menu()
 
 

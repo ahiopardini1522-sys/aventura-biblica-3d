@@ -50,7 +50,7 @@ theme_override_constants/separation = 24
 
 [node name="Header" parent="UI/Root/Margin/VBox" instance=ExtResource("3_header")]
 layout_mode = 2
-title = "MAPAS BÍBLICOS"
+title = "LISTA DE MAPAS"
 
 [node name="Content" type="HBoxContainer" parent="UI/Root/Margin/VBox"]
 layout_mode = 2
@@ -96,7 +96,7 @@ text = "ESTADO"
 
 [node name="MapDescLabel" type="Label" parent="UI/Root/Margin/VBox/Content/DetailPanel/Details"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 130)
+custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
 size_flags_vertical = 3
 text = "Descripción"
@@ -107,6 +107,17 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"DimLabel"
 text = "Tablero"
+
+[node name="MapStatsLabel" type="Label" parent="UI/Root/Margin/VBox/Content/DetailPanel/Details"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "Estadísticas"
+
+[node name="MapBadgeLabel" type="Label" parent="UI/Root/Margin/VBox/Content/DetailPanel/Details"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Insignia"
 
 [node name="SwatchTitle" type="Label" parent="UI/Root/Margin/VBox/Content/DetailPanel/Details"]
 layout_mode = 2

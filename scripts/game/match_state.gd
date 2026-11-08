@@ -57,6 +57,10 @@ static func _new_stats() -> Dictionary:
 		"extra_rolls": 0,
 		"skipped_turns": 0,
 		"highest_tile": 1,
+		"specials": 0,
+		"special_rewards": 0,
+		"special_obstacles": 0,
+		"special_stars": 0,
 	}
 
 
@@ -117,7 +121,68 @@ func apply_roll(player_index: int, roll: int) -> Dictionary:
 	plan["challenge"] = bool(options["challenges"]) and not finished \
 			and not bool(plan["blocked"]) and (plan["jump"] as Dictionary).is_empty() \
 			and layout.is_challenge_tile(int(plan["final"]))
+	# Una casilla especial solo actúa si la ficha camina hasta ella: caer por una escalera o una
+	# serpiente, o llegar a ella por un premio o castigo, no la activa (no hay cadenas).
+	plan["special"] = {}
+	if not finished and not bool(plan["blocked"]) and (plan["jump"] as Dictionary).is_empty():
+		plan["special"] = layout.special_at(int(plan["final"]))
 	return plan
+
+
+## Aplica la casilla especial en la que está parado el jugador del turno. Devuelve:
+##   ok, player, kind, name, ref, good, converted, stars, move (plan_shift o {}),
+##   extra_roll, skip_next, reached_goal
+func apply_special(player_index: int) -> Dictionary:
+	if finished or not can_roll(player_index):
+		return {"ok": false, "reason": "no es el turno de ese jugador"}
+	var info: Dictionary = players[player_index]
+	var special: Dictionary = layout.special_at(int(info["tile"]))
+	if special.is_empty():
+		return {"ok": false, "reason": "no hay casilla especial en esa casilla"}
+	var effect: Dictionary = GameRules.special_effect(special, players.size())
+	var stats: Dictionary = info["stats"]
+	var kind: String = str(effect["kind"])
+	var result: Dictionary = {
+		"ok": true,
+		"player": player_index,
+		"kind": kind,
+		"name": str(effect["name"]),
+		"ref": str(effect["ref"]),
+		"good": bool(effect["good"]),
+		"converted": bool(effect["converted"]),
+		"stars": 0,
+		"move": {},
+		"extra_roll": false,
+		"skip_next": false,
+		"reached_goal": false,
+	}
+	stats["specials"] = int(stats["specials"]) + 1
+	if bool(effect["good"]):
+		stats["special_rewards"] = int(stats["special_rewards"]) + 1
+	else:
+		stats["special_obstacles"] = int(stats["special_obstacles"]) + 1
+	match kind:
+		BoardLayout.SPECIAL_ADVANCE:
+			result["move"] = _shift(info, int(effect["steps"]))
+		BoardLayout.SPECIAL_BACK:
+			result["move"] = _shift(info, -int(effect["steps"]))
+		BoardLayout.SPECIAL_EXTRA_ROLL:
+			extra_roll_pending = true
+			result["extra_roll"] = true
+		BoardLayout.SPECIAL_STARS:
+			var gained: int = int(effect["stars"])
+			info["stars"] = int(info["stars"]) + gained
+			stats["special_stars"] = int(stats["special_stars"]) + gained
+			result["stars"] = gained
+		BoardLayout.SPECIAL_SKIP:
+			if players.size() > 1:
+				info["skip_next"] = true
+				result["skip_next"] = true
+	var move: Dictionary = result["move"]
+	if not move.is_empty() and bool(move["reached_goal"]):
+		result["reached_goal"] = true
+		_finish(player_index)
+	return result
 
 
 ## Aplica el resultado de un desafío del jugador en turno: estrellas y premio si acertó,

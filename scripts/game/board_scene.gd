@@ -70,6 +70,7 @@ func _ready() -> void:
 	_flow.panel = _panel
 	_flow.fx = _effects
 	_flow.tokens = token_nodes
+	ProgressManager.record_start(str(map_data["id"]))
 	_flow.start(match_state)
 
 
@@ -117,8 +118,11 @@ func _on_menu_requested() -> void:
 	SceneRouter.go_back()
 
 
+## Al terminar la partida se anota en el progreso (estadísticas, mapa completado, recompensa,
+## insignias y desbloqueos) y se guarda; la pantalla de victoria muestra el informe.
 func _on_match_finished(summary: Dictionary) -> void:
 	GameState.last_summary = summary
+	GameState.last_progress = ProgressManager.record_match(str(map_data["id"]), summary)
 	SceneRouter.go_to("victory")
 
 

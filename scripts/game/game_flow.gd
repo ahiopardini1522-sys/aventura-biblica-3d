@@ -13,6 +13,7 @@ signal moved(player_index: int, tile: int)
 signal jumped(player_index: int, kind: String, from_tile: int, to_tile: int)
 signal challenge_shown(player_index: int, item: Challenge)
 signal challenge_resolved(player_index: int, correct: bool)
+signal special_triggered(player_index: int, result: Dictionary)
 signal turn_ended(player_index: int)
 signal match_finished(summary: Dictionary)
 signal _choice_made
@@ -58,7 +59,7 @@ func start(new_state: MatchState) -> void:
 	state = new_state
 	layout = state.layout
 	_rng.randomize()
-	deck = ChallengeDeck.new(_rng.randi())
+	deck = ChallengeDeck.new(_rng.randi(), layout.map_id)
 	dice.speed = speed
 	if not panel.answered.is_connected(_on_panel_answered):
 		panel.answered.connect(_on_panel_answered)
@@ -223,6 +224,11 @@ func _resolve_roll(player_index: int, value: int) -> void:
 		return
 	if bool(result["challenge"]):
 		await _run_challenge(player_index)
+		if state.finished:
+			await _celebrate_goal(player_index)
+			return
+	elif not (result["special"] as Dictionary).is_empty():
+		await _run_special(player_index)
 		if state.finished:
 			await _celebrate_goal(player_index)
 			return
@@ -436,6 +442,76 @@ func _apply_challenge_result(player_index: int, result: Dictionary) -> void:
 	elif bool(result["extra_roll"]):
 		hud.show_toast("¡Ganaste una tirada extra!", UiTheme.GOLD, 2.0)
 		await _wait(0.5)
+
+
+# ---------------------------------------------------------------- Casillas especiales
+
+## La ficha cayó en una casilla especial (recompensa u obstáculo del mapa): se anuncia, se
+## aplica su efecto en las reglas y se cuenta lo que pasó, sin pedir nada al jugador.
+func _run_special(player_index: int) -> void:
+	var result: Dictionary = state.apply_special(player_index)
+	if not bool(result.get("ok", false)):
+		return
+	var token: PlayerToken = tokens[player_index]
+	var info: Dictionary = state.get_player(player_index)
+	var good: bool = bool(result["good"])
+	var accent: Color = Effects.GREEN if good else Effects.RED
+	var lift := Vector3(0.0, 1.5, 0.0)
+	_stop_following()
+	hud.set_hint("%s: %s" % ["Recompensa" if good else "Obstáculo", str(result["name"])])
+	hud.show_toast("%s\n%s" % [str(result["name"]), _special_text(result)],
+			UiTheme.GOLD if good else UiTheme.WARN_RED, 2.8)
+	if good:
+		SettingsManager.play_star()
+		hud.flash(Effects.GOLD, 0.16, 0.5)
+		Effects.sparkle_burst(fx, token.position + Vector3(0.0, 0.5, 0.0), Effects.GOLD, 16)
+	else:
+		SettingsManager.play_wrong()
+		hud.flash(Effects.RED, 0.14, 0.5)
+		token.shake_head(0.5)
+	Effects.ring_pulse(fx, token.position, accent, 1.5, 0.7)
+	await _wait(1.1)
+
+	var stars: int = int(result["stars"])
+	if stars > 0:
+		hud.update_player(player_index, _shown_tile[player_index], int(info["stars"]))
+		SettingsManager.play_star()
+		Effects.star_shower(fx, token.position + Vector3(0.0, 0.4, 0.0), Effects.GOLD, 8 + stars * 4)
+		Effects.floating_text(fx, token.position + lift, "+%s" % _stars_text(stars), Effects.GOLD, 1.0, 1.4, 1.6)
+		token.celebrate(2, 0.6)
+		await _wait(0.8)
+	if bool(result["skip_next"]):
+		hud.set_player_note(player_index, "pierde su próximo turno")
+	var move: Dictionary = result["move"]
+	if not move.is_empty() and bool(move["moved"]):
+		_follow(token)
+		camera.focus_on(token.position)
+		for tile in (move["steps"] as Array):
+			await _hop(player_index, int(tile), SHIFT_HOP_TIME)
+		Effects.sparkle_burst(fx, token.position + Vector3(0.0, 0.3, 0.0), accent, 12)
+	elif bool(result["extra_roll"]):
+		await _wait(0.5)
+	special_triggered.emit(player_index, result)
+
+
+## Lo que hace una casilla especial, dicho en una frase corta ("Avanzas 3 casillas").
+func _special_text(result: Dictionary) -> String:
+	var steps: int = 0
+	var move: Dictionary = result["move"]
+	if not move.is_empty():
+		steps = absi(int(move["delta"]))
+	match str(result["kind"]):
+		BoardLayout.SPECIAL_ADVANCE:
+			return "Avanzas %s" % _tiles_text(steps) if steps > 0 else "Ya estás en la meta"
+		BoardLayout.SPECIAL_BACK:
+			return "Retrocedes %s" % _tiles_text(steps) if steps > 0 else "Ya estás en el inicio"
+		BoardLayout.SPECIAL_EXTRA_ROLL:
+			return "¡Tiras otra vez!"
+		BoardLayout.SPECIAL_STARS:
+			return "+%s" % _stars_text(int(result["stars"]))
+		BoardLayout.SPECIAL_SKIP:
+			return "Pierdes tu próximo turno"
+	return ""
 
 
 func _on_panel_answered(index: int) -> void:

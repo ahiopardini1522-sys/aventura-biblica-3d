@@ -55,8 +55,11 @@ func _ready() -> void:
 
 	_build_podium()
 	_hud.show_summary(summary)
+	# Sin una partida terminada de verdad no hay recompensa que mostrar.
+	_hud.show_progress(GameState.last_progress if not GameState.last_summary.is_empty() else {})
 	_hud.play_again_pressed.connect(_on_play_again)
 	_hud.menu_pressed.connect(_on_menu)
+	_hud.world_pressed.connect(_on_world)
 	_hud.play_intro()
 	_update_camera()
 	_start_celebration()
@@ -87,6 +90,10 @@ func _on_play_again() -> void:
 
 func _on_menu() -> void:
 	SceneRouter.go_back()
+
+
+func _on_world() -> void:
+	SceneRouter.go_to("world")
 
 
 # ---------------------------------------------------------------- Podio

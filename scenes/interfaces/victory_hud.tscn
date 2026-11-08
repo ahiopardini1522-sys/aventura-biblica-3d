@@ -49,6 +49,35 @@ theme_override_font_sizes/font_size = 64
 text = "¡Jugador ganó la partida!"
 horizontal_alignment = 1
 
+[node name="RewardBanner" type="PanelContainer" parent="Margin/Layout"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="RewardBox" type="VBoxContainer" parent="Margin/Layout/RewardBanner"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="RewardTitle" type="Label" parent="Margin/Layout/RewardBanner/RewardBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1100, 0)
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+theme_override_colors/font_color = Color(1, 0.88, 0.45, 1)
+theme_override_font_sizes/font_size = 44
+text = "¡Mundo completado!"
+horizontal_alignment = 1
+
+[node name="RewardDetail" type="Label" parent="Margin/Layout/RewardBanner/RewardBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1100, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Detalle"
+horizontal_alignment = 1
+autowrap_mode = 3
+
 [node name="MessageLabel" type="Label" parent="Margin/Layout"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -116,14 +145,26 @@ theme_override_constants/separation = 22
 
 [node name="PlayAgainButton" type="Button" parent="Margin/Layout/Body/RightColumn/Buttons"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 118)
+custom_minimum_size = Vector2(0, 108)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.2
 theme_type_variation = &"PrimaryButton"
+theme_override_font_sizes/font_size = 38
 text = "JUGAR OTRA VEZ"
+
+[node name="WorldButton" type="Button" parent="Margin/Layout/Body/RightColumn/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 108)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.1
+theme_override_font_sizes/font_size = 36
+text = "MUNDO BÍBLICO"
 
 [node name="MenuButton" type="Button" parent="Margin/Layout/Body/RightColumn/Buttons"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(340, 118)
+custom_minimum_size = Vector2(190, 108)
 layout_mode = 2
+theme_override_font_sizes/font_size = 36
 text = "MENÚ"

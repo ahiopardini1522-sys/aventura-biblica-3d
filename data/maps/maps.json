@@ -1,56 +1,198 @@
 {
-  "schema_version": 1,
-  "note": "Catálogo de mapas bíblicos. Por ahora solo 'desierto_sinai' es jugable; los demás reservan su lugar en la estructura y se completarán en etapas posteriores. 'challenge_tiles' son las casillas que plantean un desafío bíblico (nunca inicio, meta, escaleras ni serpientes); si falta, el juego reparte unas por defecto.",
+  "schema_version": 2,
+  "note": "Catálogo de mapas bíblicos de la Etapa 3. Los 7 mundos son jugables; el orden del campo 'unlock.requires' define el desbloqueo progresivo (el primero está abierto desde el inicio). 'board' trae las escaleras, serpientes, casillas de desafío bíblico y casillas especiales (recompensas y obstáculos) de cada tablero. Las referencias bíblicas son pasajes reales; no se incluye texto de ninguna versión con derechos de autor.",
   "maps": [
     {
-      "id": "betel",
+      "id": "eden",
       "order": 1,
-      "name": "Betel",
-      "reference": "Génesis 28:10-22",
-      "description": "Jacob sueña con una escalera que une la tierra con el cielo.",
-      "status": "coming_soon",
-      "theme": {
-        "tile_a": "#cdbfe0",
-        "tile_b": "#a995c9",
-        "frame": "#3d2f55",
-        "ground": "#7e6fa0",
-        "sky_top": "#1d2a5c",
-        "sky_horizon": "#d9a7c0",
-        "ambient": "#e6d8f2",
-        "fog": "#cfa8c4",
-        "sun": "#ffd9c2",
-        "props": ["rock", "dune"]
+      "name": "Jardín del Edén",
+      "reference": "Génesis 2:8-17",
+      "description": "El huerto que Dios plantó: árboles, ríos y el primer hogar del ser humano.",
+      "status": "available",
+      "style": "eden",
+      "world": {"x": -52.0, "z": -12.0, "icon": "tree"},
+      "unlock": {"requires": ""},
+      "reward": {
+        "stars": 10,
+        "badge": "badge_eden",
+        "badge_name": "Guardián del Huerto",
+        "badge_text": "Recorriste el Jardín del Edén de principio a fin."
       },
-      "board": { "columns": 10, "rows": 10, "ladders": [], "snakes": [] }
+      "ambience": {"sound": "garden"},
+      "lighting": {
+        "sun_energy": 0.27,
+        "ambient_energy": 0.3,
+        "fog_density": 0.0035,
+        "sun_dir": [-0.5, 0.65, 0.45]
+      },
+      "theme": {
+        "tile_a": "#d3eba9",
+        "tile_b": "#a2d17c",
+        "frame": "#5b3d22",
+        "ground": "#5fa04a",
+        "sky_top": "#4aa3e8",
+        "sky_horizon": "#f6f1c8",
+        "ambient": "#fff8e0",
+        "fog": "#d9edc2",
+        "sun": "#fff2cf",
+        "props": []
+      },
+      "board": {
+        "columns": 10,
+        "rows": 10,
+        "style": "garden",
+        "ladders": [[11, 26], [22, 42], [34, 44], [47, 75], [64, 82], [80, 95]],
+        "snakes": [[19, 4], [30, 6], [55, 28], [61, 45], [76, 41], [86, 69], [98, 63]],
+        "challenge_tiles": [5, 9, 15, 17, 21, 24, 33, 37, 46, 49, 56, 58, 65, 68, 71, 74, 88, 90, 92, 97],
+        "rewards": [
+          {"tile": 20, "kind": "advance", "name": "Árbol de la vida", "ref": "Génesis 2:9", "steps": 3},
+          {"tile": 32, "kind": "extra_roll", "name": "Fruto del huerto", "ref": "Génesis 2:16"},
+          {"tile": 60, "kind": "stars", "name": "Río de cuatro brazos", "ref": "Génesis 2:10", "stars": 2},
+          {"tile": 73, "kind": "advance", "name": "Rocío del amanecer", "ref": "Génesis 2:5-6", "steps": 2}
+        ],
+        "obstacles": [
+          {"tile": 29, "kind": "back", "name": "Espinos y cardos", "ref": "Génesis 3:18", "steps": 2},
+          {"tile": 43, "kind": "back", "name": "Sombra de la serpiente", "ref": "Génesis 3:1", "steps": 3},
+          {"tile": 62, "kind": "skip", "name": "Espada encendida", "ref": "Génesis 3:24"},
+          {"tile": 83, "kind": "back", "name": "Niebla del huerto", "ref": "Génesis 2:6", "steps": 1}
+        ]
+      }
     },
     {
-      "id": "egipto",
+      "id": "arca_noe",
       "order": 2,
-      "name": "Egipto y el Mar Rojo",
-      "reference": "Éxodo 12-14",
-      "description": "El pueblo de Israel sale de Egipto y cruza el mar en seco.",
-      "status": "coming_soon",
+      "name": "Arca de Noé",
+      "reference": "Génesis 6-8",
+      "description": "Noé, su familia y los animales se salvan del diluvio dentro del arca.",
+      "status": "available",
+      "style": "arca",
+      "world": {"x": -27.0, "z": -18.0, "icon": "ark"},
+      "unlock": {"requires": "eden"},
+      "reward": {
+        "stars": 15,
+        "badge": "badge_arca",
+        "badge_name": "Capitán del Arca",
+        "badge_text": "Llevaste el arca a salvo hasta la meta."
+      },
+      "ambience": {"sound": "sea"},
+      "lighting": {
+        "sun_energy": 0.24,
+        "ambient_energy": 0.31,
+        "fog_density": 0.0055,
+        "sun_dir": [-0.4, 0.55, 0.5]
+      },
       "theme": {
-        "tile_a": "#f1dca4",
-        "tile_b": "#d9b56a",
-        "frame": "#5b3b1e",
-        "ground": "#d8b673",
-        "sky_top": "#3a7bc8",
-        "sky_horizon": "#fbe3b0",
+        "tile_a": "#e8c995",
+        "tile_b": "#c99b62",
+        "frame": "#6e4524",
+        "ground": "#4f7fa0",
+        "sky_top": "#5f86ad",
+        "sky_horizon": "#dce5e2",
+        "ambient": "#eaf0f3",
+        "fog": "#c9d6da",
+        "sun": "#fff0d8",
+        "props": []
+      },
+      "board": {
+        "columns": 10,
+        "rows": 10,
+        "style": "deck",
+        "ladders": [[8, 37], [21, 43], [40, 55], [47, 77], [69, 79], [80, 90]],
+        "snakes": [[24, 4], [32, 15], [50, 20], [65, 31], [72, 35], [87, 67], [96, 82]],
+        "challenge_tiles": [5, 7, 12, 16, 27, 29, 34, 38, 44, 46, 52, 56, 63, 68, 71, 75, 81, 85, 92, 99],
+        "rewards": [
+          {"tile": 18, "kind": "advance", "name": "Paloma con el olivo", "ref": "Génesis 8:11", "steps": 3},
+          {"tile": 36, "kind": "extra_roll", "name": "Pareja de animales", "ref": "Génesis 7:8-9"},
+          {"tile": 51, "kind": "stars", "name": "Arcoíris del pacto", "ref": "Génesis 9:13", "stars": 2},
+          {"tile": 76, "kind": "advance", "name": "Provisiones del arca", "ref": "Génesis 6:21", "steps": 2}
+        ],
+        "obstacles": [
+          {"tile": 30, "kind": "back", "name": "Ola del diluvio", "ref": "Génesis 7:17-20", "steps": 3},
+          {"tile": 42, "kind": "back", "name": "Cuervo errante", "ref": "Génesis 8:7", "steps": 1},
+          {"tile": 64, "kind": "skip", "name": "Tormenta de cuarenta días", "ref": "Génesis 7:12"},
+          {"tile": 89, "kind": "back", "name": "Cubierta resbalosa", "ref": "Génesis 7:18", "steps": 2}
+        ]
+      }
+    },
+    {
+      "id": "egipto_exodo",
+      "order": 3,
+      "name": "Egipto y el Éxodo",
+      "reference": "Éxodo 12-14",
+      "description": "Israel sale de Egipto y Dios abre el Mar Rojo para su pueblo.",
+      "status": "available",
+      "style": "egipto",
+      "world": {"x": -30.0, "z": 8.0, "icon": "pyramid"},
+      "unlock": {"requires": "arca_noe"},
+      "reward": {
+        "stars": 20,
+        "badge": "badge_egipto",
+        "badge_name": "Libertador del Éxodo",
+        "badge_text": "Cruzaste el Mar Rojo siguiendo al pueblo de Dios."
+      },
+      "ambience": {"sound": "wind"},
+      "lighting": {
+        "sun_energy": 0.28,
+        "ambient_energy": 0.28,
+        "fog_density": 0.0025,
+        "sun_dir": [-0.6, 0.6, 0.45]
+      },
+      "theme": {
+        "tile_a": "#f3dd9e",
+        "tile_b": "#dcb56a",
+        "frame": "#8a5b2b",
+        "ground": "#dcb875",
+        "sky_top": "#3d86d4",
+        "sky_horizon": "#fbe6b4",
         "ambient": "#fff0d6",
         "fog": "#f3dcae",
         "sun": "#fff1d2",
-        "props": ["palm", "rock", "dune"]
+        "props": []
       },
-      "board": { "columns": 10, "rows": 10, "ladders": [], "snakes": [] }
+      "board": {
+        "columns": 10,
+        "rows": 10,
+        "style": "causeway",
+        "ladders": [[2, 18], [25, 40], [28, 55], [49, 76], [69, 83], [82, 93]],
+        "snakes": [[26, 15], [35, 21], [50, 31], [56, 20], [78, 47], [92, 52], [94, 74]],
+        "challenge_tiles": [6, 8, 12, 14, 27, 29, 33, 36, 44, 46, 54, 58, 62, 68, 75, 77, 86, 89, 96, 99],
+        "rewards": [
+          {"tile": 19, "kind": "advance", "name": "Pan sin levadura", "ref": "Éxodo 12:39", "steps": 2},
+          {"tile": 34, "kind": "extra_roll", "name": "Columna de fuego", "ref": "Éxodo 13:21"},
+          {"tile": 60, "kind": "advance", "name": "Camino en seco", "ref": "Éxodo 14:21-22", "steps": 3},
+          {"tile": 72, "kind": "stars", "name": "Regalos de los egipcios", "ref": "Éxodo 12:35-36", "stars": 2}
+        ],
+        "obstacles": [
+          {"tile": 22, "kind": "back", "name": "Plaga de ranas", "ref": "Éxodo 8:1-6", "steps": 2},
+          {"tile": 41, "kind": "back", "name": "Plaga de langostas", "ref": "Éxodo 10:12-15", "steps": 3},
+          {"tile": 65, "kind": "skip", "name": "Oscuridad espesa", "ref": "Éxodo 10:21-23"},
+          {"tile": 87, "kind": "back", "name": "Ladrillos sin paja", "ref": "Éxodo 5:6-8", "steps": 1}
+        ]
+      }
     },
     {
       "id": "desierto_sinai",
-      "order": 3,
+      "order": 4,
       "name": "Desierto del Sinaí",
-      "reference": "Éxodo 19-20",
-      "description": "En el desierto, Dios da su ley a Israel por medio de Moisés.",
+      "reference": "Éxodo 16-17",
+      "description": "En el desierto, Dios cuida a Israel con maná, codornices y agua de la roca.",
       "status": "available",
+      "style": "desierto",
+      "world": {"x": -6.0, "z": 14.0, "icon": "tent"},
+      "unlock": {"requires": "egipto_exodo"},
+      "reward": {
+        "stars": 25,
+        "badge": "badge_desierto",
+        "badge_name": "Peregrino del Desierto",
+        "badge_text": "Atravesaste el desierto confiando en Dios."
+      },
+      "ambience": {"sound": "desert"},
+      "lighting": {
+        "sun_energy": 0.26,
+        "ambient_energy": 0.28,
+        "fog_density": 0.003,
+        "sun_dir": [-0.55, 0.62, 0.5]
+      },
       "theme": {
         "tile_a": "#ead29a",
         "tile_b": "#d6a766",
@@ -68,71 +210,189 @@
         "rows": 10,
         "ladders": [[3, 22], [8, 30], [28, 56], [39, 60], [51, 72], [71, 92]],
         "snakes": [[98, 78], [94, 67], [85, 64], [62, 44], [54, 34], [46, 15], [36, 6]],
-        "challenge_tiles": [5, 12, 14, 19, 24, 26, 33, 38, 41, 48, 50, 55, 58, 65, 69, 75, 80, 87, 90, 96]
+        "challenge_tiles": [5, 12, 14, 19, 24, 26, 33, 38, 41, 48, 50, 55, 58, 65, 69, 75, 80, 87, 90, 96],
+        "style": "sand",
+        "rewards": [
+          {"tile": 17, "kind": "advance", "name": "Maná del cielo", "ref": "Éxodo 16:14-15", "steps": 2},
+          {"tile": 43, "kind": "advance", "name": "Agua de la roca", "ref": "Éxodo 17:6", "steps": 3},
+          {"tile": 66, "kind": "extra_roll", "name": "Codornices al anochecer", "ref": "Éxodo 16:13"},
+          {"tile": 83, "kind": "stars", "name": "Nube que guía de día", "ref": "Éxodo 13:21", "stars": 2}
+        ],
+        "obstacles": [
+          {"tile": 29, "kind": "back", "name": "Tormenta de arena", "ref": "Éxodo 15:22", "steps": 2},
+          {"tile": 52, "kind": "back", "name": "Sed del desierto", "ref": "Éxodo 17:1-3", "steps": 3},
+          {"tile": 74, "kind": "skip", "name": "Quejas del pueblo", "ref": "Éxodo 16:2-3"},
+          {"tile": 89, "kind": "back", "name": "Ataque de Amalec", "ref": "Éxodo 17:8", "steps": 2}
+        ]
       }
     },
     {
-      "id": "rio_jordan",
-      "order": 4,
-      "name": "Cruce del Jordán",
-      "reference": "Josué 3",
-      "description": "Israel cruza el río Jordán para entrar a la tierra prometida.",
-      "status": "coming_soon",
-      "theme": {
-        "tile_a": "#c9e3c0",
-        "tile_b": "#8fbf8a",
-        "frame": "#4a3a22",
-        "ground": "#6f9a58",
-        "sky_top": "#3c82cf",
-        "sky_horizon": "#d8ecf5",
-        "ambient": "#eef6e8",
-        "fog": "#cfe3d6",
-        "sun": "#fff6dc",
-        "props": ["palm", "rock"]
+      "id": "monte_sinai",
+      "order": 5,
+      "name": "Monte Sinaí",
+      "reference": "Éxodo 19-20",
+      "description": "Dios desciende sobre el monte y entrega los diez mandamientos a Moisés.",
+      "status": "available",
+      "style": "sinai",
+      "world": {"x": 16.0, "z": 6.0, "icon": "mountain"},
+      "unlock": {"requires": "desierto_sinai"},
+      "reward": {
+        "stars": 30,
+        "badge": "badge_sinai",
+        "badge_name": "Testigo del Sinaí",
+        "badge_text": "Subiste al monte donde Dios entregó su ley."
       },
-      "board": { "columns": 10, "rows": 10, "ladders": [], "snakes": [] }
+      "ambience": {"sound": "mountain"},
+      "lighting": {
+        "sun_energy": 0.3,
+        "ambient_energy": 0.26,
+        "fog_density": 0.004,
+        "sun_dir": [-0.35, 0.7, 0.4]
+      },
+      "theme": {
+        "tile_a": "#cdc4b8",
+        "tile_b": "#a99b8d",
+        "frame": "#4a3d34",
+        "ground": "#8c7a68",
+        "sky_top": "#5b82bb",
+        "sky_horizon": "#f4e7d2",
+        "ambient": "#f1e7dd",
+        "fog": "#e6dacd",
+        "sun": "#ffe9c4",
+        "props": []
+      },
+      "board": {
+        "columns": 10,
+        "rows": 10,
+        "style": "rock",
+        "ladders": [[4, 21], [18, 35], [32, 56], [50, 76], [68, 78], [81, 93]],
+        "snakes": [[23, 6], [30, 20], [47, 29], [58, 42], [70, 36], [87, 53], [99, 62]],
+        "challenge_tiles": [3, 10, 14, 16, 24, 28, 31, 40, 41, 43, 52, 59, 66, 69, 71, 77, 84, 89, 92, 95],
+        "rewards": [
+          {"tile": 11, "kind": "advance", "name": "Nube de gloria", "ref": "Éxodo 24:15-16", "steps": 2},
+          {"tile": 38, "kind": "stars", "name": "Tablas de la ley", "ref": "Éxodo 31:18", "stars": 3},
+          {"tile": 57, "kind": "extra_roll", "name": "Sonido de trompeta", "ref": "Éxodo 19:16"},
+          {"tile": 73, "kind": "advance", "name": "Zarza que ardía", "ref": "Éxodo 3:2-4", "steps": 3}
+        ],
+        "obstacles": [
+          {"tile": 22, "kind": "back", "name": "Temblor del monte", "ref": "Éxodo 19:18", "steps": 3},
+          {"tile": 49, "kind": "skip", "name": "Truenos y relámpagos", "ref": "Éxodo 19:16"},
+          {"tile": 65, "kind": "back", "name": "Límite del monte", "ref": "Éxodo 19:12", "steps": 2},
+          {"tile": 83, "kind": "back", "name": "Becerro de oro", "ref": "Éxodo 32:1-4", "steps": 3}
+        ]
+      }
     },
     {
       "id": "jerusalen",
-      "order": 5,
+      "order": 6,
       "name": "Jerusalén",
       "reference": "2 Samuel 5; 1 Reyes 6",
-      "description": "La ciudad de David y el templo que construyó Salomón.",
-      "status": "coming_soon",
+      "description": "La ciudad de David, sus murallas y el templo que construyó Salomón.",
+      "status": "available",
+      "style": "jerusalen",
+      "world": {"x": 36.0, "z": -10.0, "icon": "temple"},
+      "unlock": {"requires": "monte_sinai"},
+      "reward": {
+        "stars": 35,
+        "badge": "badge_jerusalen",
+        "badge_name": "Guardián de la Ciudad Santa",
+        "badge_text": "Llegaste hasta el templo de Jerusalén."
+      },
+      "ambience": {"sound": "city"},
+      "lighting": {
+        "sun_energy": 0.27,
+        "ambient_energy": 0.29,
+        "fog_density": 0.003,
+        "sun_dir": [-0.5, 0.62, 0.5]
+      },
       "theme": {
-        "tile_a": "#efe6d2",
-        "tile_b": "#cfc0a0",
-        "frame": "#5a4630",
-        "ground": "#c9b48a",
-        "sky_top": "#4a86cf",
-        "sky_horizon": "#f8e7c4",
+        "tile_a": "#f1e7d1",
+        "tile_b": "#d6c6a4",
+        "frame": "#6b5638",
+        "ground": "#c6af84",
+        "sky_top": "#4a8bd0",
+        "sky_horizon": "#f9e9c8",
         "ambient": "#fff3dc",
         "fog": "#f1e1bf",
         "sun": "#fff3d6",
-        "props": ["rock", "dune"]
+        "props": []
       },
-      "board": { "columns": 10, "rows": 10, "ladders": [], "snakes": [] }
+      "board": {
+        "columns": 10,
+        "rows": 10,
+        "style": "city",
+        "ladders": [[2, 22], [24, 46], [37, 57], [45, 68], [72, 95], [77, 86]],
+        "snakes": [[28, 8], [35, 15], [44, 11], [62, 50], [75, 48], [84, 58], [99, 88]],
+        "challenge_tiles": [3, 5, 13, 20, 23, 29, 34, 36, 42, 47, 52, 56, 64, 66, 76, 79, 83, 89, 93, 97],
+        "rewards": [
+          {"tile": 17, "kind": "advance", "name": "Cedros para el templo", "ref": "1 Reyes 5:6-10", "steps": 2},
+          {"tile": 38, "kind": "stars", "name": "Oro de Salomón", "ref": "1 Reyes 10:14", "stars": 3},
+          {"tile": 59, "kind": "advance", "name": "Canto de los peregrinos", "ref": "Salmo 122:1", "steps": 3},
+          {"tile": 78, "kind": "extra_roll", "name": "El arca en el templo", "ref": "1 Reyes 8:6"}
+        ],
+        "obstacles": [
+          {"tile": 27, "kind": "back", "name": "Muralla en ruinas", "ref": "Nehemías 2:13-15", "steps": 3},
+          {"tile": 41, "kind": "back", "name": "Ejército que cerca la ciudad", "ref": "2 Reyes 18:17", "steps": 2},
+          {"tile": 67, "kind": "skip", "name": "Mercaderes en el templo", "ref": "Juan 2:14-16"},
+          {"tile": 81, "kind": "back", "name": "Puertas quemadas", "ref": "Nehemías 2:13", "steps": 1}
+        ]
+      }
     },
     {
-      "id": "mar_galilea",
-      "order": 6,
-      "name": "Mar de Galilea",
-      "reference": "Marcos 4:35-41; Mateo 14:22-33",
-      "description": "Jesús calma la tormenta y camina sobre el agua.",
-      "status": "coming_soon",
-      "theme": {
-        "tile_a": "#c4def2",
-        "tile_b": "#7fb3d9",
-        "frame": "#3f4f66",
-        "ground": "#5b8fb0",
-        "sky_top": "#2f6fbd",
-        "sky_horizon": "#d7ecfa",
-        "ambient": "#e8f3fb",
-        "fog": "#c9e1f1",
-        "sun": "#fff8e6",
-        "props": ["rock"]
+      "id": "belen",
+      "order": 7,
+      "name": "Belén",
+      "reference": "Lucas 2:1-20; Mateo 2:1-12",
+      "description": "En la ciudad de David nace Jesús; los pastores y los magos van a adorarlo.",
+      "status": "available",
+      "style": "belen",
+      "world": {"x": 56.0, "z": 2.0, "icon": "stable"},
+      "unlock": {"requires": "jerusalen"},
+      "reward": {
+        "stars": 50,
+        "badge": "badge_belen",
+        "badge_name": "Seguidor de la Estrella",
+        "badge_text": "Seguiste la estrella hasta el pesebre de Belén."
       },
-      "board": { "columns": 10, "rows": 10, "ladders": [], "snakes": [] }
+      "ambience": {"sound": "night"},
+      "lighting": {
+        "sun_energy": 0.17,
+        "ambient_energy": 0.27,
+        "fog_density": 0.0055,
+        "sun_dir": [0.4, 0.6, 0.5]
+      },
+      "theme": {
+        "tile_a": "#e0d2ae",
+        "tile_b": "#b9a27a",
+        "frame": "#3d2d1f",
+        "ground": "#38486a",
+        "sky_top": "#0a1433",
+        "sky_horizon": "#2f4382",
+        "ambient": "#93a2d6",
+        "fog": "#27355f",
+        "sun": "#b9c8ff",
+        "props": []
+      },
+      "board": {
+        "columns": 10,
+        "rows": 10,
+        "style": "village",
+        "ladders": [[2, 30], [24, 43], [35, 61], [55, 85], [57, 82], [80, 90]],
+        "snakes": [[26, 14], [42, 13], [53, 29], [60, 28], [76, 59], [89, 49], [96, 75]],
+        "challenge_tiles": [4, 10, 15, 17, 21, 25, 32, 39, 41, 47, 51, 56, 65, 70, 74, 78, 86, 88, 91, 99],
+        "rewards": [
+          {"tile": 19, "kind": "advance", "name": "Estrella de oriente", "ref": "Mateo 2:2", "steps": 3},
+          {"tile": 37, "kind": "extra_roll", "name": "Canto de los ángeles", "ref": "Lucas 2:13-14"},
+          {"tile": 54, "kind": "stars", "name": "Regalos de los magos", "ref": "Mateo 2:11", "stars": 3},
+          {"tile": 72, "kind": "advance", "name": "Pastores en vela", "ref": "Lucas 2:8-9", "steps": 2}
+        ],
+        "obstacles": [
+          {"tile": 22, "kind": "back", "name": "Posada llena", "ref": "Lucas 2:7", "steps": 2},
+          {"tile": 44, "kind": "back", "name": "Largo camino desde Nazaret", "ref": "Lucas 2:4-5", "steps": 1},
+          {"tile": 64, "kind": "skip", "name": "Censo del emperador", "ref": "Lucas 2:1-3"},
+          {"tile": 84, "kind": "back", "name": "Senda pedregosa", "ref": "Lucas 2:4", "steps": 3}
+        ]
+      }
     }
   ]
 }

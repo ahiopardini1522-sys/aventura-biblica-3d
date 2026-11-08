@@ -38,6 +38,47 @@ static func by_type(type: String) -> Array[Challenge]:
 	return result
 
 
+## Desafíos propios de un mapa (no incluye los generales). Con un id vacío no devuelve nada.
+static func for_map(map_id: String) -> Array[Challenge]:
+	_ensure_loaded()
+	var result: Array[Challenge] = []
+	if map_id.is_empty():
+		return result
+	for item in _items:
+		if item.map_id == map_id:
+			result.append(item)
+	return result
+
+
+## Desafíos de un tipo que son propios de un mapa.
+static func by_type_for_map(type: String, map_id: String) -> Array[Challenge]:
+	var result: Array[Challenge] = []
+	for item in for_map(map_id):
+		if item.type == type:
+			result.append(item)
+	return result
+
+
+## Desafíos generales (los que valen en cualquier mapa) de un tipo.
+static func general_by_type(type: String) -> Array[Challenge]:
+	_ensure_loaded()
+	var result: Array[Challenge] = []
+	for item in _items:
+		if item.type == type and item.map_id.is_empty():
+			result.append(item)
+	return result
+
+
+## Cuántos desafíos propios tiene un mapa de cada tipo.
+static func count_for_map(map_id: String) -> Dictionary:
+	var counts: Dictionary = {}
+	for type in Challenge.TYPES:
+		counts[type] = 0
+	for item in for_map(map_id):
+		counts[item.type] = int(counts[item.type]) + 1
+	return counts
+
+
 ## Cuántos desafíos hay de cada tipo.
 static func count_by_type() -> Dictionary:
 	_ensure_loaded()

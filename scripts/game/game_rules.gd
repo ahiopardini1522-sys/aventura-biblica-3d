@@ -123,3 +123,27 @@ static func plan_shift(layout: BoardLayout, from_tile: int, delta: int) -> Dicti
 ## Estrellas que da un desafío según su dificultad (1 a 3).
 static func stars_for(difficulty: int) -> int:
 	return clampi(difficulty, 1, MAX_STARS)
+
+
+## Efecto real de una casilla especial según cuántos jugadores haya. Devuelve:
+##   kind, steps, stars, name, ref, good, converted
+## Con un solo jugador perder el turno no cambia nada, así que esa casilla se convierte en
+## retroceder una casilla ("converted" = true) para que siempre tenga efecto.
+static func special_effect(special: Dictionary, player_count: int) -> Dictionary:
+	var kind: String = str(special.get("kind", ""))
+	var steps: int = clampi(int(special.get("steps", 0)), 0, BoardLayout.MAX_SPECIAL_STEPS)
+	var stars: int = clampi(int(special.get("stars", 0)), 0, BoardLayout.MAX_SPECIAL_STARS)
+	var converted: bool = false
+	if kind == BoardLayout.SPECIAL_SKIP and player_count <= 1:
+		kind = BoardLayout.SPECIAL_BACK
+		steps = 1
+		converted = true
+	return {
+		"kind": kind,
+		"steps": steps,
+		"stars": stars,
+		"name": str(special.get("name", "")),
+		"ref": str(special.get("ref", "")),
+		"good": bool(special.get("good", false)),
+		"converted": converted,
+	}
