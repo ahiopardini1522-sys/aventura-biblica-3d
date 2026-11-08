@@ -115,14 +115,12 @@ export class Hub extends DurableObject {
   }
 
   async webSocketClose(ws, code, reason) {
-    console.log(`[hub] webSocketClose código=${code} conocida=${this.ids.has(ws)} estado=${ws.readyState}`);
     this.#forget(ws);
     safeClose(ws, code, "closing");
     await this.#persist();
   }
 
   async webSocketError(ws) {
-    console.log(`[hub] webSocketError conocida=${this.ids.has(ws)}`);
     this.#forget(ws);
     await this.#persist();
   }
@@ -197,9 +195,7 @@ export class Hub extends DurableObject {
     for (const { conn, code, reason } of effects.close) {
       const ws = this.#untrack(conn);
       this.core.onClose(conn);
-      if (code >= 4003) console.log(`[hub] cierre ${code} (${reason}): ${ws ? `con conexión, estado antes=${ws.readyState}` : "SIN conexión conocida"}`);
       if (ws) safeClose(ws, code, reason);
-      if (ws && code >= 4003) console.log(`[hub] estado después de cerrar=${ws.readyState}`);
     }
   }
 

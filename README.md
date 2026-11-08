@@ -3,9 +3,14 @@
 Juego de tablero 3D para Android con temática bíblica (escaleras y serpientes con desafíos), hecho con **Godot 4.7** y **GDScript**.
 Orientación horizontal, interfaz táctil y recursos provisionales creados por código, sin modelos externos.
 
-> **Etapa 3 (versión 0.3.0, esta versión):** el **MUNDO BÍBLICO** (un mapa 3D con 7 regiones conectadas) y **7 mundos jugables**, cada uno con su
+> **Etapa 4, fase 4.1 (versión 0.4.0-alfa.1, esta versión):** la **base del juego en línea**: un servidor en Cloudflare (listo para publicar con tu cuenta,
+> ver [`docs/online/CONFIGURAR_SERVIDOR.md`](docs/online/CONFIGURAR_SERVIDOR.md)), la conexión segura del juego con ese servidor y el panel **PARTIDA EN LÍNEA**
+> de MULTIJUGADOR. **Todavía no se puede jugar una partida en línea:** las salas, los códigos de invitación y los turnos sincronizados son las fases 4.2 y 4.3.
+> Se verificó con pruebas automáticas en GitHub Actions; **esta versión todavía no se probó en un teléfono real** (según informó el autor, la 0.3.0 funciona
+> bien en su Moto G84 5G). Ver [Qué falta](#qué-falta).
+>
+> **Etapa 3 (versión 0.3.0):** el **MUNDO BÍBLICO** (un mapa 3D con 7 regiones conectadas) y **7 mundos jugables**, cada uno con su
 > paisaje, su tablero propio de 100 casillas, su sonido ambiental, desafíos propios, desbloqueo progresivo, insignias y progreso guardado.
-> Se verificó con más de 2 000 controles automáticos en GitHub Actions; **todavía no se probó en un teléfono real** (ver [Qué falta](#qué-falta)).
 
 ## Capturas
 
@@ -32,10 +37,14 @@ la **entrada del tablero**: la cámara empieza baja y con ángulo ancho para ens
 | --- | --- |
 | ![Desafío](docs/screenshots/challenge_question.jpg) | ![Victoria](docs/screenshots/victory.jpg) |
 
+| MULTIJUGADOR con el panel PARTIDA EN LÍNEA (Etapa 4; aquí el servidor todavía no está configurado) |
+| --- |
+| ![Multijugador en línea](docs/screenshots/multiplayer_online.jpg) |
+
 ## Cómo se juega
 
 1. En el menú principal, **MAPAS** abre el **MUNDO BÍBLICO**. Toca un mundo para elegirlo (la cámara vuela hasta él y se abre su ficha con la referencia bíblica, tus estadísticas y su insignia). Un segundo toque, o el botón **JUGAR** de la ficha, abre su tablero. Los mundos con candado explican qué mundo hay que completar antes. El botón **JUGAR** del menú principal abre directamente el último mundo elegido (al empezar, el Jardín del Edén).
-2. Se elige de 1 a 4 jugadores en el mismo dispositivo (**MULTIJUGADOR**); cada uno tiene su propia ficha y su personaje.
+2. Se elige de 1 a 4 jugadores en el mismo dispositivo (**MULTIJUGADOR**); cada uno tiene su propia ficha y su personaje. El panel **PARTIDA EN LÍNEA** de esa misma pantalla, por ahora, solo prueba la conexión con el servidor (ver [Qué incluye la Etapa 4](#qué-incluye-la-etapa-4-fase-41-base-en-línea)).
 3. Cada turno el jugador pulsa **LANZAR DADO**. Mientras el dado rueda, el botón queda bloqueado, y nadie puede tirar fuera de su turno.
 4. La ficha avanza casilla por casilla el número que salió. Si cae en la base de una **escalera**, sube; si cae en la cabeza de una **serpiente**, baja por su cuerpo.
 5. Las casillas con un círculo dorado y un **"?"** son **desafíos bíblicos**: una pregunta con su respuesta, su explicación y su referencia. Acertar da **estrellas** y un premio de juego; fallar aplica la penalización elegida.
@@ -44,6 +53,21 @@ la **entrada del tablero**: la cámara empieza baja y con ángulo ancho para ens
 
 **Controles del mapa mundial:** un dedo arrastra, el pellizco acerca o aleja (también hay botones **+** y **−**), **VISTA** vuelve a la vista general, **LISTA** muestra la lista de mapas e **INSIGNIAS** abre la colección.
 **Controles del tablero:** al entrar, la cámara empieza baja y con ángulo ancho para mostrar el paisaje del mundo y sube sola hasta la vista de juego. Un dedo gira la cámara (se puede bajar hasta casi el horizonte para ver montañas y cielo), el pellizco acerca o aleja, **VISTA** la restaura y **PAUSAR** abre el menú de pausa. En Android, el botón o gesto de atrás pausa la partida, cierra las insignias y vuelve de la lista al mapa.
+
+## Qué incluye la Etapa 4 (fase 4.1: base en línea)
+
+| Parte | Qué hace |
+| --- | --- |
+| **Servidor** (`server/`) | Cloudflare Workers + un Durable Object (`Hub`) con conexiones WebSocket que "duermen" cuando no hay actividad. Saluda, mantiene el latido, cuenta los jugadores en línea y reanuda sesiones. La lógica pura (`hub_core.js`) está separada del pegamento con Cloudflare (`worker.js`) para poder probarla sin red. Ver [`server/README.md`](server/README.md). |
+| **Cliente** (`scripts/online/`) | `OnlineManager` (autoload), `OnlineClient` (estados, reintentos con espera creciente, latido), `OnlineProtocol`, `OnlineConfig` y el transporte `WebSocketTransport`, sobre el `WebSocketPeer` de Godot. |
+| **Identidad anónima** | Un identificador al azar por dispositivo (`user://online.cfg`) y una sesión que entrega el servidor. Sin cuentas, correos ni contraseñas. |
+| **Pantalla** | El panel **PARTIDA EN LÍNEA** de **MULTIJUGADOR** muestra el estado (*Conectando…*, *Conectado · N jugadores en línea*, *Reintentando…*, errores explicados) y el botón **PROBAR CONEXIÓN**. La conexión solo existe mientras esa pantalla está abierta. |
+| **Seguridad** | Solo `wss://`; sin secretos en el APK (únicamente la dirección pública del servidor, en `data/online.json`); límites de tamaño, ritmo y conexiones en el servidor; las claves de Cloudflare solo viven como secretos de GitHub. |
+| **Android** | Permiso `INTERNET` y llave de depuración guardada (se crea una vez en GitHub): los APK siguientes deberían instalarse **encima** del anterior. |
+
+**Cómo activar el servidor (desde el teléfono):** crea una cuenta gratuita de Cloudflare, guarda dos secretos en GitHub y pulsa **Run workflow** en *Desplegar servidor en línea*. El flujo publica el servidor, lo prueba, guarda su dirección en `data/online.json` y recompila la app. Pasos detallados en [`docs/online/CONFIGURAR_SERVIDOR.md`](docs/online/CONFIGURAR_SERVIDOR.md); el diseño completo, en [`docs/online/ARQUITECTURA.md`](docs/online/ARQUITECTURA.md).
+
+**Plan de la Etapa 4:** 4.1 base en línea *(esta versión)* → 4.2 salas privadas y públicas → 4.3 turnos sincronizados → 4.4 personajes 3D → 4.5 animaciones y recompensas → 4.6 música y sonidos → 4.7 perfiles y estadísticas → 4.8 pruebas, optimización y APK final. Cada fase se informa antes de empezar la siguiente.
 
 ## Qué incluye la Etapa 3
 
@@ -140,6 +164,7 @@ aventura-biblica-3d/
 │   │                        reglas y estado puros (game_rules, match_state, progress_data), efectos, mensajes y sonido
 │   │                        (audio_synth para efectos, ambience_synth y ambience_player para los ambientes de cada mundo)
 │   ├── dice/                Dado 3D
+│   ├── online/              Juego en línea (Etapa 4): OnlineManager (autoload), cliente con reintentos, protocolo, configuración y transporte WebSocket
 │   ├── players/             Catálogo de personajes, ficha y vista previa
 │   ├── questions/           Desafíos: tipos, banco, mazo, referencias bíblicas y proveedor de versículos
 │   ├── maps/                Catálogo de mapas, trazado y constructor del tablero, estilos de tablero, cámara, entorno,
@@ -153,10 +178,12 @@ aventura-biblica-3d/
 │   │                                   posición en el mapa mundial, desbloqueo y recompensa
 │   ├── questions/challenges.json       Los 251 desafíos bíblicos
 │   ├── messages/messages.json          Mensajes de ánimo por situación
-│   └── verses/                         Referencias bíblicas (solo citas) y versiones previstas (RVR1960 desactivada)
-├── docs/                    Capturas del README y notas de cada versión (docs/release-notes)
-├── tools/                   Pruebas automáticas (prueba de humo y capturas)
-└── .github/                 Compilación y verificación automática en GitHub Actions
+│   ├── verses/                         Referencias bíblicas (solo citas) y versiones previstas (RVR1960 desactivada)
+│   └── online.json                     Dirección del servidor en línea (vacía hasta publicarlo; la completa el flujo de despliegue)
+├── docs/                    Capturas del README, notas de cada versión (docs/release-notes) y documentación del juego en línea (docs/online)
+├── server/                  Servidor en línea (Cloudflare Workers): código, pruebas de Node y pruebas de extremo a extremo
+├── tools/                   Pruebas automáticas (prueba de humo, capturas y prueba del cliente en línea)
+└── .github/                 Compilación y verificación automática, y publicación del servidor, en GitHub Actions
 ```
 
 ### Autoloads
@@ -165,6 +192,7 @@ aventura-biblica-3d/
 * `ProgressManager`: mundos abiertos y completados, insignias y estadísticas por región; guarda en `user://progress.cfg` cada vez que cambia.
 * `GameState`: mapa, personaje y número de jugadores elegidos y último resumen de partida; guarda en `user://profile.cfg`.
 * `SceneRouter`: navegación entre pantallas con transición, rutas centralizadas y botón de atrás de Android.
+* `OnlineManager`: dirección del servidor (se lee de `data/online.json`), cliente en línea y estado de la conexión para la pantalla MULTIJUGADOR; guarda el identificador anónimo del dispositivo en `user://online.cfg`. La conexión solo está abierta mientras esa pantalla lo está.
 
 ## Cómo ejecutar el proyecto
 
@@ -178,12 +206,12 @@ El proyecto usa el renderizador **Compatibilidad** (OpenGL), pensado para funcio
 
 ### Opción A: APK generado automáticamente (no necesita computadora)
 
-1. En GitHub abre **Releases** (a la derecha de la página principal del repositorio). Hay dos pre-lanzamientos: **Versión de prueba 0.3.0** (enlace fijo a esa versión) y **latest-debug** (siempre la última subida a `main`).
-2. Descarga el archivo `.apk` de la sección *Assets* directamente en el teléfono. El de la versión 0.3.0 es `aventura-biblica-3d-v0.3.0-debug.apk`.
+1. En GitHub abre **Releases** (a la derecha de la página principal del repositorio). Hay pre-lanzamientos: **Versión de prueba 0.4.0-alfa.1** (enlace fijo a esa versión), **latest-debug** (siempre la última subida a `main`) y los de versiones anteriores (v0.3.0, …).
+2. Descarga el archivo `.apk` de la sección *Assets* directamente en el teléfono. El de la versión 0.4.0-alfa.1 es `aventura-biblica-3d-v0.4.0-alfa.1-debug.apk`.
 3. Ábrelo y permite la instalación de apps desconocidas cuando Android lo pida.
 4. También puedes bajar el APK desde la pestaña **Actions**, en el artefacto **aventura-biblica-3d-apk-debug** de la última ejecución en verde (llega comprimido en `.zip`).
 
-**Importante al actualizar:** cada compilación de GitHub crea una llave de depuración nueva, así que un APK de prueba **no se puede instalar encima de otro** (Android dice "App no instalada"). Si ya tienes instalada otra versión de prueba, por ejemplo la de la Etapa 2, **desinstálala primero** (se pierden los ajustes y el progreso guardados). Para poder actualizar sin desinstalar habría que usar una llave de firma fija guardada como secreto de GitHub; hoy no está configurada.
+**Importante al actualizar:** hasta la 0.3.0, cada compilación de GitHub creaba una llave de depuración nueva, así que esos APK no se podían instalar unos encima de otros (Android dice "App no instalada"). **Desde la 0.4.0-alfa.1 la llave se crea una sola vez y se guarda en la caché de GitHub Actions** (nunca en el repositorio), y todas las compilaciones la reutilizan. Por eso: **desinstala una sola vez la 0.3.0 (o anterior)** antes de instalar la 0.4.0-alfa.1 (se pierden los ajustes y el progreso guardados en ese teléfono). A partir de ahí, Android debería aceptar los APK nuevos encima del anterior; eso todavía no se probó en un teléfono. Si GitHub borrara la caché (lo hace tras 7 días sin uso), la siguiente compilación de `main` crearía otra llave y habría que desinstalar una vez más. Es una llave de depuración: sirve para pruebas, **no** para Google Play. Detalles en [`docs/online/ARQUITECTURA.md`](docs/online/ARQUITECTURA.md#firma-del-apk-de-prueba-actualizar-sin-desinstalar).
 
 ### Opción B: exportar desde el editor de Godot
 
@@ -191,7 +219,7 @@ El proyecto usa el renderizador **Compatibilidad** (OpenGL), pensado para funcio
 2. En **Editor → Configuración del editor → Exportar → Android** indica el SDK de Android y el JDK 17.
 3. En **Proyecto → Exportar** elige el preajuste **Android** y pulsa **Exportar proyecto** (o conecta el teléfono con depuración USB y usa **Despliegue con un clic**).
 
-El preajuste ya trae: paquete `com.aventurabiblica.game3d`, arquitectura arm64-v8a, sin Gradle, pantalla horizontal, modo inmersivo y sin permisos extra.
+El preajuste ya trae: paquete `com.aventurabiblica.game3d`, arquitectura arm64-v8a, sin Gradle, pantalla horizontal, modo inmersivo y un solo permiso: Internet (para el juego en línea).
 
 ## Verificación automática
 
@@ -202,10 +230,14 @@ El flujo `.github/workflows/build.yml` ejecuta en cada subida de código, con Go
    * **progreso:** desbloqueo en cadena, premios, insignias, estadísticas por región y **guardado** y carga del archivo;
    * **los 7 mundos:** partidas completas simuladas en los 7 tableros, cada tablero armado en la escena real con sus escaleras, serpientes, desafíos y casillas especiales, su ambiente sonoro, su presupuesto de triángulos y un primer turno jugado con dado y ficha;
    * **sonidos ambientales:** los 7 bucles no están vacíos, no se recortan, cierran sin salto, tienen movimiento y suenan distinto entre sí;
+   * **juego en línea (cliente):** el protocolo y sus números coinciden con los de `server/src/protocol.js`, configuración, reintentos con espera creciente, latido, códigos de cierre y la pantalla MULTIJUGADOR con un transporte falso; el proyecto declara el permiso de Internet y excluye `server/` del APK;
    * turnos y bloqueo del dado (de 1 a 4 jugadores), movimiento ficha por ficha, las **6 escaleras y 7 serpientes**, los **5 tipos de desafío**, premios y castigos, pausa (botón, Escape y atrás de Android), victoria, jugar otra vez y una partida completa jugada por un robot.
 2. **capturas**: abre cada pantalla (mapa mundial, los 7 mundos, menús y tablero) con una pantalla virtual y guarda imágenes.
-3. **android**: exporta el APK de depuración con las plantillas oficiales, revisa su contenido y su firma con `aapt2` y `apksigner`, y arranca el juego solo desde el paquete de datos exportado. Al subir a `main` publica los pre-lanzamientos con el APK.
-4. **resumen**: deja los registros y las imágenes en la rama `ci-artifacts`.
+3. **android**: exporta el APK de depuración con las plantillas oficiales, revisa su contenido, su permiso de Internet y su firma con `aapt2` y `apksigner`, y arranca el juego solo desde el paquete de datos exportado. Al subir a `main` publica los pre-lanzamientos con el APK.
+4. **en_linea**: levanta el servidor con `wrangler dev` (el mismo motor que Cloudflare), pasa las 52 pruebas de Node del servidor, ejecuta 17 comprobaciones de extremo a extremo con conexiones WebSocket reales y hace que el **cliente de Godot** se conecte de verdad a ese servidor (34 controles: conexión, latido, reanudación tras un corte, reemplazo de dispositivo, despedida y errores). Su resultado se publica enseguida en la rama `ci-online`.
+5. **resumen**: deja los registros y las imágenes en la rama `ci-artifacts`.
+
+Aparte, `.github/workflows/servidor-desplegar.yml` publica el servidor en Cloudflare cuando se lo pides (o cuando cambia `server/` en `main`) si están guardados los dos secretos; sin ellos termina sin error y explica qué falta.
 
 El resultado de cada ejecución (verde o rojo) se ve en la pestaña **Actions**. Un APK solo existe si el paso de exportación terminó bien. Estas pruebas **no sustituyen probar el juego en un teléfono real**: el rendimiento, el sonido y el comportamiento táctil en un dispositivo concreto solo se conocen probándolo ahí.
 
@@ -218,12 +250,14 @@ El resultado de cada ejecución (verde o rojo) se ve en la pestaña **Actions**.
 
 ## Qué falta
 
-* **Probar en un teléfono real:** hasta ahora solo hay verificación automática (render por software en GitHub). Falta medir fluidez, consumo, sonido y comportamiento táctil en un dispositivo, en especial en el Moto G84 5G.
+* **Probar la 0.4.0-alfa.1 en un teléfono real:** la verificación automática (render por software en GitHub) no mide fluidez, consumo, sonido ni toque. Según informó el autor, la 0.3.0 funciona bien en su Moto G84 5G; falta probar esta versión, la conexión con el servidor y la actualización encima del APK anterior.
+* **Publicar el servidor en Cloudflare:** necesita tu cuenta y dos secretos de GitHub (guía en [`docs/online/CONFIGURAR_SERVIDOR.md`](docs/online/CONFIGURAR_SERVIDOR.md)). Hasta entonces el panel PARTIDA EN LÍNEA dice "Servidor en línea sin configurar". Sin comprobar todavía: la conexión `wss://` de Godot contra el servidor publicado y cómo cierra Cloudflare las conexiones que nunca saludan.
+* **Juego en línea de verdad (fases 4.2 y 4.3):** salas privadas y públicas, códigos de invitación, oponentes al azar, turnos sincronizados y reconexión en plena partida. Hoy solo existe la conexión de prueba.
 * Texto bíblico completo (RVR1960) en los desafíos de completar versículos: la estructura está lista y desactivada hasta tener autorización.
-* Modelos 3D, texturas y sonidos definitivos (hoy todo es provisional, creado por código) y música.
-* Multijugador en línea (la estructura de jugadores ya admite varios; falta la red).
+* Modelos 3D, texturas y sonidos definitivos (hoy todo es provisional, creado por código) y música (fases 4.4 a 4.6).
+* Perfiles y estadísticas en línea (fase 4.7).
 * Más mundos y desafíos propios para cada región.
-* Exportación firmada para Google Play y llave de firma fija para actualizar sin desinstalar (hoy solo hay APK de depuración).
+* Firma de lanzamiento para Google Play (hoy solo hay APK de depuración, con una llave de depuración guardada).
 
 ## Licencia
 
