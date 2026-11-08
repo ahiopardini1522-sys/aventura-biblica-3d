@@ -118,6 +118,8 @@ func _run() -> void:
 	_test_challenge_bank()
 	_test_character_roster()
 	_test_meshes()
+	_test_kits()
+	_test_scenery()
 	await _test_menu_and_screens()
 	await _test_board_scene()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_PROGRESS_PATH))
@@ -525,6 +527,350 @@ func _winding_ratio(mesh: ArrayMesh) -> float:
 		if front.dot(stored) > 0.0:
 			good += 1
 	return float(good) / float(maxi(total, 1))
+
+
+# ---------------------------------------------------------------- Herramientas 3D de los escenarios
+
+## Fracción de triángulos cuya normal guardada apunta lejos de "center" (piezas convexas).
+func _outward_ratio(mesh: ArrayMesh, center: Vector3) -> float:
+	var arrays: Array = mesh.surface_get_arrays(0)
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var norms: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var good: int = 0
+	var total: int = 0
+	for t in range(0, verts.size() - 2, 3):
+		var centroid: Vector3 = (verts[t] + verts[t + 1] + verts[t + 2]) / 3.0
+		total += 1
+		if norms[t].dot(centroid - center) > 0.0:
+			good += 1
+	return float(good) / float(maxi(total, 1))
+
+
+## Triángulos de todas las mallas de un nodo (y sus hijos).
+func _triangles_of(node: Node) -> int:
+	var total: int = 0
+	if node is MeshInstance3D:
+		var mesh: Mesh = (node as MeshInstance3D).mesh
+		if mesh != null:
+			for surface in mesh.get_surface_count():
+				var arrays: Array = mesh.surface_get_arrays(surface)
+				var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+				total += int(float(verts.size()) / 3.0)
+	for child in node.get_children():
+		total += _triangles_of(child)
+	return total
+
+
+func _count_nodes(node: Node, type_name: String) -> int:
+	var total: int = 0
+	if node.is_class(type_name):
+		total += 1
+	for child in node.get_children():
+		total += _count_nodes(child, type_name)
+	return total
+
+
+func _piece_ok(label: String, kit: MeshKit, center: Vector3, minimum: float = 0.999) -> void:
+	_check(kit.triangle_count() > 0, "%s: tiene triángulos (%d)" % [label, kit.triangle_count()])
+	if kit.triangle_count() == 0:
+		return
+	var mesh: ArrayMesh = kit.commit()
+	_check(_winding_ratio(mesh) > 0.999, "%s: el orden de los vértices coincide con las normales" % label)
+	_check(_outward_ratio(mesh, center) >= minimum, "%s: las caras miran hacia afuera" % label)
+
+
+func _test_kits() -> void:
+	print("-- Herramientas 3D (mallas, texturas, terreno, agua, efectos)")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var white := Color.WHITE
+
+	var kit := MeshKit.new()
+	kit.box(Vector3(1.0, 2.0, 3.0), Vector3(2.0, 1.0, 4.0), white)
+	_check(kit.triangle_count() == 12, "una caja tiene 12 triángulos")
+	_piece_ok("caja", kit, Vector3(1.0, 2.0, 3.0))
+
+	kit = MeshKit.new()
+	kit.cylinder(Vector3.ZERO, 1.0, 0.7, 2.0, 8, white, true, true)
+	_piece_ok("cilindro", kit, Vector3(0.0, 1.0, 0.0))
+	kit = MeshKit.new()
+	kit.cone(Vector3.ZERO, 1.0, 2.0, 7, white)
+	_piece_ok("cono", kit, Vector3(0.0, 0.6, 0.0))
+	kit = MeshKit.new()
+	kit.pyramid(Vector3.ZERO, 1.5, 3.0, white)
+	_piece_ok("pirámide", kit, Vector3(0.0, 1.0, 0.0))
+	_check(kit.triangle_count() == 4, "una pirámide tiene 4 caras")
+	kit = MeshKit.new()
+	kit.frustum(Vector3.ZERO, 1.0, 0.5, 3.0, white)
+	_piece_ok("tronco de pirámide", kit, Vector3(0.0, 1.5, 0.0))
+	kit = MeshKit.new()
+	kit.sphere(Vector3(0.0, 1.0, 0.0), Vector3(1.0, 0.7, 1.2), white, 8, 5, 0.2, rng)
+	_piece_ok("esfera irregular", kit, Vector3(0.0, 1.0, 0.0), 0.98)
+	kit = MeshKit.new()
+	kit.dome(Vector3.ZERO, 1.5, white)
+	_piece_ok("cúpula", kit, Vector3(0.0, 0.3, 0.0))
+	kit = MeshKit.new()
+	kit.gable(Vector3.ZERO, Vector3(4.0, 1.5, 3.0), white)
+	_piece_ok("techo a dos aguas", kit, Vector3(0.0, 0.5, 0.0))
+	kit = MeshKit.new()
+	kit.beam(Vector3.ZERO, Vector3(3.0, 1.0, 2.0), 0.2, 0.1, white)
+	_piece_ok("viga", kit, Vector3(1.5, 0.5, 1.0))
+
+	# Dos polígonos (uno en cada sentido) dan prismas con las caras hacia afuera.
+	var square_ccw := PackedVector2Array([Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)])
+	var square_cw := PackedVector2Array([Vector2(-1, -1), Vector2(-1, 1), Vector2(1, 1), Vector2(1, -1)])
+	kit = MeshKit.new()
+	kit.extrude(square_ccw, 0.0, 2.0, white)
+	_piece_ok("prisma (sentido antihorario)", kit, Vector3(0.0, 1.0, 0.0))
+	kit = MeshKit.new()
+	kit.extrude(square_cw, 0.0, 2.0, white)
+	_piece_ok("prisma (sentido horario)", kit, Vector3(0.0, 1.0, 0.0))
+
+	# Colocar, girar, escalar y reflejar no deja caras al revés.
+	kit = MeshKit.new()
+	kit.place(Vector3(10.0, 0.0, 0.0), PI * 0.5, Vector3(1.0, 2.0, 0.5))
+	kit.box(Vector3(0.0, 1.0, 0.0), Vector3(1.0, 1.0, 1.0), white)
+	kit.pop()
+	_piece_ok("caja girada y escalada", kit, Vector3(10.0, 2.0, 0.0))
+	kit = MeshKit.new()
+	kit.place(Vector3(0.0, 0.0, 0.0), 0.0, Vector3(-1.0, 1.0, 1.0))
+	kit.box(Vector3(3.0, 1.0, 0.0), Vector3(1.0, 1.0, 1.0), white)
+	kit.pop()
+	_piece_ok("caja reflejada", kit, Vector3(-3.0, 1.0, 0.0))
+	_check(kit.xf == Transform3D.IDENTITY, "pop() devuelve la colocación anterior")
+
+	# Tubo recto con los extremos abiertos: las caras miran lejos del eje.
+	var tube_points := PackedVector3Array([Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(2, 0, 0), Vector3(3, 0, 0)])
+	var tube_radii := PackedFloat32Array([0.2, 0.2, 0.15, 0.1])
+	kit = MeshKit.new()
+	kit.tube(tube_points, tube_radii, white, 6)
+	var tube_mesh: ArrayMesh = kit.commit()
+	_check(kit.triangle_count() == 3 * 6 * 2, "un tubo de 4 puntos y 6 lados tiene 36 triángulos")
+	_check(_winding_ratio(tube_mesh) > 0.999, "el tubo del escenario tiene el orden de vértices correcto")
+	var tube_arrays: Array = tube_mesh.surface_get_arrays(0)
+	var tube_verts: PackedVector3Array = tube_arrays[Mesh.ARRAY_VERTEX]
+	var tube_norms: PackedVector3Array = tube_arrays[Mesh.ARRAY_NORMAL]
+	var tube_out: int = 0
+	for t in range(0, tube_verts.size() - 2, 3):
+		var centroid: Vector3 = (tube_verts[t] + tube_verts[t + 1] + tube_verts[t + 2]) / 3.0
+		if tube_norms[t].dot(Vector3(0.0, centroid.y, centroid.z)) > 0.0:
+			tube_out += 1
+	_check(tube_out == kit.triangle_count(), "el tubo del escenario mira hacia afuera")
+
+	# La estrella se ve por los dos lados.
+	kit = MeshKit.new()
+	kit.star(Vector3.ZERO, 1.0, 0.45, white)
+	_check(kit.triangle_count() == 20, "una estrella plana tiene 20 triángulos (dos lados)")
+	var star_mesh: ArrayMesh = kit.commit()
+	var star_arrays: Array = star_mesh.surface_get_arrays(0)
+	var star_norms: PackedVector3Array = star_arrays[Mesh.ARRAY_NORMAL]
+	var plus_z: int = 0
+	var minus_z: int = 0
+	for n in star_norms:
+		if n.z > 0.9:
+			plus_z += 1
+		elif n.z < -0.9:
+			minus_z += 1
+	_check(plus_z == minus_z and plus_z > 0, "la estrella tiene el mismo número de caras hacia cada lado")
+
+	# Coordenadas de textura y colores guardados.
+	kit = MeshKit.new()
+	kit.uv_scale = 0.5
+	kit.box(Vector3.ZERO, Vector3(2.0, 2.0, 2.0), Color(0.2, 0.4, 0.6))
+	var box_arrays: Array = kit.commit().surface_get_arrays(0)
+	var box_uvs: PackedVector2Array = box_arrays[Mesh.ARRAY_TEX_UV]
+	var box_colors: PackedColorArray = box_arrays[Mesh.ARRAY_COLOR]
+	_check(box_uvs.size() == 36 and box_colors.size() == 36, "la malla guarda UVs y colores por vértice")
+	_check(box_colors[0].is_equal_approx(Color(0.2, 0.4, 0.6)), "el color por vértice es el pedido")
+
+	# Una malla vacía no rompe nada.
+	var empty := MeshKit.new()
+	_check(empty.is_empty() and empty.commit().get_surface_count() == 0, "una malla vacía no tiene superficies")
+
+	# Piezas decorativas: todas producen geometría razonable.
+	var props: Dictionary = {}
+	kit = MeshKit.new()
+	PropKit.tree_round(kit, rng, Vector3.ZERO, 1.0, Color(0.3, 0.6, 0.3))
+	props["árbol"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.tree_fruit(kit, rng, Vector3.ZERO, 1.0, Color(0.3, 0.6, 0.3), Color(0.9, 0.2, 0.2))
+	props["frutal"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.cypress(kit, rng, Vector3.ZERO, 1.0)
+	props["ciprés"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.olive(kit, rng, Vector3.ZERO, 1.0)
+	props["olivo"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.palm(kit, rng, Vector3.ZERO, 1.0)
+	props["palmera"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.papyrus(kit, rng, Vector3.ZERO, 1.0)
+	props["papiro"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.rock(kit, rng, Vector3.ZERO, 1.0, Color(0.5, 0.5, 0.5))
+	props["roca"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.house_gable(kit, rng, Vector3.ZERO, 0.3, 2.0, 2.0, 1.6, Color(0.9, 0.85, 0.7), Color(0.6, 0.3, 0.2))
+	props["casa con tejado"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.house_flat(kit, rng, Vector3.ZERO, 0.3, 2.0, 2.0, 1.6, Color(0.9, 0.85, 0.7))
+	props["casa de techo plano"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.tower(kit, Vector3.ZERO, 1.0, 4.0, Color(0.8, 0.75, 0.65), Color(0.6, 0.3, 0.2))
+	props["torre"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.wall_run(kit, Vector3(0, 0, 0), Vector3(6, 0, 2), 2.0, 0.6, Color(0.8, 0.75, 0.65))
+	props["muro"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.column(kit, Vector3.ZERO, 0.3, 3.0, Color(0.9, 0.88, 0.8))
+	props["columna"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.obelisk(kit, Vector3.ZERO, 0.5, 4.0, Color(0.9, 0.8, 0.6), Color(0.95, 0.8, 0.3))
+	props["obelisco"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.tent(kit, Vector3.ZERO, 0.0, 1.5, Color(0.5, 0.35, 0.25))
+	props["tienda"] = kit.triangle_count()
+	kit = MeshKit.new()
+	PropKit.barrel(kit, Vector3.ZERO, 0.3, 0.7, Color(0.5, 0.35, 0.2))
+	PropKit.crate(kit, Vector3.ZERO, 0.5, Color(0.5, 0.35, 0.2))
+	PropKit.hay_bale(kit, Vector3.ZERO, 0.0, Color(0.85, 0.75, 0.4))
+	PropKit.torch(kit, Vector3.ZERO)
+	PropKit.lantern_post(kit, Vector3.ZERO, 1.5)
+	PropKit.gateway(kit, Vector3.ZERO, 3.0, 3.0, 0.5, Color(0.8, 0.75, 0.65), Color(0.9, 0.8, 0.5))
+	PropKit.flower(kit, Vector3.ZERO, Color.RED)
+	PropKit.bush(kit, rng, Vector3.ZERO, 1.0, Color(0.2, 0.5, 0.2))
+	props["objetos pequeños"] = kit.triangle_count()
+	for prop_name in props:
+		var count: int = int(props[prop_name])
+		_check(count > 0 and count < 400, "pieza decorativa '%s' tiene una cantidad razonable de triángulos (%d)" % [prop_name, count])
+
+	# Texturas y materiales.
+	for kind in TextureKit.kinds():
+		var texture: ImageTexture = TextureKit.texture(kind)
+		_check(texture != null and texture.get_width() == TextureKit.SIZE and texture.get_height() == TextureKit.SIZE,
+				"textura '%s' de %d x %d" % [kind, TextureKit.SIZE, TextureKit.SIZE])
+		var image: Image = texture.get_image()
+		var total: float = 0.0
+		for y in range(0, TextureKit.SIZE, 3):
+			for x in range(0, TextureKit.SIZE, 3):
+				total += image.get_pixel(x, y).r
+		var average: float = total / float(22 * 22)
+		_check(average > 0.55 and average < 1.0, "la textura '%s' no es ni muy oscura ni quemada (%.2f)" % [kind, average])
+	_check(TextureKit.texture("grass") == TextureKit.texture("grass"), "las texturas se guardan en caché")
+	_check(TextureKit.material("stone") == TextureKit.material("stone"), "los materiales se guardan en caché")
+	_check(TextureKit.material("planks").albedo_texture != null and TextureKit.material("planks").vertex_color_use_as_albedo,
+			"el material con textura usa también el color por vértice")
+	_check(TextureKit.glow_vertex(true).blend_mode == BaseMaterial3D.BLEND_MODE_ADD, "el material de luz es aditivo")
+	_check(TextureKit.soft_dot().get_width() == 32, "el punto suave de las partículas es de 32 píxeles")
+
+	# Terreno.
+	_check(is_zero_approx(TerrainKit.board_mask(TerrainKit.PLATEAU_CENTER_X, 0.0)), "bajo el tablero el terreno es plano")
+	_check(TerrainKit.board_mask(60.0, 0.0) > 0.999, "lejos del tablero el relieve actúa completo")
+	var mid: float = TerrainKit.board_mask(TerrainKit.PLATEAU_CENTER_X + TerrainKit.PLATEAU_HALF_X + 4.0, 0.0)
+	_check(mid > 0.0 and mid < 1.0, "entre medias la subida es gradual (%.2f)" % mid)
+	var height_fn := func(x: float, z: float) -> float: return sin(x) * 0.3 + z * 0.02
+	var color_fn := func(_x: float, _z: float, _y: float) -> Color: return Color(0.4, 0.6, 0.3)
+	var grid: ArrayMesh = TerrainKit.build(10.0, 8, height_fn, color_fn, 0.3)
+	_check(grid.surface_get_arrays(0)[Mesh.ARRAY_VERTEX].size() == 8 * 8 * 2 * 3, "el terreno de 8 x 8 tiene 128 triángulos")
+	_check(_winding_ratio(grid) > 0.999, "el terreno tiene las caras hacia arriba")
+	var grid_norms: PackedVector3Array = grid.surface_get_arrays(0)[Mesh.ARRAY_NORMAL]
+	var all_up: bool = true
+	for n in grid_norms:
+		if n.y <= 0.0:
+			all_up = false
+	_check(all_up, "todas las normales del terreno miran hacia arriba")
+
+	# Agua.
+	var path := PackedVector3Array([Vector3(0, 0, 0), Vector3(1, 0, 3), Vector3(0, 0, 6), Vector3(-1, 0, 9)])
+	var ribbon: ArrayMesh = WaterKit.ribbon(path, 2.0)
+	_check(_winding_ratio(ribbon) > 0.999, "la cinta del río del escenario mira hacia arriba")
+	var ribbon_norms: PackedVector3Array = ribbon.surface_get_arrays(0)[Mesh.ARRAY_NORMAL]
+	var ribbon_up: bool = ribbon_norms.size() > 0
+	for n in ribbon_norms:
+		if n.y <= 0.0:
+			ribbon_up = false
+	_check(ribbon_up, "las normales de la cinta miran hacia arriba")
+	var sheet: ArrayMesh = WaterKit.sheet(Vector3(0, 5, 0), Vector3(4, 5, 0), Vector3(0, 0, 2), Vector3(4, 0, 2), 3, 2)
+	_check(sheet.surface_get_arrays(0)[Mesh.ARRAY_VERTEX].size() == 3 * 2 * 2 * 3, "la lámina de 3 x 2 tiene 12 triángulos")
+	_check(WaterKit.WATER_SHADER.contains("shader_type spatial") and WaterKit.FALL_SHADER.contains("shader_type spatial"),
+			"los shaders de agua están definidos")
+	var water: ShaderMaterial = WaterKit.water_material(Color(0.1, 0.4, 0.6, 0.9), Color(0.4, 0.8, 0.8, 0.8))
+	_check(water.shader != null and water.shader.code.length() > 100, "el material del agua tiene su shader")
+	_check(water == WaterKit.water_material(Color(0.1, 0.4, 0.6, 0.9), Color(0.4, 0.8, 0.8, 0.8)),
+			"el material del agua se guarda en caché")
+
+	# Efectos.
+	var holder := Node3D.new()
+	var floaters: CPUParticles3D = FxKit.floaters(holder, "Prueba", Vector3.ZERO, Vector3.ONE, 20, 0.2, Color.WHITE)
+	_check(floaters.amount == 20 and floaters.get_parent() == holder, "las partículas flotantes se crean y se agregan")
+	FxKit.clouds(holder, rng, 4, 30.0, 40.0, 100.0)
+	_check(_count_nodes(holder, "MeshInstance3D") == 4, "se crean las 4 nubes pedidas")
+	FxKit.birds(holder, rng, 3, Vector3.ZERO, 10.0, 8.0, Color.WHITE)
+	_check(holder.get_children().size() == 1 + 4 + 3, "se crean las 3 aves pedidas")
+	var stars: MeshInstance3D = FxKit.star_dome(holder, rng, 50)
+	_check(_triangles_of(stars) == 50 * 4, "50 estrellas tienen 200 triángulos")
+	var beam: MeshInstance3D = FxKit.beam(holder, Vector3.ZERO, 10.0, 1.0, 0.4, Color(1, 1, 0.8, 0.5))
+	_check(_triangles_of(beam) > 0, "el haz de luz tiene geometría")
+	holder.free()
+
+
+func _test_scenery() -> void:
+	print("-- Escenarios 3D")
+	_check(SceneryFactory.has_scenery("eden") and not SceneryFactory.has_scenery("desierto"),
+			"el desierto conserva su decoración original")
+	_test_scenery_eden()
+
+
+func _scenery_report(label: String, scenery: Node3D, max_triangles: int) -> void:
+	var triangles: int = _triangles_of(scenery)
+	var meshes: int = _count_nodes(scenery, "MeshInstance3D")
+	print("  %s: %d mallas, %d triángulos, %d sistemas de partículas" % [label, meshes, triangles,
+			_count_nodes(scenery, "CPUParticles3D")])
+	_check(meshes >= 6, "%s: tiene mallas suficientes (%d)" % [label, meshes])
+	_check(triangles > 8000 and triangles <= max_triangles, "%s: triángulos dentro del presupuesto (%d de %d)" % [label, triangles, max_triangles])
+	_check(_count_nodes(scenery, "MeshInstance3D") <= 48, "%s: pocas llamadas de dibujo (%d mallas)" % [label, meshes])
+	var all_off: bool = true
+	var stack: Array[Node] = [scenery]
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		if node is MeshInstance3D and (node as MeshInstance3D).cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+			all_off = false
+		for child in node.get_children():
+			stack.append(child)
+	_check(all_off, "%s: el escenario no proyecta sombras (solo el tablero)" % label)
+
+
+func _test_scenery_eden() -> void:
+	_check(is_equal_approx(SceneryEden.height_at(TerrainKit.PLATEAU_CENTER_X, 0.0), TerrainKit.PLATEAU_Y),
+			"Edén: el suelo bajo el tablero está a la altura esperada")
+	_check(SceneryEden.height_at(SceneryEden.river_x(20.0), 20.0) < SceneryEden.WATER_Y - 0.3, "Edén: el cauce del río queda bajo el agua")
+	_check(SceneryEden.height_at(-23.0, -29.0) > 8.0, "Edén: la cima del acantilado de la cascada es alta")
+	_check(SceneryEden.height_at(40.0, -50.0) > -0.3, "Edén: hay colinas lejos del tablero")
+	var lowest: float = 0.0
+	var highest: float = 0.0
+	for gx in range(-9, 10):
+		for gz in range(-9, 10):
+			var h: float = SceneryEden.height_at(float(gx) * 10.0, float(gz) * 10.0)
+			lowest = minf(lowest, h)
+			highest = maxf(highest, h)
+	_check(lowest > -2.0 and highest < 13.0, "Edén: las alturas están entre %.1f y %.1f" % [lowest, highest])
+	var eden := Node3D.new()
+	SceneryEden.build(eden, 12345, 1, Color(0.37, 0.63, 0.29))
+	_scenery_report("Edén", eden, 90000)
+	_check(eden.get_node_or_null("Terrain") != null and eden.get_node_or_null("River") != null, "Edén: tiene terreno y río")
+	_check(eden.get_node_or_null("Waterfall") != null, "Edén: tiene cascada")
+	_check(_count_nodes(eden, "CPUParticles3D") >= 2, "Edén: tiene polen y niebla de cascada")
+	eden.free()
+	var low_root := Node3D.new()
+	SceneryEden.build(low_root, 12345, 0, Color(0.37, 0.63, 0.29))
+	var low_triangles: int = _triangles_of(low_root)
+	low_root.free()
+	var high_root := Node3D.new()
+	SceneryEden.build(high_root, 12345, 2, Color(0.37, 0.63, 0.29))
+	var high_triangles: int = _triangles_of(high_root)
+	high_root.free()
+	_check(low_triangles < high_triangles, "Edén: la calidad baja usa menos triángulos que la alta (%d < %d)" % [low_triangles, high_triangles])
 
 
 # ---------------------------------------------------------------- Reglas del juego

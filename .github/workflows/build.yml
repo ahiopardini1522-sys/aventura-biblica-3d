@@ -121,6 +121,16 @@ jobs:
             --script res://tools/capture_screens.gd 2>&1 | tee logs/capture.log
           ls -la shots
 
+      - name: Buscar errores de shaders y scripts en el registro de capturas
+        # Los shaders solo se compilan al dibujar, así que este es el único sitio donde se ven.
+        if: always()
+        run: |
+          if grep -n -E "SHADER ERROR|SCRIPT ERROR|Parse Error|Failed to load script" logs/capture.log; then
+            echo "::error::Hay errores de shaders o scripts en el registro de capturas"
+            exit 1
+          fi
+          echo "Sin errores de shaders ni de scripts en las capturas."
+
       - name: Guardar capturas y registros
         if: always()
         uses: actions/upload-artifact@v4

@@ -41,7 +41,7 @@ func _ready() -> void:
 	_board.build(layout, theme_data)
 	var dice_spot: Vector3 = _board.dice_position()
 	_dice.position = dice_spot
-	_environment.apply_theme(theme_data, hash(str(map_data["id"])),
+	_environment.apply_map(map_data, hash(str(map_data["id"])),
 			[Vector3(dice_spot.x, dice_spot.z, 4.0)])
 
 	roster = GameState.build_roster()

@@ -20,6 +20,8 @@ const GROUND_DARKEN := 0.18
 @onready var _ground: MeshInstance3D = %Ground
 @onready var _props: Node3D = %Props
 
+var _scenery: Node3D
+
 
 func _ready() -> void:
 	# El sol queda alto, a la izquierda y delante de la cámara. No es cenital para que
@@ -31,16 +33,36 @@ func _ready() -> void:
 	_ground.position = Vector3(0.0, GROUND_Y, 0.0)
 
 
-## Aplica los colores del mapa y coloca la decoración. "keep_out" son zonas (x, z, radio)
+## Aplica un mapa completo: colores, iluminación propia (sección "lighting" del JSON) y el
+## escenario 3D de su estilo. Es lo que usa el tablero. "keep_out" son zonas (x, z, radio)
 ## donde no se debe poner nada, por ejemplo el área del dado.
-func apply_theme(theme_data: Dictionary, seed_value: int, keep_out: Array = []) -> void:
+func apply_map(map_data: Dictionary, seed_value: int, keep_out: Array = []) -> void:
+	var theme_data: Dictionary = map_data.get("theme", {})
+	var lighting: Dictionary = map_data.get("lighting", {})
+	apply_theme(theme_data, seed_value, keep_out, lighting)
+	_build_scenery(str(map_data.get("style", "")), theme_data, seed_value)
+
+
+## Aplica los colores del mapa y coloca la decoración sencilla (sin escenario propio).
+func apply_theme(theme_data: Dictionary, seed_value: int, keep_out: Array = [],
+		lighting: Dictionary = {}) -> void:
 	var sky_top: Color = _color(theme_data, "sky_top", Color(0.25, 0.47, 0.80))
 	var sky_horizon: Color = _color(theme_data, "sky_horizon", Color(0.96, 0.85, 0.64))
 	var ground: Color = _color(theme_data, "ground", Color(0.80, 0.64, 0.40))
 	var ambient: Color = _color(theme_data, "ambient", Color(1.0, 0.94, 0.84))
 	var fog: Color = _color(theme_data, "fog", Color(0.95, 0.84, 0.64))
+	var sun_energy: float = float(lighting.get("sun_energy", SUN_ENERGY))
+	var ambient_energy: float = float(lighting.get("ambient_energy", AMBIENT_ENERGY))
+	var fog_density: float = float(lighting.get("fog_density", FOG_DENSITY))
 	var environment: Environment = EnvFactory.create(sky_top, sky_horizon, ground, ambient, fog,
-			FOG_DENSITY, AMBIENT_ENERGY)
+			fog_density, ambient_energy)
+	_sun.light_energy = sun_energy
+	var direction: Variant = lighting.get("sun_dir", null)
+	if direction is Array and (direction as Array).size() == 3:
+		var parts: Array = direction
+		var sun_in_sky := Vector3(float(parts[0]), float(parts[1]), float(parts[2]))
+		if sun_in_sky.length() > 0.01:
+			_sun.transform = Transform3D(Basis.looking_at(-sun_in_sky.normalized(), Vector3.UP), Vector3.ZERO)
 	# Tono lineal: los colores del tablero salen como están definidos en maps.json.
 	environment.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	_world_env.environment = environment
@@ -52,6 +74,28 @@ func apply_theme(theme_data: Dictionary, seed_value: int, keep_out: Array = []) 
 
 func prop_count() -> int:
 	return _props.get_child_count()
+
+
+## Cantidad de piezas del escenario 3D del mapa (0 si el mapa usa solo la decoración sencilla).
+func scenery_count() -> int:
+	return _scenery.get_child_count() if _scenery != null else 0
+
+
+## Construye el escenario del estilo del mapa y, si lo tiene, oculta el suelo liso antiguo
+## (el escenario trae su propio terreno).
+func _build_scenery(style: String, theme_data: Dictionary, seed_value: int) -> void:
+	if _scenery != null:
+		remove_child(_scenery)
+		_scenery.queue_free()
+		_scenery = null
+	_ground.visible = true
+	if not SceneryFactory.has_scenery(style):
+		return
+	_scenery = Node3D.new()
+	_scenery.name = "Scenery"
+	add_child(_scenery)
+	SceneryFactory.build(style, _scenery, seed_value, SettingsManager.quality, theme_data)
+	_ground.visible = false
 
 
 func _build_props(theme_data: Dictionary, ground: Color, seed_value: int, keep_out: Array) -> void:

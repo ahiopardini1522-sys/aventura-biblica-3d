@@ -9,7 +9,9 @@ extends SceneTree
 ## fotografiar el dado, una escalera, una serpiente, un desafío, la pausa y la victoria.
 
 const SCREENS := ["main_menu", "maps", "multiplayer", "characters", "settings", "board"]
-const TIME_LIMIT := 330.0
+const TIME_LIMIT := 480.0
+## Mundos de los que se toman capturas del escenario 3D (vista normal, baja y lateral).
+const SCENERY_MAPS := ["eden"]
 
 var _dir: String = ""
 var _router: Node
@@ -70,6 +72,7 @@ func _run() -> void:
 
 	await _capture_board()
 	await _capture_victory()
+	await _capture_scenery(SCENERY_MAPS)
 
 	_finished = true
 	print("CAPTURAS: listo (%s)" % _dir)
@@ -174,6 +177,31 @@ func _capture_victory() -> void:
 	await _save("victory")
 
 
+## Abre el tablero de cada mundo y fotografía su escenario: vista normal, vista baja (se ve el
+## horizonte) y vista lateral.
+func _capture_scenery(map_ids: Array) -> void:
+	for map_id in map_ids:
+		var id: String = str(map_id)
+		_state.select_map(id)
+		_router.go_to("board")
+		await _wait_for("board")
+		await create_timer(3.4).timeout
+		if not _bind_board():
+			print("CAPTURAS: el tablero de '%s' no tiene todas sus piezas" % id)
+			continue
+		await _save("scenery_%s" % id)
+		_camera.goal_yaw = 0.0
+		_camera.goal_pitch = 29.0
+		_camera.goal_distance = _camera.default_distance * 1.15
+		await create_timer(1.8).timeout
+		await _save("scenery_%s_low" % id)
+		_camera.goal_yaw = -48.0
+		_camera.goal_pitch = 36.0
+		_camera.goal_distance = _camera.default_distance * 1.25
+		await create_timer(1.8).timeout
+		await _save("scenery_%s_side" % id)
+
+
 func _challenge_open() -> bool:
 	return _panel != null and _panel.is_open() and not _panel.is_answered()
 
@@ -214,3 +242,7 @@ func _save(shot_name: String) -> void:
 	var path: String = _dir.path_join(shot_name + ".png")
 	var err: int = image.save_png(path)
 	print("CAPTURAS: %s -> %s (%dx%d, error %d)" % [shot_name, path, image.get_width(), image.get_height(), err])
+	print("CAPTURAS:   %s: objetos %d, triángulos %d, llamadas de dibujo %d" % [shot_name,
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)])
