@@ -11,7 +11,7 @@ extends SceneTree
 const SCREENS := ["main_menu", "maps", "multiplayer", "characters", "settings", "board"]
 const TIME_LIMIT := 480.0
 ## Mundos de los que se toman capturas del escenario 3D (vista normal, baja y lateral).
-const SCENERY_MAPS := ["eden"]
+const SCENERY_MAPS := ["eden", "arca_noe", "egipto_exodo", "monte_sinai"]
 
 var _dir: String = ""
 var _router: Node

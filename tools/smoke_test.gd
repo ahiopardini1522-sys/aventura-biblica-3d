@@ -745,6 +745,21 @@ func _test_kits() -> void:
 		var count: int = int(props[prop_name])
 		_check(count > 0 and count < 400, "pieza decorativa '%s' tiene una cantidad razonable de triángulos (%d)" % [prop_name, count])
 
+	# Animales del escenario: cada uno es una pieza razonable y con el orden de vértices correcto.
+	for animal in ["elefante", "jirafa", "leon", "cebra", "oveja", "burro", "buey", "paloma"]:
+		kit = MeshKit.new()
+		AnimalKit.make(kit, rng, str(animal), Vector3.ZERO, 0.0, 1.0)
+		var animal_triangles: int = kit.triangle_count()
+		_check(animal_triangles > 60 and animal_triangles < 500,
+				"animal '%s' tiene una cantidad razonable de triángulos (%d)" % [str(animal), animal_triangles])
+		_check(_winding_ratio(kit.commit()) > 0.999, "animal '%s' tiene el orden de vértices correcto" % str(animal))
+	kit = MeshKit.new()
+	AnimalKit.make(kit, rng, "especie_inventada", Vector3.ZERO, 0.0, 1.0)
+	_check(kit.is_empty(), "un animal desconocido no agrega nada")
+	kit = MeshKit.new()
+	AnimalKit.make(kit, rng, "jirafa", Vector3(5.0, 0.0, 5.0), 1.0, 1.0)
+	_check(kit.xf == Transform3D.IDENTITY, "colocar un animal deja el MeshKit como estaba")
+
 	# Texturas y materiales.
 	for kind in TextureKit.kinds():
 		var texture: ImageTexture = TextureKit.texture(kind)
@@ -820,6 +835,41 @@ func _test_scenery() -> void:
 	_check(SceneryFactory.has_scenery("eden") and not SceneryFactory.has_scenery("desierto"),
 			"el desierto conserva su decoración original")
 	_test_scenery_eden()
+	_test_scenery_style("arca", "arca_noe", "Arca de Noé", ["Sea", "Ark", "Animals", "Ararat", "Rainbow"])
+	_test_scenery_style("egipto", "egipto_exodo", "Egipto", ["Terrain", "WaterWall", "SeaVolume", "Monuments", "Flames", "Seabed"])
+	_test_scenery_style("sinai", "monte_sinai", "Monte Sinaí", ["Terrain", "Land", "Glow", "SummitCloud", "Beam"])
+
+
+## Construye el escenario de un estilo con los datos reales de su mapa y revisa sus piezas, su
+## presupuesto de triángulos y que la calidad baja use menos geometría que la alta.
+func _test_scenery_style(style: String, map_id: String, label: String, required_nodes: Array) -> void:
+	var map_data: Dictionary = MapCatalog.find_map(map_id)
+	var theme_data: Dictionary = map_data.get("theme", {})
+	_check(SceneryFactory.has_scenery(style), "%s: el estilo '%s' tiene escenario propio" % [label, style])
+	_check(str(map_data.get("style", "")) == style, "%s: el mapa '%s' usa el estilo '%s'" % [label, map_id, style])
+	var scenery := Node3D.new()
+	SceneryFactory.build(style, scenery, 12345, 1, theme_data)
+	_scenery_report(label, scenery, 90000)
+	for piece_name in required_nodes:
+		_check(scenery.get_node_or_null(str(piece_name)) != null, "%s: tiene '%s'" % [label, str(piece_name)])
+	scenery.free()
+	var low_root := Node3D.new()
+	SceneryFactory.build(style, low_root, 12345, 0, theme_data)
+	var low_triangles: int = _triangles_of(low_root)
+	low_root.free()
+	var high_root := Node3D.new()
+	SceneryFactory.build(style, high_root, 12345, 2, theme_data)
+	var high_triangles: int = _triangles_of(high_root)
+	high_root.free()
+	_check(low_triangles < high_triangles, "%s: la calidad baja usa menos triángulos que la alta (%d < %d)" % [label, low_triangles, high_triangles])
+	# El mismo escenario con la misma semilla sale idéntico (para que el mapa no cambie de una partida a otra).
+	var again := Node3D.new()
+	SceneryFactory.build(style, again, 12345, 1, theme_data)
+	var first := Node3D.new()
+	SceneryFactory.build(style, first, 12345, 1, theme_data)
+	_check(_triangles_of(again) == _triangles_of(first), "%s: con la misma semilla el escenario es idéntico" % label)
+	again.free()
+	first.free()
 
 
 func _scenery_report(label: String, scenery: Node3D, max_triangles: int) -> void:

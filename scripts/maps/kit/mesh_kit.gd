@@ -13,6 +13,9 @@ extends RefCounted
 var xf: Transform3D = Transform3D.IDENTITY
 ## Repeticiones de la textura por metro (UVs planares según la cara dominante).
 var uv_scale: float = 0.5
+## Si es verdadero, en las caras verticales la textura se gira un cuarto de vuelta (las vetas
+## de los tablones quedan horizontales, como en el casco de un barco).
+var side_uv_swap: bool = false
 
 var _verts := PackedVector3Array()
 var _norms := PackedVector3Array()
@@ -130,8 +133,12 @@ func _add_vertex(p: Vector3, n: Vector3, color: Color, mode: int) -> void:
 	var uv: Vector2 = Vector2(p.x, p.z)
 	if mode == 1:
 		uv = Vector2(p.z, -p.y)
+		if side_uv_swap:
+			uv = Vector2(-p.y, p.z)
 	elif mode == 2:
 		uv = Vector2(p.x, -p.y)
+		if side_uv_swap:
+			uv = Vector2(-p.y, p.x)
 	_uvs.append(uv * uv_scale)
 
 

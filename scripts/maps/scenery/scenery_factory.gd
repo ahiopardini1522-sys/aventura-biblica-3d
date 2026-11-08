@@ -3,7 +3,7 @@ extends RefCounted
 ## Elige y construye el escenario 3D de un mapa según su "style" de data/maps/maps.json.
 ## El Desierto del Sinaí ("desierto") conserva su decoración original y no pasa por aquí.
 
-const STYLES: Array[String] = ["eden", "arca", "egipto", "sinai", "jerusalen", "belen"]
+const STYLES: Array[String] = ["eden", "arca", "egipto", "sinai"]
 
 
 ## Verdadero si el estilo tiene un escenario propio (con su terreno, que reemplaza el suelo liso).
@@ -20,3 +20,9 @@ static func build(style: String, root: Node3D, seed_value: int, quality: int, th
 	match style:
 		"eden":
 			SceneryEden.build(root, seed_value, quality, ground)
+		"arca":
+			SceneryArca.build(root, seed_value, quality, ground)
+		"egipto":
+			SceneryEgipto.build(root, seed_value, quality, ground)
+		"sinai":
+			ScenerySinai.build(root, seed_value, quality, ground)
