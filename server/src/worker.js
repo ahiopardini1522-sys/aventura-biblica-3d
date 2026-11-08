@@ -15,6 +15,8 @@ import { PROTOCOL_VERSION, SERVER_VERSION } from "./protocol.js";
 
 const HUB_NAME = "principal"; // Un solo Hub por ahora; las salas llegan en la fase 4.2.
 const STATE_KEY = "state";
+/** Una alarma nunca se programa para "ahora mismo": se deja este margen (ms) para no repetirla en bucle. */
+const MIN_ALARM_GAP_MS = 250;
 
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
@@ -123,7 +125,9 @@ export class Hub extends DurableObject {
 
   async alarm() {
     this.alarmAt = null;
-    this.#apply(this.core.sweep());
+    const effects = this.core.sweep();
+    console.log(`[hub] alarma: conexiones=${this.core.conns.size} cierres=${effects.close.length} sesiones=${this.core.sessions.size}`);
+    this.#apply(effects);
     await this.#persist();
   }
 
@@ -201,14 +205,22 @@ export class Hub extends DurableObject {
     await this.#schedule();
   }
 
-  /** Programa una alarma para revisar saludos atrasados y sesiones vencidas. */
+  /**
+   * Programa una alarma para revisar saludos atrasados y sesiones vencidas.
+   *
+   * Nunca se pide una hora igual o anterior a "ahora + MIN_ALARM_GAP_MS": si la revisión ya toca,
+   * se hace en un instante, y así tampoco se vuelve a pedir la misma hora de la alarma que acaba de
+   * sonar (Cloudflare puede descartar esa petición y la revisión se perdería).
+   */
   async #schedule() {
     const wake = this.core.nextWake();
     if (wake === null) return;
+    const target = Math.max(wake, this.core.now() + MIN_ALARM_GAP_MS);
     if (this.alarmAt === undefined) this.alarmAt = await this.ctx.storage.getAlarm();
-    if (this.alarmAt === null || this.alarmAt > wake) {
-      await this.ctx.storage.setAlarm(wake);
-      this.alarmAt = wake;
+    if (this.alarmAt === null || this.alarmAt > target) {
+      await this.ctx.storage.setAlarm(target);
+      console.log(`[hub] alarma programada en ${target - this.core.now()} ms`);
+      this.alarmAt = target;
     }
   }
 }

@@ -21,8 +21,16 @@ const hello = (client, extra = {}) => JSON.stringify({ t: "hello", v: PROTOCOL_V
 const realNow = Date.now;
 let fakeNow = 5_000_000;
 Date.now = () => fakeNow;
+
+// El Hub deja avisos cortos en el registro (alarma sonó / programada); aquí se recogen para no ensuciar la salida.
+const realLog = console.log;
+const logLines = [];
+console.log = (...parts) => {
+  logLines.push(parts.join(" "));
+};
 after(() => {
   Date.now = realNow;
+  console.log = realLog;
 });
 
 async function newHub(ctx = new FakeContext()) {
@@ -198,7 +206,7 @@ test("hibernación: una conexión cerrada mientras dormía deja la sesión para 
   const despierto = new Hub(ctx, {});
   await ctx.ready();
   assert.equal(despierto.core.onlineCount(), 0);
-  assert.ok(ctx.storage.alarm !== null && ctx.storage.alarm <= fakeNow, "se programó una revisión inmediata");
+  assert.ok(ctx.storage.alarm !== null && ctx.storage.alarm - fakeNow <= 1000, "se programó una revisión enseguida");
 
   await despierto.alarm();
   const [, session] = ctx.storage.data.get("state").sessions[0];
@@ -234,4 +242,44 @@ test("stats y bye pasan por el Hub", async () => {
   await hub.webSocketMessage(ws, JSON.stringify({ t: "bye" }));
   assert.deepEqual(ws.closed, { code: 1000, reason: "bye" });
   assert.equal(hub.core.sessions.size, 0);
+});
+
+test("si la alarma suena un instante antes de la hora, la siguiente se pide para otro momento (no el mismo)", async () => {
+  const { hub, ctx } = await newHub();
+  const ws = await connect(hub);
+  const primera = ctx.storage.alarm;
+  assert.equal(primera, fakeNow + LIMITS.HANDSHAKE_TIMEOUT_MS);
+
+  // El reloj del servidor marca 1 ms menos que la hora de la alarma: todavía no toca cerrar.
+  fakeNow = primera - 1;
+  await hub.alarm();
+  assert.equal(ws.closed, null, "todavía no venció el plazo del saludo");
+  assert.notEqual(ctx.storage.alarm, primera, "no se vuelve a pedir la misma hora que acaba de sonar");
+  assert.ok(ctx.storage.alarm > primera, "la nueva alarma es posterior");
+  assert.ok(ctx.storage.alarm - fakeNow >= 250, "y deja un margen para no repetirse en bucle");
+
+  fakeNow = ctx.storage.alarm;
+  await hub.alarm();
+  assert.equal(ws.messages().at(-1).code, "handshake_timeout");
+  assert.deepEqual(ws.closed, { code: CLOSE.HANDSHAKE_TIMEOUT, reason: "handshake_timeout" });
+  assert.equal(hub.core.nextWake(), null, "ya no queda nada que vigilar");
+});
+
+test("nunca se programa una alarma para menos de 250 ms después de ahora", async () => {
+  const { hub, ctx } = await newHub();
+  const ws = await connect(hub);
+  await hub.webSocketMessage(ws, hello(CLIENT_A));
+  ws.closed = { code: 1006, reason: "" };
+  const despierto = new Hub(ctx, {});
+  await ctx.ready();
+  assert.ok(ctx.storage.alarm - fakeNow >= 250, `alarma en ${ctx.storage.alarm - fakeNow} ms`);
+});
+
+test("el Hub deja un aviso corto en el registro cuando suena la alarma", async () => {
+  const { hub } = await newHub();
+  await connect(hub);
+  logLines.length = 0;
+  fakeNow += LIMITS.HANDSHAKE_TIMEOUT_MS;
+  await hub.alarm();
+  assert.ok(logLines.some((line) => line.startsWith("[hub] alarma:") && line.includes("cierres=1")), logLines.join(" | "));
 });

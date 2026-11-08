@@ -2020,8 +2020,8 @@ func _test_online_protocol() -> void:
 	var cleaning := {
 		"  Ana   María ": "Ana María",
 		"A\u0001b\u0007c": "Abc",
-		"Zero​Width": "ZeroWidth",
-		"‮atrás": "atrás",
+		"Zero\u200bWidth": "ZeroWidth",
+		"\u202eatrás": "atrás",
 		"": "",
 		"   ": "",
 	}

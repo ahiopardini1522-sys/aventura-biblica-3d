@@ -15,6 +15,7 @@ on:
     branches-ignore:
       - ci-artifacts
       - ci-validar
+      - ci-online
   pull_request:
   workflow_dispatch:
 
@@ -419,6 +420,28 @@ jobs:
           name: registros-en-linea
           path: logs/
           if-no-files-found: warn
+
+      - name: Publicar el resultado del servidor en línea enseguida (rama ci-online)
+        # Aviso rápido: no espera a las capturas ni al APK, que tardan bastante más.
+        if: always()
+        run: |
+          set -eo pipefail
+          mkdir -p /tmp/early
+          cp -r logs/. /tmp/early/ || true
+          cd /tmp/early
+          {
+            echo "# Resultado rápido (servidor en línea)"
+            echo
+            echo "- Commit: ${GITHUB_SHA}"
+            echo "- Rama: ${GITHUB_REF_NAME}"
+            echo "- en_linea: ${{ job.status }}"
+          } > STATUS.md
+          git init -q -b ci-online
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "en_linea ${GITHUB_SHA::7} (${GITHUB_REF_NAME}): ${{ job.status }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-online
 
   resumen:
     name: Resumen de resultados
