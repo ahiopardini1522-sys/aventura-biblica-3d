@@ -292,12 +292,19 @@ jobs:
           VERSION="$(grep -oP '^config/version="\K[^"]+' project.godot)"
           NAMED="build/android/aventura-biblica-3d-v${VERSION}-debug.apk"
           cp "build/android/$APK_NAME" "$NAMED"
+          NOTES="APK de depuración de la versión ${VERSION}, generado desde la rama main (commit ${GITHUB_SHA::7}). GitHub Actions comprobó las pruebas automáticas, la exportación y el arranque del paquete de datos; no sustituye una prueba en un teléfono real. Para instalarlo hay que permitir la instalación de apps desconocidas. Cada APK de prueba se firma con una llave de depuración nueva: si ya tienes instalada otra versión de prueba, desinstálala antes de instalar esta."
+          # Si existe docs/release-notes/v<versión>.md, sus novedades van primero en la página del lanzamiento.
+          if [ -f "docs/release-notes/v${VERSION}.md" ]; then
+            { cat "docs/release-notes/v${VERSION}.md"; echo; echo "---"; echo; echo "$NOTES"; } > build/release-notes.md
+          else
+            echo "$NOTES" > build/release-notes.md
+          fi
           gh release delete "v${VERSION}" --cleanup-tag --yes || true
           gh release create "v${VERSION}" "$NAMED" \
             --prerelease \
             --target "$GITHUB_SHA" \
             --title "Versión de prueba ${VERSION} (APK de depuración)" \
-            --notes "APK de depuración de la versión ${VERSION}, generado desde la rama main (commit ${GITHUB_SHA::7}). GitHub Actions comprobó las pruebas automáticas, la exportación y el arranque del paquete de datos; no sustituye una prueba en un teléfono real. Para instalarlo hay que permitir la instalación de apps desconocidas. Cada APK de prueba se firma con una llave de depuración nueva: si ya tienes instalada otra versión de prueba, desinstálala antes de instalar esta."
+            --notes-file build/release-notes.md
 
   resumen:
     name: Resumen de resultados

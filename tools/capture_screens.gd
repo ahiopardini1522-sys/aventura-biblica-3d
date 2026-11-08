@@ -108,7 +108,8 @@ func _capture_board() -> void:
 		print("CAPTURAS: el tablero no tiene todas sus piezas")
 		return
 
-	# Vistas de la cámara.
+	# Vistas de la cámara (primero se detiene la entrada de la escena, que si no pisaría estas metas).
+	_camera.reset_view(false)
 	_camera.goal_yaw = 28.0
 	_camera.goal_pitch = 34.0
 	_camera.goal_distance = _camera.default_distance * 0.62
@@ -190,6 +191,8 @@ func _capture_scenery(map_ids: Array) -> void:
 		if not _bind_board():
 			print("CAPTURAS: el tablero de '%s' no tiene todas sus piezas" % id)
 			continue
+		_camera.reset_view(false)
+		await create_timer(0.4).timeout
 		await _save("scenery_%s" % id)
 		_camera.goal_yaw = 0.0
 		_camera.goal_pitch = 29.0
@@ -201,6 +204,12 @@ func _capture_scenery(map_ids: Array) -> void:
 		_camera.goal_distance = _camera.default_distance * 1.25
 		await create_timer(1.8).timeout
 		await _save("scenery_%s_side" % id)
+		# Panorama: la cámara baja que usa la entrada de la escena, con el paisaje hasta el horizonte.
+		_camera.goal_yaw = BoardCamera.INTRO_YAW
+		_camera.goal_pitch = BoardCamera.INTRO_PITCH
+		_camera.goal_distance = _camera.default_distance * BoardCamera.INTRO_ZOOM
+		await create_timer(1.8).timeout
+		await _save("scenery_%s_pano" % id)
 
 
 ## El mapa mundial con un viaje a medias (Edén y Arca completados, Egipto abierto, el resto bloqueado):

@@ -14,6 +14,12 @@ const MAX_PITCH := 84.0
 const MAX_YAW := 70.0
 const ORBIT_SPEED := Vector2(0.14, 0.12) # grados por píxel (giro, inclinación)
 const SMOOTHING := 10.0
+## Entrada de la escena: la cámara empieza baja, mirando el paisaje hasta el horizonte, y sube a la vista de juego.
+const INTRO_YAW := -34.0
+const INTRO_PITCH := 17.0
+const INTRO_ZOOM := 1.55
+const INTRO_HOLD := 0.5
+const INTRO_SECONDS := 2.3
 
 var target: Vector3 = Vector3.ZERO
 var goal_target: Vector3 = Vector3.ZERO
@@ -91,22 +97,26 @@ func reset_view(animated: bool = true) -> void:
 	_tween.tween_property(self, "goal_distance", default_distance, 0.6).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
-## Entrada de la escena: la cámara baja desde arriba y se coloca en la vista inicial.
+## Entrada de la escena: la cámara empieza baja, para que se vea el paisaje del mundo (montañas, cielo,
+## construcciones), y sube hasta la vista inicial del tablero.
 func play_intro() -> void:
 	_kill_tween()
 	target = _home_target
 	goal_target = _home_target
-	yaw = -32.0
-	pitch = 78.0
-	distance = default_distance * 1.7
+	yaw = INTRO_YAW
+	pitch = INTRO_PITCH
+	distance = default_distance * INTRO_ZOOM
 	goal_yaw = yaw
 	goal_pitch = pitch
 	goal_distance = distance
 	_apply()
 	_tween = create_tween().set_parallel(true)
-	_tween.tween_property(self, "goal_yaw", default_yaw, 1.8).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_tween.tween_property(self, "goal_pitch", default_pitch, 1.8).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_tween.tween_property(self, "goal_distance", default_distance, 1.8).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_tween.tween_property(self, "goal_yaw", default_yaw, INTRO_SECONDS).set_delay(INTRO_HOLD) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_tween.tween_property(self, "goal_pitch", default_pitch, INTRO_SECONDS).set_delay(INTRO_HOLD) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_tween.tween_property(self, "goal_distance", default_distance, INTRO_SECONDS).set_delay(INTRO_HOLD) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
 ## Acerca (factor < 1) o aleja (factor > 1) la cámara.
