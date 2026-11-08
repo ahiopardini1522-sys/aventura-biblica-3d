@@ -130,6 +130,7 @@ func _run() -> void:
 	await _test_ambience()
 	await _test_menu_and_screens()
 	await _test_board_scene()
+	await _test_every_board()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_PROGRESS_PATH))
 	_finish()
 
@@ -3170,6 +3171,71 @@ func _test_board_scene() -> void:
 	await _test_victory_and_replay()
 	await _test_full_match_with_bot()
 	await _test_player_counts()
+	await _go_to_menu()
+
+
+## Abre los 7 tableros en la escena real, uno tras otro (como al tocar JUGAR en el mapa mundial), y en cada
+## uno comprueba que se arma completo, que suena como su mundo, que cabe en el presupuesto del teléfono y que el
+## primer turno funciona: dado, ficha, lista de jugadores y cambio de turno.
+func _test_every_board() -> void:
+	print("-- Los 7 tableros en la escena real")
+	_settings.reset_game_rules()
+	_progress.unlock_everything_for_session()
+	for map_id in MAP_ORDER:
+		var data: Dictionary = MapCatalog.find_map(map_id)
+		var title: String = str(data["name"])
+		_state.select_map(map_id)
+		_state.select_character(CharacterCatalog.all_ids()[0])
+		_state.set_player_count(2)
+		_router.go_to("board")
+		if not await _wait_until(_arrived.bind("board"), 20.0):
+			_check(false, "%s: se abre el tablero" % title)
+			continue
+		if not _bind_board():
+			continue
+		var layout: BoardLayout = _flow.layout
+		var board_data: Dictionary = data["board"]
+		_check(str(_state.selected_map_id) == map_id and layout.tile_count() == 100 and _board.tile_count() == 100
+				and _board.ladder_count() == (board_data["ladders"] as Array).size()
+				and _board.snake_count() == (board_data["snakes"] as Array).size(),
+				"%s: tablero de 100 casillas con sus %d escaleras y sus %d serpientes" % [title,
+						_board.ladder_count(), _board.snake_count()])
+		var marks_ok: bool = true
+		for tile in layout.challenge_tiles:
+			if not _board.has_challenge_mark(tile):
+				marks_ok = false
+		for tile in layout.special_tiles():
+			if not _board.has_special_mark(tile):
+				marks_ok = false
+		_check(marks_ok and layout.challenge_tiles.size() >= 10 and layout.special_tiles().size() >= 6,
+				"%s: %d desafíos y %d casillas especiales, todos marcados" % [title,
+						layout.challenge_tiles.size(), layout.special_tiles().size()])
+		var map_line := _hud.get_node_or_null("%MapLine") as Label
+		_check(map_line != null and map_line.text.contains(title) and map_line.text.contains(str(data["reference"])),
+				"%s: la interfaz dice el mundo y su referencia bíblica" % title)
+		var sound: Node = current_scene.get_node_or_null("Ambience")
+		var wanted_sound: String = str(data["ambience"]["sound"])
+		_check(sound != null and str(sound.get("kind")) == wanted_sound and bool(sound.get("playing")),
+				"%s: suena su ambiente ('%s')" % [title, wanted_sound])
+		var triangles: int = _triangles_of(current_scene)
+		var meshes: int = _count_nodes(current_scene, "MeshInstance3D")
+		print("  %s: %d mallas y %d triángulos en total" % [title, meshes, triangles])
+		_check(triangles < 120000 and meshes < 300,
+				"%s: cabe en el presupuesto del teléfono (%d triángulos, %d mallas)" % [title, triangles, meshes])
+
+		var roll_button := _hud.get_node_or_null("%RollButton") as Button
+		if roll_button == null:
+			_check(false, "%s: hay botón LANZAR DADO" % title)
+			continue
+		_events.clear()
+		roll_button.pressed.emit()
+		var rolled: bool = await _wait_until(_has_event.bind("rolled"), 10.0)
+		var ready: bool = await _drive_until_ready()
+		var tile_after: int = int(_flow.state.get_player(0)["tile"])
+		_check(rolled and ready and tile_after > 1 and _flow.current_player() == 1,
+				"%s: el primer turno funciona (casilla %d, ahora le toca al jugador 2)" % [title, tile_after])
+		_check_synced("%s: fichas, lista e insignias coinciden con las reglas" % title)
+	_progress.reset(false)
 	await _go_to_menu()
 
 
