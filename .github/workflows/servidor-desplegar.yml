@@ -1,0 +1,217 @@
+name: Desplegar servidor en línea
+
+# Publica el servidor en línea (carpeta server/) en Cloudflare Workers, plan gratuito.
+#
+# Se ejecuta:
+#   - a mano, desde la pestaña Actions -> "Desplegar servidor en línea" -> Run workflow (usar la rama main), o
+#   - solo, cuando en main cambia algo de la carpeta server/.
+#
+# Necesita dos secretos del repositorio (Settings -> Secrets and variables -> Actions):
+#   CLOUDFLARE_API_TOKEN   token de API con la plantilla "Edit Cloudflare Workers"
+#   CLOUDFLARE_ACCOUNT_ID  identificador de la cuenta de Cloudflare
+# Si faltan, el flujo termina SIN error y explica en su resumen qué hacer
+# (guía completa: docs/online/CONFIGURAR_SERVIDOR.md).
+#
+# Al terminar bien: comprueba el servidor publicado con pruebas reales, guarda su dirección en
+# data/online.json (solo desde main) y vuelve a compilar la app para que el APK ya la lleve.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "server/**"
+      - ".github/workflows/servidor-desplegar.yml"
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: servidor-desplegar
+  cancel-in-progress: false
+
+env:
+  GODOT_VERSION: "4.7.2"
+  WORKER_NAME: aventura-biblica-online
+
+jobs:
+  desplegar:
+    name: Desplegar en Cloudflare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Comprobar los secretos de Cloudflare
+        id: cfg
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "listo=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "## Servidor en línea: todavía falta conectar Cloudflare"
+              echo
+              echo "Este flujo no desplegó nada porque faltan los secretos \`CLOUDFLARE_API_TOKEN\` y/o \`CLOUDFLARE_ACCOUNT_ID\`."
+              echo "No es un error: el juego sigue funcionando sin partidas en línea."
+              echo
+              echo "Pasos (desde el teléfono): abre \`docs/online/CONFIGURAR_SERVIDOR.md\` en el repositorio y sigue la guía."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::Faltan los secretos de Cloudflare; no se despliega nada. Guía: docs/online/CONFIGURAR_SERVIDOR.md"
+          else
+            echo "listo=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.listo == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.cfg.outputs.listo == 'true'
+        with:
+          node-version: "22"
+
+      - name: Instalar wrangler y pasar las pruebas del servidor
+        if: steps.cfg.outputs.listo == 'true'
+        working-directory: server
+        run: |
+          set -eo pipefail
+          npm install --no-audit --no-fund
+          npm test
+
+      - name: Preparar el subdominio workers.dev de la cuenta
+        if: steps.cfg.outputs.listo == 'true'
+        id: subdominio
+        run: |
+          set -eo pipefail
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain"
+          RESPUESTA="$(curl -sS -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "$API" || true)"
+          SUBDOMINIO="$(echo "$RESPUESTA" | jq -r '.result.subdomain // empty' 2>/dev/null || true)"
+          if [ -z "$SUBDOMINIO" ]; then
+            echo "La cuenta todavía no tiene subdominio workers.dev: se crea uno."
+            for candidato in "aventura-${CLOUDFLARE_ACCOUNT_ID:0:8}" "aventura-biblica-${CLOUDFLARE_ACCOUNT_ID:0:6}" "ab-${CLOUDFLARE_ACCOUNT_ID:0:12}"; do
+              RESPUESTA="$(curl -sS -X PUT -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H "Content-Type: application/json" \
+                --data "{\"subdomain\":\"${candidato}\"}" "$API" || true)"
+              SUBDOMINIO="$(echo "$RESPUESTA" | jq -r '.result.subdomain // empty' 2>/dev/null || true)"
+              if [ -n "$SUBDOMINIO" ]; then break; fi
+            done
+          fi
+          if [ -z "$SUBDOMINIO" ]; then
+            echo "::error::No se pudo obtener ni crear el subdominio workers.dev. Revisa que el token tenga el permiso 'Workers Scripts: Edit' y que el Account ID sea el correcto."
+            echo "$RESPUESTA" | jq -c '{success, errors}' 2>/dev/null || true
+            exit 1
+          fi
+          echo "Subdominio de la cuenta: ${SUBDOMINIO}"
+          echo "subdominio=${SUBDOMINIO}" >> "$GITHUB_OUTPUT"
+
+      - name: Desplegar el servidor
+        if: steps.cfg.outputs.listo == 'true'
+        id: desplegar
+        working-directory: server
+        run: |
+          set -eo pipefail
+          npx wrangler deploy 2>&1 | tee "$RUNNER_TEMP/deploy.log"
+          URL="$(grep -oE 'https://[A-Za-z0-9.-]+\.workers\.dev' "$RUNNER_TEMP/deploy.log" | head -n 1 || true)"
+          if [ -z "$URL" ]; then
+            URL="https://${WORKER_NAME}.${{ steps.subdominio.outputs.subdominio }}.workers.dev"
+          fi
+          echo "Dirección del servidor: ${URL}"
+          echo "url=${URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Esperar a que el servidor publicado responda (/health)
+        if: steps.cfg.outputs.listo == 'true'
+        run: |
+          set -eo pipefail
+          URL="${{ steps.desplegar.outputs.url }}"
+          # Un subdominio recién creado puede tardar un par de minutos en resolverse.
+          for i in $(seq 1 60); do
+            if curl -fsS --max-time 10 "${URL}/health" > "$RUNNER_TEMP/health.json" 2>/dev/null; then
+              echo "El servidor respondió tras ~$((i * 3)) s:"
+              cat "$RUNNER_TEMP/health.json"; echo
+              grep -q '"ok":true' "$RUNNER_TEMP/health.json"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "::error::El servidor publicado no respondió en 3 minutos: ${URL}/health"
+          exit 1
+
+      - name: Pruebas de extremo a extremo contra el servidor publicado
+        if: steps.cfg.outputs.listo == 'true'
+        working-directory: server
+        run: |
+          set -o pipefail
+          node e2e/e2e.mjs "${{ steps.desplegar.outputs.url }}" 2>&1 | tee "$RUNNER_TEMP/e2e.log"
+
+      - name: Preparar Godot (para probar la conexión segura wss:// del juego)
+        if: steps.cfg.outputs.listo == 'true'
+        uses: ./.github/actions/setup-godot
+        with:
+          version: ${{ env.GODOT_VERSION }}
+
+      - name: Probar el cliente del juego contra el servidor publicado (wss://)
+        # Comprueba que el motor de Godot confía en el certificado de Cloudflare. No bloquea el
+        # despliegue: su resultado queda en el resumen.
+        if: steps.cfg.outputs.listo == 'true'
+        id: godot
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          godot --headless --path . --import > "$RUNNER_TEMP/import-1.log" 2>&1 || true
+          godot --headless --path . --import > "$RUNNER_TEMP/import-2.log" 2>&1 || true
+          godot --headless --path . --script res://tools/online_e2e.gd -- --url="${{ steps.desplegar.outputs.url }}" 2>&1 | tee "$RUNNER_TEMP/godot-e2e.log"
+
+      - name: Guardar la dirección en data/online.json y reconstruir la app (solo desde main)
+        if: steps.cfg.outputs.listo == 'true' && github.ref == 'refs/heads/main'
+        id: guardar
+        env:
+          GH_TOKEN: ${{ github.token }}
+          URL: ${{ steps.desplegar.outputs.url }}
+        run: |
+          set -eo pipefail
+          python3 - <<'PY'
+          import json, os
+          ruta = "data/online.json"
+          datos = json.load(open(ruta, encoding="utf-8"))
+          datos["server_url"] = os.environ["URL"]
+          with open(ruta, "w", encoding="utf-8") as f:
+              json.dump(datos, f, ensure_ascii=False, indent="\t")
+              f.write("\n")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/online.json
+          if git diff --cached --quiet; then
+            echo "data/online.json ya tenía esta dirección; no hace falta reconstruir la app."
+            echo "cambio=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -q -m "Servidor en línea: dirección ${URL}"
+            git pull --rebase -q origin main
+            git push -q origin HEAD:main
+            gh workflow run build.yml --ref main
+            echo "cambio=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resumen
+        if: always() && steps.cfg.outputs.listo == 'true'
+        run: |
+          {
+            echo "## Servidor en línea"
+            echo
+            if [ -n "${{ steps.desplegar.outputs.url }}" ]; then
+              echo "- Dirección: ${{ steps.desplegar.outputs.url }}"
+              echo "- Salud: ${{ steps.desplegar.outputs.url }}/health"
+            fi
+            echo "- Despliegue: ${{ steps.desplegar.outcome }}"
+            echo "- Pruebas de extremo a extremo (Node, servidor publicado): ${{ job.status }}"
+            echo "- Prueba del cliente del juego por wss:// (Godot): ${{ steps.godot.outcome }}"
+            if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+              echo "- Dirección guardada en data/online.json; app reconstruida: ${{ steps.guardar.outputs.cambio }}"
+            else
+              echo "- Esta ejecución no es de la rama main, así que no se guardó la dirección en el juego."
+            fi
+            if [ "${{ steps.guardar.outputs.cambio }}" = "true" ]; then
+              echo
+              echo "En unos minutos aparecerá un APK nuevo en Releases con el servidor ya configurado."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

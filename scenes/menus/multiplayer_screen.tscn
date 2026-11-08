@@ -133,7 +133,6 @@ text = "JUGAR"
 
 [node name="OnlinePanel" type="PanelContainer" parent="UI/Root/Margin/VBox/Content"]
 unique_name_in_owner = true
-modulate = Color(1, 1, 1, 0.85)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -142,18 +141,51 @@ layout_mode = 2
 theme_override_constants/separation = 18
 
 [node name="OnlineTitle" type="Label" parent="UI/Root/Margin/VBox/Content/OnlinePanel/Online"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"HeadingLabel"
 theme_override_font_sizes/font_size = 46
 text = "PARTIDA EN LÍNEA"
 
-[node name="SoonLabel" type="Label" parent="UI/Root/Margin/VBox/Content/OnlinePanel/Online"]
+[node name="StatusRow" type="HBoxContainer" parent="UI/Root/Margin/VBox/Content/OnlinePanel/Online"]
 layout_mode = 2
-theme_type_variation = &"ValueLabel"
-text = "PRÓXIMAMENTE"
+theme_override_constants/separation = 18
 
-[node name="OnlineText" type="Label" parent="UI/Root/Margin/VBox/Content/OnlinePanel/Online"]
+[node name="StatusDot" type="Panel" parent="UI/Root/Margin/VBox/Content/OnlinePanel/Online/StatusRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="StatusLabel" type="Label" parent="UI/Root/Margin/VBox/Content/OnlinePanel/Online/StatusRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 34
+text = "Sin conexión."
+autowrap_mode = 3
+
+[node name="DetailLabel" type="Label" parent="UI/Root/Margin/VBox/Content/OnlinePanel/Online"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"DimLabel"
-text = "Aquí podrás jugar con amigos por internet. La estructura del juego ya está preparada para conectarlo en una etapa posterior."
+theme_override_font_sizes/font_size = 26
 autowrap_mode = 3
+
+[node name="OnlineText" type="Label" parent="UI/Root/Margin/VBox/Content/OnlinePanel/Online"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 28
+text = "Prueba de conexión. Las partidas con amigos (código de invitación), los oponentes al azar y los turnos sincronizados llegarán en las siguientes fases."
+autowrap_mode = 3
+
+[node name="ConnectButton" type="Button" parent="UI/Root/Margin/VBox/Content/OnlinePanel/Online"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 116)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "PROBAR CONEXIÓN"

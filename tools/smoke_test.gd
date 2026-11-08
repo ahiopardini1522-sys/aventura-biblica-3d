@@ -127,6 +127,9 @@ func _run() -> void:
 	_test_board_styles()
 	_test_world_logic()
 	_test_world_camera()
+	_test_online_protocol()
+	_test_online_config()
+	_test_online_client()
 	await _test_ambience()
 	await _test_menu_and_screens()
 	await _test_board_scene()
@@ -238,6 +241,13 @@ func _test_project_settings() -> void:
 		_check(regex.search(package_name) != null, "nombre de paquete válido (%s)" % package_name)
 		_check(str(cfg.get_value("preset.0", "include_filter", "")).contains("*.json"),
 				"la exportación incluye los archivos .json de data/")
+		_check(bool(cfg.get_value("preset.0.options", "permissions/internet", false)),
+				"el APK declara el permiso de Internet (necesario para jugar en línea)")
+		_check(str(cfg.get_value("preset.0", "exclude_filter", "")).contains("server/*"),
+				"la carpeta del servidor (server/) no viaja en el APK")
+		_check(str(cfg.get_value("preset.0.options", "version/name", "")) == str(ProjectSettings.get_setting("application/config/version", "")),
+				"la versión del APK coincide con la del proyecto")
+	_check(ProjectSettings.has_setting("autoload/OnlineManager"), "OnlineManager está registrado como autoload")
 
 
 func _test_scripts_compile() -> void:
@@ -1866,6 +1876,8 @@ func _test_menu_and_screens() -> void:
 			if back != null:
 				back.pressed.emit()
 				_check(await _wait_until(_arrived.bind("main_menu")), "VOLVER regresa al menú desde '%s'" % key)
+				if key == "multiplayer":
+					_online_after_leaving_screen()
 		if current_scene == null or not _arrived("main_menu"):
 			_check(await _go_to_menu(), "regreso al menú para seguir probando")
 
@@ -1897,11 +1909,607 @@ func _test_screen(key: String) -> void:
 		"maps":
 			await _test_maps_screen()
 		"multiplayer":
-			_test_multiplayer_screen()
+			await _test_multiplayer_screen()
 		"characters":
 			_test_characters_screen()
 		"settings":
 			_test_settings_screen()
+
+
+# ---------------------------------------------------------------- Conexión en línea (fase 4.1)
+
+const FakeTransport := preload("res://tools/fake_online_transport.gd")
+const ONLINE_TEST_ID := "prueba-0123456789abcdef"
+const ONLINE_TEST_SESSION := "0123456789abcdef0123456789abcdef"
+const ONLINE_TEST_URL := "https://juego.example"
+
+var _fakes: Array = []
+var _fake_open_result: int = OK
+var _online_events: Array = []
+var _online_restore_url: String = ""
+
+
+func _make_fake() -> OnlineTransport:
+	var fake: OnlineTransport = FakeTransport.new()
+	fake.set("open_result", _fake_open_result)
+	_fakes.append(fake)
+	return fake
+
+
+func _last_fake() -> Object:
+	return _fakes[_fakes.size() - 1]
+
+
+func _on_online_welcomed(_info: Dictionary) -> void:
+	_online_events.append("welcomed")
+
+
+func _on_online_stats(count: int) -> void:
+	_online_events.append("stats:%d" % count)
+
+
+func _on_online_message(message: Dictionary) -> void:
+	_online_events.append("message:%s" % str(message.get("t", "")))
+
+
+func _on_online_lost(will_retry: bool) -> void:
+	_online_events.append("lost:%s" % str(will_retry))
+
+
+func _on_online_error(code: String, _text: String) -> void:
+	_online_events.append("error:%s" % code)
+
+
+func _new_online_client(url: String = ONLINE_TEST_URL) -> OnlineClient:
+	_fakes.clear()
+	_fake_open_result = OK
+	_online_events.clear()
+	var client := OnlineClient.new(_make_fake)
+	client.jitter_enabled = false
+	client.configure(url, ONLINE_TEST_ID, "Noé", "0.4.0-alfa.1")
+	client.welcomed.connect(_on_online_welcomed)
+	client.stats_received.connect(_on_online_stats)
+	client.message_received.connect(_on_online_message)
+	client.connection_lost.connect(_on_online_lost)
+	client.server_error.connect(_on_online_error)
+	return client
+
+
+func _online_welcome(online: int, resumed: bool) -> Dictionary:
+	return {
+		"t": "welcome", "v": OnlineProtocol.VERSION, "session": ONLINE_TEST_SESSION, "resumed": resumed,
+		"server": "prueba", "now": 1, "online": online, "you": {"client": ONLINE_TEST_ID, "name": "Noé"},
+	}
+
+
+## Lleva un cliente nuevo hasta ONLINE con el servidor falso.
+func _online_connect(client: OnlineClient, online: int = 3, resumed: bool = false) -> void:
+	client.start()
+	var fake: Object = _last_fake()
+	fake.server_accepts()
+	client.tick(0.05)
+	fake.server_sends_json(_online_welcome(online, resumed))
+	client.tick(0.05)
+
+
+func _online_state(client: OnlineClient) -> String:
+	return OnlineClient.state_name(client.state)
+
+
+func _test_online_protocol() -> void:
+	print("-- Conexión en línea: protocolo")
+	var hello: Dictionary = OnlineProtocol.parse(OnlineProtocol.hello(ONLINE_TEST_ID, "  Noé  ", "0.4.0-alfa.1"))
+	_check(str(hello.get("t", "")) == "hello" and int(hello.get("v", 0)) == OnlineProtocol.VERSION,
+			"el saludo lleva su tipo y la versión del protocolo")
+	_check(str(hello.get("client", "")) == ONLINE_TEST_ID and str(hello.get("name", "")) == "Noé"
+			and str(hello.get("app", "")) == "0.4.0-alfa.1",
+			"el saludo lleva el identificador, el nombre limpio y la versión de la app")
+	_check(not hello.has("resume"), "sin sesión previa, el saludo no pide reanudar")
+	var resume: Dictionary = OnlineProtocol.parse(OnlineProtocol.hello(ONLINE_TEST_ID, "Noé", "x", ONLINE_TEST_SESSION))
+	_check(str(resume.get("resume", "")) == ONLINE_TEST_SESSION, "con una sesión válida, el saludo pide reanudarla")
+	var bad_resume: Dictionary = OnlineProtocol.parse(OnlineProtocol.hello(ONLINE_TEST_ID, "Noé", "x", "no-valida"))
+	_check(not bad_resume.has("resume"), "una sesión mal formada no se envía")
+	_check(str(OnlineProtocol.parse(OnlineProtocol.bye()).get("t", "")) == "bye", "mensaje de despedida (bye)")
+	_check(str(OnlineProtocol.parse(OnlineProtocol.stats_request()).get("t", "")) == "stats", "mensaje de estadísticas (stats)")
+
+	_check(not OnlineProtocol.parse("{\"t\":\"welcome\",\"online\":2}").is_empty(), "se lee un mensaje válido")
+	for bad in ["", "hola", "{", "[]", "null", "7", "\"t\"", "{}", "{\"t\":1}", "{\"t\":\"\"}",
+			"{\"t\":\"%s\"}" % "x".repeat(33), "[{\"t\":\"a\"}]"]:
+		_check(OnlineProtocol.parse(bad).is_empty(), "se ignora el mensaje inválido: %s" % bad.left(20))
+
+	var cleaning := {
+		"  Ana   María ": "Ana María",
+		"A\u0001b\u0007c": "Abc",
+		"Zero​Width": "ZeroWidth",
+		"‮atrás": "atrás",
+		"": "",
+		"   ": "",
+	}
+	for raw in cleaning:
+		_check(OnlineProtocol.clean_name(str(raw)) == str(cleaning[raw]), "limpia el nombre '%s'" % str(raw).strip_edges())
+	_check(OnlineProtocol.clean_name("x".repeat(50)).length() == OnlineProtocol.NAME_MAX_CHARS, "el nombre se recorta a 20 caracteres")
+
+	_check(OnlineProtocol.is_valid_client_id("abcdefghijklmnop") and not OnlineProtocol.is_valid_client_id("corto")
+			and not OnlineProtocol.is_valid_client_id("con espacios y mas!!") and not OnlineProtocol.is_valid_client_id("a".repeat(65)),
+			"validación del identificador de dispositivo")
+	_check(OnlineProtocol.is_valid_session(ONLINE_TEST_SESSION) and not OnlineProtocol.is_valid_session("ABCDEF")
+			and not OnlineProtocol.is_valid_session(ONLINE_TEST_SESSION.to_upper()),
+			"validación del código de sesión")
+	var first_id: String = OnlineProtocol.make_client_id()
+	_check(OnlineProtocol.is_valid_client_id(first_id) and first_id != OnlineProtocol.make_client_id(),
+			"los identificadores de dispositivo generados son válidos y distintos")
+	_test_online_protocol_matches_server()
+
+
+## El juego y el servidor tienen que usar los mismos números: se leen de server/src/protocol.js.
+func _test_online_protocol_matches_server() -> void:
+	var path := "res://server/src/protocol.js"
+	_check(FileAccess.file_exists(path), "existe el protocolo del servidor (server/src/protocol.js)")
+	if not FileAccess.file_exists(path):
+		return
+	var source: String = FileAccess.get_file_as_string(path)
+	var expected := {
+		"PROTOCOL_VERSION = ": OnlineProtocol.VERSION,
+		"REPLACED: ": OnlineProtocol.CLOSE_REPLACED,
+		"BAD_VERSION: ": OnlineProtocol.CLOSE_BAD_VERSION,
+		"BAD_MESSAGE: ": OnlineProtocol.CLOSE_BAD_MESSAGE,
+		"RATE_LIMITED: ": OnlineProtocol.CLOSE_RATE_LIMITED,
+		"TOO_MANY: ": OnlineProtocol.CLOSE_TOO_MANY,
+		"HANDSHAKE_TIMEOUT: ": OnlineProtocol.CLOSE_HANDSHAKE_TIMEOUT,
+		"NAME_MAX_CHARS: ": OnlineProtocol.NAME_MAX_CHARS,
+		"MAX_MESSAGE_CHARS: ": OnlineProtocol.MAX_MESSAGE_CHARS,
+	}
+	for key in expected:
+		var regex := RegEx.new()
+		regex.compile(String(key) + "(\\d+)")
+		var found: RegExMatch = regex.search(source)
+		_check(found != null and int(found.get_string(1)) == int(expected[key]),
+				"el juego y el servidor coinciden en %s%d" % [String(key), int(expected[key])])
+
+
+func _test_online_config() -> void:
+	print("-- Conexión en línea: configuración")
+	var cases := {
+		"https://a.b.workers.dev": "https://a.b.workers.dev",
+		"https://a.b.workers.dev/": "https://a.b.workers.dev",
+		"wss://a.b.workers.dev/ws": "https://a.b.workers.dev",
+		"  https://a.b.workers.dev/ws/  ": "https://a.b.workers.dev",
+		"http://127.0.0.1:8787": "http://127.0.0.1:8787",
+		"ws://localhost:8787/ws": "http://localhost:8787",
+		"http://evil.example": "",
+		"ws://evil.example/ws": "",
+		"ftp://a.dev": "",
+		"a.b.workers.dev": "",
+		"": "",
+		"   ": "",
+		"https://": "",
+		"https://a b.dev": "",
+		"https://a.dev/otra/ruta": "",
+		"https://usuario@a.dev": "",
+		"https://a.dev?x=1": "",
+	}
+	for raw in cases:
+		_check(OnlineConfig.normalize_base_url(str(raw)) == str(cases[raw]), "dirección '%s' -> '%s'" % [str(raw).strip_edges(), str(cases[raw])])
+	_check(OnlineConfig.to_ws_url("https://a.dev") == "wss://a.dev/ws", "https se convierte en wss://.../ws")
+	_check(OnlineConfig.to_ws_url("http://127.0.0.1:8787") == "ws://127.0.0.1:8787/ws", "http local se convierte en ws://.../ws")
+	_check(OnlineConfig.to_ws_url("http://evil.example").is_empty() and OnlineConfig.to_ws_url("").is_empty(),
+			"una dirección no permitida no genera WebSocket")
+	_check(OnlineConfig.to_http_url("https://a.dev", "/health") == "https://a.dev/health", "dirección de /health")
+
+	var shipped: String = OnlineConfig.CONFIG_PATH
+	_check(FileAccess.file_exists(shipped), "existe data/online.json")
+	var parsed := JSON.new()
+	_check(parsed.parse(FileAccess.get_file_as_string(shipped)) == OK and typeof(parsed.data) == TYPE_DICTIONARY
+			and (parsed.data as Dictionary).has("server_url"), "data/online.json es un JSON con el campo server_url")
+	var shipped_url: String = OnlineConfig.load_server_url()
+	_check(shipped_url.is_empty() or shipped_url.begins_with("https://"), "la dirección del servidor del juego está vacía o es https")
+
+	var temp := "user://online_config_test.json"
+	_write_text(temp, "{\"server_url\": \"https://x.workers.dev/ws\"}")
+	_check(OnlineConfig.load_server_url(temp) == "https://x.workers.dev", "lee y normaliza la dirección del archivo")
+	_write_text(temp, "no es json")
+	_check(OnlineConfig.load_server_url(temp).is_empty(), "un archivo dañado da una dirección vacía")
+	_write_text(temp, "[1, 2]")
+	_check(OnlineConfig.load_server_url(temp).is_empty(), "un archivo que no es un objeto da una dirección vacía")
+	_write_text(temp, "{\"server_url\": \"http://malo.example\"}")
+	_check(OnlineConfig.load_server_url(temp).is_empty(), "una dirección insegura se rechaza")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(temp))
+	_check(OnlineConfig.load_server_url(temp).is_empty(), "sin archivo, la dirección está vacía")
+
+	var identity := "user://online_identity_test.cfg"
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(identity))
+	var created: String = OnlineConfig.load_client_id(identity)
+	_check(OnlineProtocol.is_valid_client_id(created), "se crea un identificador de dispositivo válido")
+	_check(OnlineConfig.load_client_id(identity) == created, "el identificador se conserva entre sesiones")
+	var cfg := ConfigFile.new()
+	cfg.set_value("identity", "client_id", "dañado!")
+	cfg.save(identity)
+	var repaired: String = OnlineConfig.load_client_id(identity)
+	_check(OnlineProtocol.is_valid_client_id(repaired) and repaired != "dañado!", "un identificador dañado se vuelve a crear")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(identity))
+
+
+func _write_text(path: String, text: String) -> void:
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file != null:
+		file.store_string(text)
+		file.close()
+
+
+func _test_online_client() -> void:
+	print("-- Conexión en línea: cliente (con servidor falso)")
+	_online_client_without_server()
+	_online_client_happy_path()
+	_online_client_heartbeat_and_resume()
+	_online_client_backoff()
+	_online_client_close_codes()
+	_online_client_stop()
+	_online_client_timeouts()
+	_online_client_misc()
+
+
+func _online_client_without_server() -> void:
+	var client: OnlineClient = _new_online_client("")
+	client.start()
+	_check(not client.has_server() and client.state == OnlineClient.State.FAILED and client.fail_code == OnlineClient.FAIL_NO_SERVER
+			and _fakes.is_empty(), "sin dirección de servidor no se intenta conectar (FAILED no_server)")
+	client = _new_online_client("http://evil.example")
+	client.start()
+	_check(client.state == OnlineClient.State.FAILED and _fakes.is_empty(), "una dirección insegura no se usa")
+	client = _new_online_client()
+	client.configure(ONLINE_TEST_URL, "corto", "Noé", "x")
+	client.start()
+	_check(client.state == OnlineClient.State.FAILED and client.fail_code == OnlineClient.FAIL_BAD_CLIENT,
+			"un identificador de dispositivo inválido no se usa")
+
+
+func _online_client_happy_path() -> void:
+	var client: OnlineClient = _new_online_client()
+	_check(client.state == OnlineClient.State.IDLE and not client.is_busy(), "el cliente nuevo está en reposo")
+	client.start()
+	_check(client.state == OnlineClient.State.CONNECTING and _fakes.size() == 1 and client.is_busy(), "start() empieza a conectar")
+	var fake: Object = _last_fake()
+	_check(str(fake.url) == "wss://juego.example/ws", "se conecta a wss://servidor/ws (%s)" % str(fake.url))
+	fake.server_accepts()
+	client.tick(0.05)
+	_check(client.state == OnlineClient.State.HANDSHAKE, "con la conexión abierta se espera el welcome")
+	var sent: Array = fake.sent_json()
+	_check(sent.size() == 1 and str((sent[0] as Dictionary).get("t", "")) == "hello", "lo primero que se envía es el hello")
+	var hello: Dictionary = sent[0]
+	_check(str(hello.get("client", "")) == ONLINE_TEST_ID and str(hello.get("name", "")) == "Noé"
+			and int(hello.get("v", 0)) == OnlineProtocol.VERSION and not hello.has("resume"),
+			"el hello lleva identificador, nombre y versión; sin sesión previa no pide reanudar")
+	fake.server_sends_json(_online_welcome(3, false))
+	client.tick(0.05)
+	_check(client.state == OnlineClient.State.ONLINE and client.is_online(), "tras el welcome el cliente está ONLINE")
+	_check(client.session == ONLINE_TEST_SESSION and not client.resumed and client.online_count == 3 and client.attempt == 0,
+			"guarda la sesión y el número de jugadores en línea")
+	_check(_online_events.has("welcomed"), "avisa con la señal welcomed")
+	_check(client.request_stats() and fake.sent_json().size() == 2 and str((fake.sent_json()[1] as Dictionary).get("t", "")) == "stats",
+			"request_stats() envía el pedido de estadísticas")
+	fake.server_sends_json({"t": "stats", "online": 5})
+	client.tick(0.05)
+	_check(client.online_count == 5 and _online_events.has("stats:5"), "las estadísticas actualizan el número de jugadores")
+	fake.server_sends_json({"t": "sala_actualizada", "jugadores": 2})
+	fake.server_sends("esto no es json")
+	fake.server_sends_json({"sin_tipo": true})
+	fake.server_sends_json({"t": "error", "code": "unknown_type", "msg": "no existe"})
+	client.tick(0.05)
+	_check(_online_events.has("message:sala_actualizada"), "los mensajes de juego se pasan a message_received")
+	_check(_online_events.has("error:unknown_type") and client.last_error_code == "unknown_type", "los errores del servidor se avisan")
+	_check(client.state == OnlineClient.State.ONLINE, "los mensajes inválidos o desconocidos no cortan la conexión")
+	_check(client.send_message({"t": "sala_unirse", "codigo": "ABCD"}) and fake.sent_json().size() == 3, "send_message() envía un mensaje de juego")
+	_check(not client.send_message({"t": "grande", "relleno": "x".repeat(5000)}), "un mensaje demasiado grande no se envía")
+	client.stop()
+
+
+func _online_client_heartbeat_and_resume() -> void:
+	var client: OnlineClient = _new_online_client()
+	_online_connect(client)
+	var fake: Object = _last_fake()
+	client.tick(OnlineClient.PING_INTERVAL - 1.0)
+	_check(fake.sent_ping_count() == 0, "todavía no toca el latido")
+	client.tick(1.1)
+	_check(fake.sent_ping_count() == 1, "cada 20 s se envía un ping")
+	client.tick(0.1)
+	fake.server_sends("pong")
+	client.tick(0.1)
+	_check(client.state == OnlineClient.State.ONLINE and client.ping_ms >= 0, "el pong mantiene la conexión y mide la demora (%d ms)" % client.ping_ms)
+	client.tick(OnlineClient.PING_INTERVAL + 0.5)
+	_check(fake.sent_ping_count() == 2, "el latido se repite")
+	client.tick(OnlineClient.PONG_TIMEOUT - 1.0)
+	_check(client.state == OnlineClient.State.ONLINE, "mientras no pase el plazo del pong sigue conectado")
+	client.tick(1.5)
+	_check(client.state == OnlineClient.State.WAITING and client.attempt == 1, "sin pong a tiempo se da por perdida la conexión (WAITING)")
+	_check(_online_events.has("lost:true"), "avisa que se perdió la conexión y que va a reintentar")
+	_check((fake.closed_by_client as Array).size() == 1, "se descarta la conexión muerta")
+	client.tick(OnlineClient.BACKOFF_BASE - 0.1)
+	_check(client.state == OnlineClient.State.WAITING, "espera 1 s antes del primer reintento")
+	client.tick(0.2)
+	_check(client.state == OnlineClient.State.CONNECTING and _fakes.size() == 2, "reintenta con una conexión nueva")
+	var second: Object = _last_fake()
+	second.server_accepts()
+	client.tick(0.05)
+	var hello: Dictionary = (second.sent_json() as Array)[0]
+	_check(str(hello.get("resume", "")) == ONLINE_TEST_SESSION, "al reconectar pide reanudar la misma sesión")
+	second.server_sends_json(_online_welcome(4, true))
+	client.tick(0.05)
+	_check(client.state == OnlineClient.State.ONLINE and client.resumed and client.attempt == 0 and client.online_count == 4,
+			"sesión reanudada: vuelve a ONLINE y se reinicia el contador de reintentos")
+	client.stop()
+
+
+func _online_client_backoff() -> void:
+	var delays: Array[float] = [1.0, 2.0, 4.0, 8.0, 16.0, 30.0, 30.0]
+	for i in delays.size():
+		_check(is_equal_approx(OnlineClient.backoff_delay(i + 1, false), delays[i]), "espera del reintento %d = %s s" % [i + 1, str(delays[i])])
+	_check(is_equal_approx(OnlineClient.backoff_delay(1, true), 5.0) and is_equal_approx(OnlineClient.backoff_delay(2, true), 10.0)
+			and is_equal_approx(OnlineClient.backoff_delay(9, true), 30.0), "los errores de límite esperan más (5, 10, 20, 30 s)")
+	_check(is_equal_approx(OnlineClient.backoff_delay(3, false, 0.0), 3.2) and is_equal_approx(OnlineClient.backoff_delay(3, false, 1.0), 4.8),
+			"la variación al azar es de ±20 %")
+
+	var client: OnlineClient = _new_online_client()
+	client.start()
+	for failure in range(1, 4):
+		_last_fake().connection_fails()
+		client.tick(0.05)
+		var expected: float = OnlineClient.backoff_delay(failure, false)
+		_check(client.state == OnlineClient.State.WAITING and client.attempt == failure, "fallo %d: espera %s s" % [failure, str(expected)])
+		client.tick(expected - 0.3)
+		var still_waiting: bool = client.state == OnlineClient.State.WAITING
+		client.tick(0.4)
+		_check(still_waiting and client.state == OnlineClient.State.CONNECTING, "fallo %d: reintenta justo después de la espera" % failure)
+	_check(not _online_events.has("lost:true"), "si nunca estuvo conectado no avisa 'conexión perdida'")
+	# Sigue fallando hasta agotar los reintentos automáticos.
+	var guard: int = 0
+	while client.state != OnlineClient.State.FAILED and guard < 30:
+		_last_fake().connection_fails()
+		client.tick(0.05)
+		client.tick(OnlineClient.BACKOFF_MAX + 1.0)
+		guard += 1
+	_check(client.state == OnlineClient.State.FAILED and client.fail_code == OnlineClient.FAIL_UNREACHABLE, "tras %d reintentos se rinde (FAILED unreachable)" % OnlineClient.MAX_AUTO_RETRIES)
+	var made: int = _fakes.size()
+	client.tick(120.0)
+	_check(_fakes.size() == made and not client.is_busy(), "ya no reintenta solo")
+	client.start()
+	_check(client.state == OnlineClient.State.CONNECTING and client.attempt == 0 and client.fail_code.is_empty(), "start() de nuevo reinicia los reintentos")
+	_fake_open_result = ERR_CANT_CONNECT
+	client = _new_online_client()
+	_fake_open_result = ERR_CANT_CONNECT
+	client.start()
+	_check(client.state == OnlineClient.State.WAITING and client.attempt == 1, "si ni siquiera se puede empezar a conectar, se reintenta después")
+	_fake_open_result = OK
+
+
+func _online_client_close_codes() -> void:
+	var client: OnlineClient = _new_online_client()
+	_online_connect(client)
+	_last_fake().server_closes(OnlineProtocol.CLOSE_BAD_VERSION, "bad_version")
+	client.tick(0.05)
+	var made: int = _fakes.size()
+	client.tick(60.0)
+	_check(client.state == OnlineClient.State.FAILED and client.fail_code == OnlineClient.FAIL_BAD_VERSION and _fakes.size() == made,
+			"cierre 4001: versión distinta, no reintenta")
+
+	client = _new_online_client()
+	_online_connect(client)
+	_last_fake().server_closes(OnlineProtocol.CLOSE_REPLACED, "replaced")
+	client.tick(0.05)
+	_check(client.state == OnlineClient.State.FAILED and client.fail_code == OnlineClient.FAIL_REPLACED, "cierre 4000: se abrió en otro lugar, no reintenta")
+
+	client = _new_online_client()
+	_online_connect(client)
+	_last_fake().server_sends_json({"t": "bye", "reason": "replaced"})
+	client.tick(0.05)
+	_check(client.state == OnlineClient.State.FAILED and client.fail_code == OnlineClient.FAIL_REPLACED, "el aviso 'bye replaced' también detiene los reintentos")
+
+	client = _new_online_client()
+	_online_connect(client)
+	_last_fake().server_closes(OnlineProtocol.CLOSE_RATE_LIMITED, "rate_limited")
+	client.tick(0.05)
+	_check(client.state == OnlineClient.State.WAITING and _online_events.has("lost:true"), "cierre 4003: reintenta")
+	client.tick(OnlineClient.BACKOFF_SLOW_BASE - 0.3)
+	var slow_waiting: bool = client.state == OnlineClient.State.WAITING
+	client.tick(0.4)
+	_check(slow_waiting and client.state == OnlineClient.State.CONNECTING, "cierre 4003: espera 5 s (más que un corte normal)")
+
+	client = _new_online_client()
+	_online_connect(client)
+	_last_fake().server_closes(1006, "")
+	client.tick(0.05)
+	client.tick(OnlineClient.BACKOFF_BASE + 0.1)
+	_check(client.state == OnlineClient.State.CONNECTING and client.last_close_code == 1006, "un corte de red (1006) reintenta a los 1,0 s")
+
+	client = _new_online_client()
+	_online_connect(client)
+	_last_fake().server_closes(OnlineProtocol.CLOSE_TOO_MANY, "too_many_connections")
+	client.tick(0.05)
+	_check(client.state == OnlineClient.State.WAITING and client.attempt == 1, "cierre 4004 (servidor lleno): espera y reintenta")
+
+
+func _online_client_stop() -> void:
+	var client: OnlineClient = _new_online_client()
+	_online_connect(client)
+	var fake: Object = _last_fake()
+	client.stop()
+	var sent: Array = fake.sent_json()
+	_check(str((sent[sent.size() - 1] as Dictionary).get("t", "")) == "bye", "stop() envía la despedida (bye)")
+	_check((fake.closed_by_client as Array).size() == 1 and int((fake.closed_by_client[0] as Dictionary).get("code", 0)) == 1000,
+			"stop() cierra con el código normal 1000")
+	_check(client.state == OnlineClient.State.IDLE and client.session.is_empty(), "tras stop() queda en reposo y sin sesión")
+	client.tick(0.5)
+	var made: int = _fakes.size()
+	client.tick(120.0)
+	_check(_fakes.size() == made and not client.is_busy(), "tras stop() no reintenta ni queda nada pendiente")
+	_online_connect(client)
+	var again: Dictionary = (_last_fake().sent_json() as Array)[0]
+	_check(not again.has("resume"), "después de una despedida voluntaria no se intenta reanudar la sesión")
+
+	client = _new_online_client()
+	client.start()
+	_last_fake().connection_fails()
+	client.tick(0.05)
+	client.stop()
+	made = _fakes.size()
+	client.tick(120.0)
+	_check(client.state == OnlineClient.State.IDLE and _fakes.size() == made, "stop() durante la espera cancela el reintento")
+
+
+func _online_client_timeouts() -> void:
+	var client: OnlineClient = _new_online_client()
+	client.start()
+	client.tick(OnlineClient.CONNECT_TIMEOUT - 0.5)
+	_check(client.state == OnlineClient.State.CONNECTING, "mientras no pase el plazo sigue conectando")
+	client.tick(1.0)
+	_check(client.state == OnlineClient.State.WAITING and client.attempt == 1, "si la conexión no abre a tiempo, se reintenta")
+
+	client = _new_online_client()
+	client.start()
+	_last_fake().server_accepts()
+	client.tick(0.05)
+	client.tick(OnlineClient.HELLO_TIMEOUT + 0.5)
+	_check(client.state == OnlineClient.State.WAITING and client.attempt == 1, "si el servidor no responde al saludo, se reintenta")
+
+
+func _online_client_misc() -> void:
+	var client: OnlineClient = _new_online_client()
+	_online_connect(client)
+	var fake: Object = _last_fake()
+	client.check_now()
+	_check(fake.sent_ping_count() == 1, "al volver de segundo plano se comprueba la conexión enseguida")
+	client.tick(OnlineClient.RESUME_CHECK_TIMEOUT - 0.5)
+	_check(client.state == OnlineClient.State.ONLINE, "la comprobación espera hasta 4 s")
+	client.tick(1.0)
+	_check(client.state == OnlineClient.State.WAITING, "sin respuesta a la comprobación se reconecta")
+	client.check_now()
+	client.tick(0.0)
+	_check(client.state == OnlineClient.State.CONNECTING, "volver a primer plano durante la espera reconecta sin esperar")
+	client.stop()
+
+	client = _new_online_client()
+	client.start()
+	var early: Object = _last_fake()
+	early.server_accepts()
+	client.tick(0.05)
+	var welcome: Dictionary = _online_welcome(2, false)
+	welcome["session"] = "inventada"
+	early.server_sends_json(welcome)
+	client.tick(0.05)
+	_check(client.state == OnlineClient.State.ONLINE and client.session.is_empty(), "un código de sesión mal formado se descarta")
+	client.stop()
+
+	client = _new_online_client()
+	_check(not client.send_message({"t": "x"}) and not client.request_stats(), "sin conexión no se envía nada")
+	client.start()
+	_last_fake().server_accepts()
+	client.tick(0.05)
+	_last_fake().server_sends_json({"t": "stats", "online": 9})
+	client.tick(0.05)
+	_check(not client.is_online(), "el servidor no puede saltarse el saludo para dejar al cliente ONLINE")
+	client.stop()
+
+
+func _online_manager_and_screen() -> void:
+	var manager: Node = root.get_node_or_null("OnlineManager")
+	_check(manager != null, "el autoload OnlineManager existe")
+	var panel := _node("%OnlinePanel")
+	var dot := _node("%StatusDot") as Panel
+	var label := _node("%StatusLabel") as Label
+	var detail := _node("%DetailLabel") as Label
+	var button := _node("%ConnectButton") as Button
+	_check(_node("%OnlineTitle") != null and _node("%OnlineText") != null, "el panel en línea tiene título y explicación")
+	if manager == null or panel == null or dot == null or label == null or detail == null or button == null:
+		return
+	var shipped_url: String = str(manager.server_url)
+	var client: OnlineClient = manager.client
+
+	manager.set_server_url("")
+	await process_frame
+	_check(not manager.is_configured() and label.text.contains("sin configurar") and button.disabled,
+			"sin servidor configurado el panel avisa y el botón está desactivado")
+	_check(manager.status_kind() == "warn" and manager.detail_text().length() > 0, "sin servidor: aviso amarillo con explicación")
+
+	manager.set_server_url(ONLINE_TEST_URL)
+	_fakes.clear()
+	_fake_open_result = OK
+	client.set_transport_factory(_make_fake)
+	client.jitter_enabled = false
+	await process_frame
+	_check(manager.is_configured() and not button.disabled and button.text == "PROBAR CONEXIÓN" and label.text == "Sin conexión.",
+			"con servidor configurado el botón PROBAR CONEXIÓN está activo")
+	button.pressed.emit()
+	_check(client.state == OnlineClient.State.CONNECTING and label.text == "Conectando…" and button.text == "CANCELAR",
+			"al probar la conexión el panel muestra 'Conectando…' y el botón pasa a CANCELAR")
+	_check(_fakes.size() == 1, "pulsar el botón abre una conexión")
+	var fake: Object = _last_fake()
+	fake.server_accepts()
+	await process_frame
+	await process_frame
+	_check(client.state == OnlineClient.State.HANDSHAKE, "OnlineManager hace avanzar al cliente en cada fotograma")
+	fake.server_sends_json(_online_welcome(7, false))
+	await process_frame
+	await process_frame
+	_check(client.state == OnlineClient.State.ONLINE, "el cliente llega a ONLINE dentro del juego")
+	_check(label.text == "Conectado · 7 jugadores en línea" and button.text == "DESCONECTAR", "el panel muestra 'Conectado' con el número de jugadores")
+	var style := dot.get_theme_stylebox("panel") as StyleBoxFlat
+	_check(style != null and style.bg_color.is_equal_approx(UiTheme.OK_GREEN), "el punto de estado se pone verde")
+	fake.server_sends_json({"t": "stats", "online": 1})
+	await process_frame
+	await process_frame
+	_check(label.text == "Conectado · 1 jugador en línea", "el panel se actualiza con las estadísticas (singular)")
+
+	fake.server_closes(1006, "")
+	await process_frame
+	await process_frame
+	_check(client.state == OnlineClient.State.WAITING and label.text.contains("Reintentando") and button.text == "CANCELAR",
+			"si se corta la conexión el panel avisa que reintenta")
+	style = dot.get_theme_stylebox("panel") as StyleBoxFlat
+	_check(style != null and style.bg_color.is_equal_approx(Color(0.96, 0.77, 0.33)), "el punto de estado se pone amarillo")
+	button.pressed.emit()
+	_check(client.state == OnlineClient.State.IDLE and label.text == "Sin conexión." and button.text == "PROBAR CONEXIÓN",
+			"CANCELAR detiene los reintentos")
+
+	client.jitter_enabled = false
+	button.pressed.emit()
+	var guard: int = 0
+	while client.state != OnlineClient.State.FAILED and guard < 40:
+		if client.state == OnlineClient.State.CONNECTING:
+			_last_fake().connection_fails()
+		client.tick(OnlineClient.BACKOFF_MAX + 1.0)
+		guard += 1
+	_check(client.state == OnlineClient.State.FAILED and label.text.contains("No se pudo conectar"), "si el servidor no responde, el panel explica el problema")
+	style = dot.get_theme_stylebox("panel") as StyleBoxFlat
+	_check(style != null and style.bg_color.is_equal_approx(UiTheme.WARN_RED), "el punto de estado se pone rojo")
+	_check(not button.disabled and button.text == "PROBAR CONEXIÓN", "después del error se puede volver a probar")
+
+	# Se deja conectado para comprobar que al salir de la pantalla la conexión se cierra.
+	button.pressed.emit()
+	var again: Object = _last_fake()
+	again.server_accepts()
+	await process_frame
+	await process_frame
+	again.server_sends_json(_online_welcome(2, false))
+	await process_frame
+	await process_frame
+	_check(client.state == OnlineClient.State.ONLINE, "se puede volver a conectar después de un error")
+	_online_restore_url = shipped_url
+
+
+## Se comprueba después de pulsar VOLVER en Multijugador: la conexión en línea se cierra sola.
+func _online_after_leaving_screen() -> void:
+	var manager: Node = root.get_node_or_null("OnlineManager")
+	if manager == null:
+		return
+	var client: OnlineClient = manager.client
+	_check(client.state == OnlineClient.State.IDLE and not client.is_online(), "al salir de Multijugador se cierra la conexión en línea")
+	if not _fakes.is_empty():
+		var sent: Array = _last_fake().sent_json()
+		_check(not sent.is_empty() and str((sent[sent.size() - 1] as Dictionary).get("t", "")) == "bye",
+				"al salir de Multijugador se avisa al servidor con bye")
+	client.set_transport_factory(Callable())
+	client.jitter_enabled = true
+	manager.set_server_url(_online_restore_url)
+	_fakes.clear()
 
 
 # ---------------------------------------------------------------- Sonidos ambientales
@@ -2873,6 +3481,7 @@ func _test_multiplayer_screen() -> void:
 	minus.pressed.emit()
 	_check(int(_state.player_count) == 3 and player_list.get_child_count() == 3, "el botón - baja a 3 y la lista se actualiza")
 	_check(not play.text.is_empty() and not play.disabled, "el botón JUGAR de la partida local está activo")
+	await _online_manager_and_screen()
 
 
 func _test_characters_screen() -> void:

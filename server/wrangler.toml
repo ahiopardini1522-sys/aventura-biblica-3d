@@ -1,0 +1,14 @@
+# Configuración del servidor en línea de Aventura Bíblica 3D (Cloudflare Workers, plan gratuito).
+name = "aventura-biblica-online"
+main = "src/worker.js"
+compatibility_date = "2025-06-01"
+
+# Un Durable Object ("Hub") guarda las sesiones y mantiene las conexiones WebSocket.
+[[durable_objects.bindings]]
+name = "HUB"
+class_name = "Hub"
+
+# El plan gratuito solo admite Durable Objects con almacenamiento SQLite.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Hub"]

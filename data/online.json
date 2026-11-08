@@ -1,0 +1,4 @@
+{
+	"server_url": "",
+	"nota": "Dirección del servidor en línea (https://...workers.dev). La completa el flujo \"Desplegar servidor en línea\" de GitHub Actions; si está vacía, el juego muestra \"servidor sin configurar\"."
+}

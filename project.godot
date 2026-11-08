@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Aventura Bíblica 3D"
 config/description="Escaleras y serpientes bíblico en 3D para Android."
-config/version="0.3.0"
+config/version="0.4.0-alfa.1"
 run/main_scene="res://scenes/menus/main_menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 run/max_fps=60
@@ -27,6 +27,7 @@ SettingsManager="*res://scripts/game/settings_manager.gd"
 ProgressManager="*res://scripts/game/progress_manager.gd"
 GameState="*res://scripts/game/game_state.gd"
 SceneRouter="*res://scripts/game/scene_router.gd"
+OnlineManager="*res://scripts/online/online_manager.gd"
 
 [display]
 

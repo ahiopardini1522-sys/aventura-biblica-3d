@@ -19,3 +19,8 @@ Thumbs.db
 # Resultados de las pruebas automáticas
 logs/
 shots/
+
+# Servidor en línea (Cloudflare Workers)
+server/node_modules/
+server/.wrangler/
+server/.dev.vars

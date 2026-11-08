@@ -260,7 +260,7 @@ func _on_reset_pressed() -> void:
 
 
 func _build_info_text() -> String:
-	var version: String = str(ProjectSettings.get_setting("application/config/version", "0.3.0"))
+	var version: String = str(ProjectSettings.get_setting("application/config/version", "0.4.0-alfa.1"))
 	var engine: Dictionary = Engine.get_version_info()
 	var adapter: String = RenderingServer.get_video_adapter_name()
 	if adapter.is_empty():

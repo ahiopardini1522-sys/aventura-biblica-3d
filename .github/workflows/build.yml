@@ -4,7 +4,9 @@ name: Compilar y verificar
 #   1. validar     -> importa el proyecto, compila todos los scripts y ejecuta la prueba de humo.
 #   2. capturas    -> abre cada pantalla con una pantalla virtual y guarda imágenes.
 #   3. android     -> exporta el APK de depuración con las plantillas oficiales de Godot.
-#   4. resumen     -> publica registros e imágenes en la rama "ci-artifacts" para poder revisarlos.
+#   4. en_linea    -> prueba el servidor en línea (wrangler dev, el mismo motor que Cloudflare) y el
+#                     cliente del juego conectándose de verdad a ese servidor.
+#   5. resumen     -> publica registros e imágenes en la rama "ci-artifacts" para poder revisarlos.
 # Además, "validar" publica su resultado enseguida en la rama "ci-validar" (aviso rápido).
 # Al subir a la rama "main" se publica además el APK en el pre-lanzamiento "latest-debug".
 
@@ -169,12 +171,27 @@ jobs:
           "$SDKMANAGER" "platform-tools" "build-tools;35.0.1" "platforms;android-35" "cmdline-tools;latest"
           echo "ANDROID_SDK_DIR=$SDK" >> "$GITHUB_ENV"
 
+      - name: Recuperar la llave de depuración guardada
+        # Con una llave fija, cada APK nuevo se puede instalar encima del anterior sin desinstalar
+        # (y sin perder el progreso). Solo la rama main guarda la llave; las demás ramas la reutilizan.
+        id: llave
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/debug.keystore
+          key: llave-depuracion-v1
+
       - name: Crear llave de depuración y ajustes del editor
         run: |
           set -eo pipefail
-          keytool -genkey -v -keystore "$HOME/debug.keystore" -storepass android -alias androiddebugkey \
-            -keypass android -keyalg RSA -keysize 2048 -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US"
+          if [ -s "$HOME/debug.keystore" ]; then
+            echo "Se reutiliza la llave de depuración guardada."
+          else
+            echo "No hay llave guardada: se crea una nueva."
+            keytool -genkey -v -keystore "$HOME/debug.keystore" -storepass android -alias androiddebugkey \
+              -keypass android -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          keytool -list -v -keystore "$HOME/debug.keystore" -storepass android -alias androiddebugkey | grep -E "SHA256|Alias" || true
           {
             echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$HOME/debug.keystore"
             echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey"
@@ -194,6 +211,13 @@ jobs:
           EOF
           done
           cat "$HOME/.config/godot/editor_settings-4.7.tres"
+
+      - name: Guardar la llave de depuración (solo en main)
+        if: github.ref == 'refs/heads/main' && steps.llave.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/debug.keystore
+          key: llave-depuracion-v1
 
       - name: Importar el proyecto
         run: |
@@ -234,6 +258,15 @@ jobs:
             ls -la "$APK"
           } 2>&1 | tee logs/android-apk-info.log
 
+      - name: Comprobar que el APK declara el permiso de Internet
+        # Sin este permiso Android bloquea toda conexión y el juego en línea no podría funcionar.
+        run: |
+          if ! grep -q "android.permission.INTERNET" logs/android-apk-info.log; then
+            echo "::error::El APK no declara android.permission.INTERNET"
+            exit 1
+          fi
+          echo "El APK declara android.permission.INTERNET."
+
       - name: Probar el paquete de datos exportado (arranque desde el .pck)
         # Se exporta solo el paquete de datos y se arranca el juego únicamente desde él,
         # en una carpeta vacía, para comprobar que todo lo necesario viaja en la exportación.
@@ -270,7 +303,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Publicar el APK en el pre-lanzamiento "latest-debug"
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -284,7 +317,7 @@ jobs:
       - name: Publicar la versión numerada (pre-lanzamiento con el número de versión)
         # Además de "latest-debug" (que se reemplaza en cada subida) queda un pre-lanzamiento con el
         # número de versión de project.godot y un nombre de archivo claro, con un enlace que no cambia.
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -292,7 +325,7 @@ jobs:
           VERSION="$(grep -oP '^config/version="\K[^"]+' project.godot)"
           NAMED="build/android/aventura-biblica-3d-v${VERSION}-debug.apk"
           cp "build/android/$APK_NAME" "$NAMED"
-          NOTES="APK de depuración de la versión ${VERSION}, generado desde la rama main (commit ${GITHUB_SHA::7}). GitHub Actions comprobó las pruebas automáticas, la exportación y el arranque del paquete de datos; no sustituye una prueba en un teléfono real. Para instalarlo hay que permitir la instalación de apps desconocidas. Cada APK de prueba se firma con una llave de depuración nueva: si ya tienes instalada otra versión de prueba, desinstálala antes de instalar esta."
+          NOTES="APK de depuración de la versión ${VERSION}, generado desde la rama main (commit ${GITHUB_SHA::7}). GitHub Actions comprobó las pruebas automáticas, la exportación y el arranque del paquete de datos; no sustituye una prueba en un teléfono real. Para instalarlo hay que permitir la instalación de apps desconocidas. Los APK de prueba de esta versión en adelante se firman con la misma llave de depuración guardada, así que se pueden instalar encima del anterior. El APK de una versión anterior (Etapa 3 o menos) se firmó con otra llave: desinstálalo una sola vez antes de instalar este."
           # Si existe docs/release-notes/v<versión>.md, sus novedades van primero en la página del lanzamiento.
           if [ -f "docs/release-notes/v${VERSION}.md" ]; then
             { cat "docs/release-notes/v${VERSION}.md"; echo; echo "---"; echo; echo "$NOTES"; } > build/release-notes.md
@@ -306,9 +339,90 @@ jobs:
             --title "Versión de prueba ${VERSION} (APK de depuración)" \
             --notes-file build/release-notes.md
 
+  en_linea:
+    name: Servidor en línea (wrangler dev) y cliente del juego
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: ./.github/actions/setup-godot
+        with:
+          version: ${{ env.GODOT_VERSION }}
+
+      - name: Importar el proyecto
+        # Se importa antes de instalar los paquetes del servidor, para que Godot no recorra node_modules.
+        run: |
+          mkdir -p logs
+          godot --headless --path . --import 2>&1 | tee logs/en-linea-import-1.log || true
+          godot --headless --path . --import 2>&1 | tee logs/en-linea-import-2.log || true
+
+      - name: Instalar wrangler (el motor local de Cloudflare Workers)
+        working-directory: server
+        run: npm install --no-audit --no-fund 2>&1 | tee ../logs/servidor-npm.log
+
+      - name: Pruebas unitarias del servidor
+        working-directory: server
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee ../logs/servidor-pruebas.log
+
+      - name: Iniciar el servidor local (wrangler dev)
+        working-directory: server
+        run: |
+          nohup npx wrangler dev --port 8787 --ip 127.0.0.1 > ../logs/servidor-wrangler.log 2>&1 &
+          echo $! > /tmp/wrangler.pid
+          for i in $(seq 1 120); do
+            if curl -fsS http://127.0.0.1:8787/health > /dev/null 2>&1; then
+              echo "El servidor local respondió tras $i s."
+              curl -sS http://127.0.0.1:8787/health
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::wrangler dev no respondió en 120 s"
+          cat ../logs/servidor-wrangler.log
+          exit 1
+
+      - name: Pruebas de extremo a extremo del servidor (Node, WebSocket real)
+        working-directory: server
+        run: |
+          set -o pipefail
+          node e2e/e2e.mjs http://127.0.0.1:8787 2>&1 | tee ../logs/servidor-e2e.log
+
+      - name: Pruebas de extremo a extremo del juego contra el servidor (Godot, WebSocket real)
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tools/online_e2e.gd -- --url=http://127.0.0.1:8787 2>&1 | tee logs/cliente-e2e.log
+
+      - name: Buscar errores de GDScript en los registros
+        if: always()
+        run: |
+          if grep -n -E "SCRIPT ERROR|Parse Error|Failed to load script|Compile Error" logs/en-linea-import-2.log logs/cliente-e2e.log; then
+            echo "::error::Hay errores de GDScript en los registros"
+            exit 1
+          fi
+          echo "Sin errores de GDScript en los registros."
+
+      - name: Detener el servidor local
+        if: always()
+        run: kill "$(cat /tmp/wrangler.pid)" 2>/dev/null || true
+
+      - name: Guardar registros
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: registros-en-linea
+          path: logs/
+          if-no-files-found: warn
+
   resumen:
     name: Resumen de resultados
-    needs: [validar, capturas, android]
+    needs: [validar, capturas, android, en_linea]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -324,6 +438,7 @@ jobs:
           RESULT_VALIDAR: ${{ needs.validar.result }}
           RESULT_CAPTURAS: ${{ needs.capturas.result }}
           RESULT_ANDROID: ${{ needs.android.result }}
+          RESULT_EN_LINEA: ${{ needs.en_linea.result }}
         run: |
           set -eo pipefail
           mkdir -p /tmp/report
@@ -338,10 +453,11 @@ jobs:
             echo "- validar: ${RESULT_VALIDAR}"
             echo "- capturas: ${RESULT_CAPTURAS}"
             echo "- android: ${RESULT_ANDROID}"
+            echo "- en_linea: ${RESULT_EN_LINEA}"
           } > STATUS.md
           git init -q -b ci-artifacts
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -q -m "CI ${GITHUB_SHA::7} (${GITHUB_REF_NAME}): validar=${RESULT_VALIDAR} capturas=${RESULT_CAPTURAS} android=${RESULT_ANDROID}"
+          git commit -q -m "CI ${GITHUB_SHA::7} (${GITHUB_REF_NAME}): validar=${RESULT_VALIDAR} capturas=${RESULT_CAPTURAS} android=${RESULT_ANDROID} en_linea=${RESULT_EN_LINEA}"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-artifacts
