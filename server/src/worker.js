@@ -33,8 +33,9 @@ function safeClose(ws, code, reason) {
   const valid = code === 1000 || (code >= 3000 && code <= 4999);
   try {
     ws.close(valid ? code : 1000, String(reason ?? "").slice(0, 100));
-  } catch {
-    // La conexión ya estaba cerrada.
+  } catch (error) {
+    // Lo normal es que la conexión ya estuviera cerrada; se deja constancia por si fuera otra cosa.
+    console.log(`[hub] no se pudo cerrar con el código ${code}: ${String(error)}`);
   }
 }
 
@@ -81,6 +82,7 @@ export class Hub extends DurableObject {
         if (saved && this.core.restoreConn(saved)) this.#track(saved.id, ws);
       }
       await this.#schedule();
+      console.log(`[hub] despertó: ${this.sockets.size} conexiones y ${this.core.sessions.size} sesiones recuperadas`);
     });
   }
 
@@ -185,13 +187,15 @@ export class Hub extends DurableObject {
       if (!ws) continue;
       try {
         ws.send(text);
-      } catch {
+      } catch (error) {
         // El cliente ya no está; el cierre llegará por webSocketClose.
+        console.log(`[hub] no se pudo enviar: ${String(error)}`);
       }
     }
     for (const { conn, code, reason } of effects.close) {
       const ws = this.#untrack(conn);
       this.core.onClose(conn);
+      if (code >= 4003) console.log(`[hub] cierre ${code} (${reason}): ${ws ? "con conexión" : "SIN conexión conocida"}`);
       if (ws) safeClose(ws, code, reason);
     }
   }

@@ -62,7 +62,15 @@ function connect() {
         new Promise((done, fail) => {
           if (closeInfo) return done(closeInfo);
           closeWaiters.push(done);
-          setTimeout(() => fail(new Error(`la conexión no se cerró en ${ms} ms`)), ms);
+          setTimeout(
+            () =>
+              fail(
+                new Error(
+                  `la conexión no se cerró en ${ms} ms (estado ${socket.readyState}, recibido: ${JSON.stringify(inbox)})`,
+                ),
+              ),
+            ms,
+          );
         }),
       close: () => {
         try {
