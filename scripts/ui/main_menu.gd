@@ -9,8 +9,8 @@ func _ready() -> void:
 	%MultiplayerButton.pressed.connect(SceneRouter.go_to.bind("multiplayer"))
 	%CharactersButton.pressed.connect(SceneRouter.go_to.bind("characters"))
 	%SettingsButton.pressed.connect(SceneRouter.go_to.bind("settings"))
-	var version: String = str(ProjectSettings.get_setting("application/config/version", "0.1.0"))
-	%VersionLabel.text = "v%s  ·  Etapa 1" % version
+	var version: String = str(ProjectSettings.get_setting("application/config/version", "0.2.0"))
+	%VersionLabel.text = "v%s  ·  Etapa 2" % version
 	UiFx.fade_scale_in([%TitleBlock, %PlayButton, %MapsButton, %MultiplayerButton,
 			%CharactersButton, %SettingsButton], 0.08, 0.5)
 	# Mensaje de arranque: sirve para comprobar el inicio en CI y con "adb logcat".

@@ -1,5 +1,5 @@
 extends ScreenBase
-## Pantalla MULTIJUGADOR. Etapa 1: partida local (1 a 4 jugadores en el mismo dispositivo).
+## Pantalla MULTIJUGADOR: partida local (1 a 4 jugadores en el mismo dispositivo).
 ## La partida en línea queda indicada como "próximamente"; su estructura se agregará después.
 
 

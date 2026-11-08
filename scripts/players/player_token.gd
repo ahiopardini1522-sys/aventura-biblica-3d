@@ -99,6 +99,12 @@ func badge_text() -> String:
 	return _badge.text if _badge != null else ""
 
 
+## Muestra u oculta la letra inicial sobre la cabeza (en el podio ya se ve el nombre completo).
+func set_initial_visible(shown: bool) -> void:
+	if is_node_ready():
+		_initial.visible = shown
+
+
 ## Salto de una casilla a otra. Devuelve el Tween para poder esperar su "finished".
 func hop_to(destination: Vector3, duration: float, height: float = HOP_HEIGHT) -> Tween:
 	_stop_move()

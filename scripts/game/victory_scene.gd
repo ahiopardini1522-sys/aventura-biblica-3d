@@ -17,7 +17,7 @@ const STEP_COLORS: Array[Color] = [
 const TOKEN_SCALE := 1.5
 const CAMERA_DISTANCE := 10.6
 const CAMERA_HEIGHT := 3.5
-const LOOK_AT := Vector3(3.6, 1.7, 0.0)
+const LOOK_AT := Vector3(3.6, 2.35, 0.0)
 const FIREWORK_COLORS: Array[Color] = [
 	Color(1.0, 0.84, 0.40),
 	Color(1.0, 0.45, 0.40),
@@ -109,7 +109,7 @@ func _build_podium() -> void:
 		_build_step(rank, slots[rank], entry)
 	_winner_spot = Vector3(slots[0] + shift, STEP_HEIGHTS[0] - 0.3, 0.0)
 	if count > 0:
-		_build_trophy(Vector3(slots[0], STEP_HEIGHTS[0] + 3.5, 0.0))
+		_build_trophy(Vector3(slots[0], STEP_HEIGHTS[0] + 3.2, 0.0))
 
 
 func _build_step(rank: int, x: float, entry: Dictionary) -> void:
@@ -139,6 +139,7 @@ func _build_step(rank: int, x: float, entry: Dictionary) -> void:
 	token.name = "Token_%d" % int(entry["index"])
 	_stage.add_child(token)
 	token.setup(entry)
+	token.set_initial_visible(false)
 	token.scale = Vector3.ONE * TOKEN_SCALE
 	token.position = Vector3(x, height, 0.0)
 	token.rotation.y = 0.0

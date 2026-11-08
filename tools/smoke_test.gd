@@ -57,6 +57,10 @@ var _events: Array = []
 var _samples: Array[Vector3] = []
 var _sample_token: Node3D
 var _sampling: bool = false
+## Solo se toman muestras mientras la interfaz ya muestra _sample_tile para el jugador _sample_player,
+## es decir, durante la subida o la bajada y no durante los pasos que llevan hasta la base.
+var _sample_player: int = -1
+var _sample_tile: int = 0
 
 
 func _initialize() -> void:
@@ -1095,7 +1099,7 @@ func _on_match_finished(summary: Dictionary) -> void:
 
 
 func _sample_frame() -> void:
-	if _sampling and _sample_token != null:
+	if _sampling and _sample_token != null and int(_flow.shown_tile(_sample_player)) == _sample_tile:
 		_samples.append(_sample_token.position)
 
 
@@ -1592,6 +1596,8 @@ func _jump_case(from_tile: int, to_tile: int, kind: String, wanted_roll: int) ->
 	_events.clear()
 	_samples.clear()
 	_sample_token = _token(player)
+	_sample_player = player
+	_sample_tile = to_tile
 	_sampling = true
 	var accepted: bool = _flow.try_roll(player, roll)
 	var ready: bool = await _drive_until_ready()
@@ -2029,10 +2035,10 @@ func _test_full_match_with_bot() -> void:
 			return
 	_flow.speed = BOT_SPEED
 	_dice.speed = BOT_SPEED
-	# Salen desde la recta final para que dure poco, pero con desafíos, escaleras y serpientes de por medio.
-	var starts: Array[int] = [90, 84, 78, 72]
+	# Partida entera de 4 jugadores desde la casilla 1 hasta la meta, con todos los desafíos,
+	# escaleras y serpientes que se crucen por el camino (las respuestas se eligen al azar).
 	for index in 4:
-		_flow.place_player(index, starts[index])
+		_check(int(_flow.state.get_player(index)["tile"]) == 1, "el jugador %d sale de la casilla 1" % (index + 1))
 	_events.clear()
 	var problems: Array[String] = []
 	var turns: int = 0
