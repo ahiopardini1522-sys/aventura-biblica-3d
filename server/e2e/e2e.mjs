@@ -108,9 +108,9 @@ const results = [];
 async function step(name, fn) {
   const started = Date.now();
   try {
-    await fn();
+    const note = await fn();
     results.push({ name, ok: true });
-    console.log(`  ok     ${name} (${Date.now() - started} ms)`);
+    console.log(`  ok     ${name} (${Date.now() - started} ms)${note ? `\n         nota: ${note}` : ""}`);
   } catch (error) {
     results.push({ name, ok: false, error });
     console.log(`  FALLA  ${name}\n         ${String(error.message).split("\n")[0]}`);
@@ -121,12 +121,30 @@ console.log(`Servidor: ${httpUrl}   WebSocket: ${wsUrl}   (ejecución ${runId})`
 
 // Las pruebas lentas (esperan tiempos reales del servidor) corren en paralelo con las rápidas.
 const slow = [
-  step("sin saludo, el servidor cierra la conexión a los ~10 s (4005)", async () => {
+  step('sin saludo (solo el texto "ping"), el servidor cierra la conexión a los ~10 s (4005)', async () => {
     const c = await connect();
+    c.send("ping");
     const info = await c.closed(25_000);
     assert.equal(info.code, 4005);
     const error = c.inbox.find((m) => m.t === "error");
     assert.equal(error?.code, "handshake_timeout");
+  }),
+  step("sin enviar nada, a los ~10 s el servidor avisa (handshake_timeout) y empieza a cerrar", async () => {
+    // Lo que se comprueba: la alarma del servidor suena, avisa y cierra por su lado. Que el cierre
+    // llegue hasta el último paso puede tardar más: wrangler dev (el motor local de Cloudflare) retiene
+    // una conexión que nunca envió nada hasta que el servidor "duerme" (unos 10 s sin actividad).
+    const started = Date.now();
+    const c = await connect();
+    const error = await c.next((m) => m.t === "error", 25_000);
+    assert.equal(error.code, "handshake_timeout");
+    const waited = ((Date.now() - started) / 1000).toFixed(1);
+    const info = await c.closed(4_000).catch(() => null);
+    assert.ok(c.socket.readyState >= 2, `la conexión debería estar cerrándose o cerrada (estado ${c.socket.readyState})`);
+    if (info) {
+      assert.equal(info.code, 4005);
+      return `el cierre completo (4005) llegó junto con el aviso, a los ${waited} s`;
+    }
+    return `el aviso llegó a los ${waited} s y el cierre quedó en curso (estado ${c.socket.readyState}): el motor lo completa más tarde`;
   }),
   step("tras 13 s sin hablar (el servidor puede hibernar) todo sigue funcionando", async () => {
     const c = await connect();

@@ -224,6 +224,7 @@ func _test_raw_errors() -> void:
 	_check(await _raw_wait(garbage, inbox, OnlineTransport.EVENT_CLOSE, 10.0), "el servidor cierra la conexión ante un mensaje inválido")
 	var error_code: String = ""
 	var close_code: int = -99
+	var close_reason: String = ""
 	for event in inbox:
 		var entry: Dictionary = event
 		if str(entry.get("kind", "")) == OnlineTransport.EVENT_MESSAGE:
@@ -232,7 +233,12 @@ func _test_raw_errors() -> void:
 				error_code = str(message.get("code", ""))
 		elif str(entry.get("kind", "")) == OnlineTransport.EVENT_CLOSE:
 			close_code = int(entry.get("code", -1))
-	_check(error_code == "bad_message", "antes de cerrar avisa del error (bad_message)")
+			close_reason = str(entry.get("reason", ""))
+	# El servidor manda un aviso de error y cierra con el mismo motivo escrito en el cierre. Godot puede
+	# descartar el aviso si el cierre termina en la misma pasada, así que el motivo del cierre vale igual.
+	var reported: String = error_code if not error_code.is_empty() else close_reason
+	print("   (aviso de error recibido: '%s'; motivo del cierre: '%s')" % [error_code, close_reason])
+	_check(reported == "bad_message", "el servidor explica el motivo ('bad_message') en el aviso o en el cierre")
 	_check(close_code == OnlineProtocol.CLOSE_BAD_MESSAGE, "el código de cierre llega al juego intacto (%d)" % close_code)
 
 	var fast := WebSocketTransport.new()

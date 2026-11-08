@@ -46,6 +46,9 @@ func poll() -> Array:
 		_was_open = true
 		events.append({"kind": EVENT_OPEN})
 	# Los mensajes se leen antes de avisar del cierre: el servidor suele mandar un error y cerrar enseguida.
+	# Ojo: si el cierre termina dentro de la misma pasada de poll(), Godot puede haber descartado ya los
+	# mensajes pendientes. Por eso el servidor repite el motivo en el cierre (código y texto), que es lo
+	# único que no se pierde.
 	while _peer.get_available_packet_count() > 0:
 		var packet: PackedByteArray = _peer.get_packet()
 		if _peer.was_string_packet():
