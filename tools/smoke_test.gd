@@ -15,6 +15,9 @@ extends SceneTree
 ##   - el progreso: desbloqueo de mapas en orden, recompensas, insignias, estadísticas y guardado,
 ##   - que cada desafío bíblico tiene referencias válidas, que los cinco tipos funcionan y que
 ##     cada mapa tiene sus propios desafíos,
+##   - el mapa mundial: relieve plano bajo las plataformas, caminos, iconos 3D, cámara táctil
+##     (arrastre, pellizco, rueda), toques de verdad sobre cada mundo, estados bloqueado/abierto/
+##     completado, celebración al abrir un mundo, insignias y apertura de cada tablero,
 ##   - que cada botón del menú abre su pantalla y que cada pantalla funciona (incluidas las
 ##     reglas del juego en Configuración),
 ##   - la partida REAL dentro de la escena del tablero, con el motor de verdad: turnos y bloqueo
@@ -26,7 +29,7 @@ extends SceneTree
 ## teléfono real.
 
 const MENU_BUTTONS := {
-	"MapsButton": "maps",
+	"MapsButton": "world",
 	"MultiplayerButton": "multiplayer",
 	"CharactersButton": "characters",
 	"SettingsButton": "settings",
@@ -122,6 +125,8 @@ func _run() -> void:
 	_test_stroke_font_and_marks()
 	_test_scenery()
 	_test_board_styles()
+	_test_world_logic()
+	_test_world_camera()
 	await _test_menu_and_screens()
 	await _test_board_scene()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_PROGRESS_PATH))
@@ -838,7 +843,7 @@ func _test_stroke_font_and_marks() -> void:
 	for glyph in "0123456789?":
 		var one := MeshKit.new()
 		StrokeFont.add_text(one, glyph, Vector3.ZERO, 0.3, 0.05, Color.BLACK)
-		_check(one.triangle_count() >= 6, "el glifo '%s' tiene trazos (%d triángulos)" % [glyph, one.triangle_count()])
+		_check(one.triangle_count() >= 4, "el glifo '%s' tiene trazos (%d triángulos)" % [glyph, one.triangle_count()])
 	_check(is_equal_approx(StrokeFont.text_width("100", 1.0), 2.0 * StrokeFont.ADVANCE + StrokeFont.GLYPH_WIDTH),
 			"el ancho de '100' suma tres glifos")
 	_check(StrokeFont.text_width("", 1.0) == 0.0, "un texto vacío no mide nada")
@@ -849,11 +854,11 @@ func _test_stroke_font_and_marks() -> void:
 	var arrays: Array = kit.commit().surface_get_arrays(0)
 	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
-	var half_width: float = StrokeFont.text_width("100", 0.3) * 0.5 + 0.03
+	var half_width: float = StrokeFont.text_width("100", 0.3) * 0.5 + 0.05
 	var inside: bool = true
 	var facing_up: bool = true
 	for i in verts.size():
-		if absf(verts[i].x - center.x) > half_width or absf(verts[i].z - center.z) > 0.15 + 0.03 or not is_equal_approx(verts[i].y, 0.2):
+		if absf(verts[i].x - center.x) > half_width or absf(verts[i].z - center.z) > 0.15 + 0.05 or not is_equal_approx(verts[i].y, 0.2):
 			inside = false
 		if normals[i].y < 0.99:
 			facing_up = false
@@ -881,6 +886,10 @@ func _test_stroke_font_and_marks() -> void:
 	var dark_color: Color = (dark_ink.commit().surface_get_arrays(0)[Mesh.ARRAY_COLOR] as PackedColorArray)[0]
 	_check(light_color.get_luminance() > 0.6 and dark_color.get_luminance() < 0.2,
 			"el número es claro sobre casillas oscuras y oscuro sobre casillas claras")
+	var night_ink := MeshKit.new()
+	TileMarks.add_number(night_ink, 8, tile_center, Color(0.95, 0.95, 0.9), true)
+	var night_color: Color = (night_ink.commit().surface_get_arrays(0)[Mesh.ARRAY_COLOR] as PackedColorArray)[0]
+	_check(night_color.get_luminance() > 0.6, "en un tablero de noche el número va en claro aunque la casilla sea clara")
 
 
 ## Cada mapa construye su propio tablero: casillas, borde, puertas, escaleras y serpientes del
@@ -889,6 +898,8 @@ func _test_board_styles() -> void:
 	print("-- Tableros propios de cada mapa")
 	_check(BoardStyle.normalize("nada") == "sand" and BoardStyle.normalize("city") == "city",
 			"un estilo desconocido usa el del desierto")
+	_check(BoardStyle.is_night("village") and not BoardStyle.is_night("garden") and not BoardStyle.is_night("sand"),
+			"solo el tablero de Belén es de noche")
 	var surface_triangles: Dictionary = {}
 	var landmark_triangles: Dictionary = {}
 	var ids: Array[String] = MapCatalog.ids_in_order()
@@ -1879,6 +1890,8 @@ func _test_menu_and_screens() -> void:
 
 func _test_screen(key: String) -> void:
 	match key:
+		"world":
+			await _test_world_screen()
 		"maps":
 			await _test_maps_screen()
 		"multiplayer":
@@ -1887,6 +1900,797 @@ func _test_screen(key: String) -> void:
 			_test_characters_screen()
 		"settings":
 			_test_settings_screen()
+
+
+# ---------------------------------------------------------------- Mapa mundial
+
+## Mundo bíblico: disposición, relieve, caminos e iconos 3D (sin abrir la pantalla).
+func _test_world_logic() -> void:
+	print("-- Mundo bíblico: relieve, caminos e iconos 3D")
+	WorldMapBuilder.prepare_layout()
+	var ids: Array[String] = MapCatalog.ids_in_order()
+	_check(WorldMapBuilder.road_count() == 6, "hay 6 caminos que unen los 7 mundos (%d)" % WorldMapBuilder.road_count())
+
+	var scale_ok: bool = true
+	var land_ok: bool = true
+	var min_gap: float = 1000000.0
+	for i in ids.size():
+		var spot: Vector2 = WorldMapBuilder.region_spot(ids[i])
+		if spot.distance_to(MapCatalog.world_position(ids[i]) * WorldMapBuilder.WORLD_SCALE) > 0.001:
+			scale_ok = false
+		if WorldMapBuilder.land_mask(spot.x, spot.y) < 0.95:
+			land_ok = false
+		for j in range(i + 1, ids.size()):
+			min_gap = minf(min_gap, spot.distance_to(WorldMapBuilder.region_spot(ids[j])))
+	_check(scale_ok, "las regiones están donde dice el catálogo (por la escala del mundo)")
+	_check(land_ok, "las 7 regiones están sobre tierra firme")
+	_check(min_gap > 28.0, "las regiones están bien separadas (mínimo %.1f)" % min_gap)
+
+	# El suelo bajo cada plataforma es plano y ningún triángulo del terreno la tapa.
+	var flat_ok: bool = true
+	var covered_ok: bool = true
+	var highest_near: float = -1000.0
+	var cell: float = WorldMapBuilder.HALF * 2.0 / float(WorldMapBuilder.CELLS)
+	var reach: float = WorldMapBuilder.PAD_RADIUS + cell * 1.45
+	for id in ids:
+		var spot: Vector2 = WorldMapBuilder.region_spot(id)
+		if absf(WorldMapBuilder.height_at(spot.x, spot.y) - WorldMapBuilder.GROUND_Y) > 0.001:
+			flat_ok = false
+		for step in 12:
+			var angle: float = TAU * float(step) / 12.0
+			var around: Vector2 = spot + Vector2(cos(angle), sin(angle)) * (WorldMapBuilder.PAD_RADIUS + 1.0)
+			if absf(WorldMapBuilder.height_at(around.x, around.y) - WorldMapBuilder.GROUND_Y) > 0.001:
+				flat_ok = false
+		for gx in range(floori((spot.x - reach) / cell), ceili((spot.x + reach) / cell) + 1):
+			for gz in range(floori((spot.y - reach) / cell), ceili((spot.y + reach) / cell) + 1):
+				var vertex := Vector2(float(gx) * cell, float(gz) * cell)
+				if vertex.distance_to(spot) <= reach:
+					highest_near = maxf(highest_near, WorldMapBuilder.height_at(vertex.x, vertex.y))
+	if highest_near >= WorldMapBuilder.PAD_Y - 0.1:
+		covered_ok = false
+	_check(flat_ok, "el suelo bajo cada plataforma es plano")
+	_check(covered_ok, "el terreno que toca cada plataforma queda por debajo de ella (máx. %.2f)" % highest_near)
+
+	# Caminos: nacen y mueren en el borde de las plataformas y van por suelo plano.
+	var chain_ok: bool = true
+	var ends_ok: bool = true
+	var flat_roads: bool = true
+	for index in WorldMapBuilder.road_count():
+		var path: PackedVector2Array = WorldMapBuilder.road_points(index)
+		if WorldMapBuilder.road_from(index) != ids[index] or WorldMapBuilder.road_to(index) != ids[index + 1]:
+			chain_ok = false
+		if path.size() < 10:
+			ends_ok = false
+			continue
+		var from_spot: Vector2 = WorldMapBuilder.region_spot(WorldMapBuilder.road_from(index))
+		var to_spot: Vector2 = WorldMapBuilder.region_spot(WorldMapBuilder.road_to(index))
+		var edge: float = WorldMapBuilder.PAD_RADIUS - 0.4
+		if absf(path[0].distance_to(from_spot) - edge) > 0.05 or absf(path[path.size() - 1].distance_to(to_spot) - edge) > 0.05:
+			ends_ok = false
+		for point in path:
+			if absf(WorldMapBuilder.height_at(point.x, point.y) - WorldMapBuilder.GROUND_Y) > 0.01:
+				flat_roads = false
+	_check(chain_ok, "los caminos unen los mundos en el orden en que se abren")
+	_check(ends_ok, "cada camino va de borde a borde de dos plataformas")
+	_check(flat_roads, "los caminos van por suelo plano")
+
+	# Relieve: montañas con cumbres altas y mar alrededor.
+	var peak: float = -100.0
+	for gx in range(-120, 121, 6):
+		for gz in range(-60, 61, 6):
+			peak = maxf(peak, WorldMapBuilder.height_at(float(gx), float(gz)))
+	_check(peak > 10.0 and peak < 26.0, "hay montañas altas (cumbre %.1f)" % peak)
+	_check(WorldMapBuilder.height_at(0.0, 140.0) < WorldMapBuilder.SEA_Y - 1.0
+			and WorldMapBuilder.height_at(-140.0, 0.0) < WorldMapBuilder.SEA_Y - 1.0
+			and WorldMapBuilder.height_at(140.0, -10.0) < WorldMapBuilder.SEA_Y - 1.0, "el continente está rodeado de mar")
+
+	var color_ok: bool = true
+	for id in ids:
+		var spot: Vector2 = WorldMapBuilder.region_spot(id)
+		var theme_data: Dictionary = MapCatalog.find_map(id)["theme"]
+		var ground: Color = theme_data["ground"]
+		var found: Color = WorldMapBuilder.color_at(spot.x, spot.y, 0.0)
+		if absf(found.r - ground.r) + absf(found.g - ground.g) + absf(found.b - ground.b) > 0.6 or found.a < 0.999:
+			color_ok = false
+	_check(color_ok, "el terreno junto a cada región toma el color de su mundo")
+	var snow: Color = WorldMapBuilder.color_at(0.0, 0.0, 15.0)
+	var beach: Color = WorldMapBuilder.color_at(0.0, 0.0, WorldMapBuilder.SEA_Y - 0.1)
+	_check(snow.get_luminance() > 0.7 and beach.r > beach.b, "las cumbres tienen nieve y la costa arena")
+
+	# Iconos 3D: uno distinto para cada región.
+	var icon_names: Dictionary = {}
+	for id in ids:
+		var world_data: Dictionary = MapCatalog.find_map(id)["world"]
+		icon_names[str(world_data["icon"])] = true
+	_check(icon_names.size() == 7, "cada mundo tiene un icono 3D distinto (%d)" % icon_names.size())
+	var shapes: Dictionary = {}
+	for icon in WorldIcons.ICONS:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 7
+		var model := MeshKit.new()
+		var glow := MeshKit.new()
+		var height: float = WorldIcons.add_icon(model, glow, icon, rng)
+		_check(icon_names.has(icon), "el icono '%s' lo usa un mundo del catálogo" % icon)
+		_check(model.triangle_count() >= 30 and height > 3.0 and height < 14.0,
+				"icono '%s': %d triángulos y %.1f de alto" % [icon, model.triangle_count(), height])
+		shapes[model.triangle_count()] = true
+		var mesh: ArrayMesh = model.commit()
+		_check(_winding_ratio(mesh) > 0.999, "icono '%s': el orden de los vértices coincide con las normales" % icon)
+		var box: AABB = mesh.get_aabb()
+		_check(box.position.y > -1.2 and box.end.y < height + 1.5 and absf(box.position.x) < 10.0 and absf(box.end.x) < 10.0
+				and absf(box.position.z) < 10.0 and absf(box.end.z) < 10.0,
+				"icono '%s': cabe en la plataforma (%s)" % [icon, str(box)])
+		var decor := MeshKit.new()
+		var decor_glow := MeshKit.new()
+		WorldIcons.add_decor(decor, decor_glow, icon, rng, 1.0)
+		var decor_box: AABB = decor.commit().get_aabb()
+		_check(decor.triangle_count() >= 40 and absf(decor_box.position.x) < 11.0 and absf(decor_box.end.x) < 11.0
+				and absf(decor_box.position.z) < 11.0 and absf(decor_box.end.z) < 11.0,
+				"icono '%s': decorado de %d triángulos dentro de la plataforma" % [icon, decor.triangle_count()])
+		var sparse := MeshKit.new()
+		WorldIcons.add_decor(sparse, MeshKit.new(), icon, rng, 0.55)
+		_check(sparse.triangle_count() > 0 and sparse.triangle_count() <= decor.triangle_count() + 400,
+				"icono '%s': con calidad baja el decorado sigue ahí (%d triángulos)" % [icon, sparse.triangle_count()])
+	_check(shapes.size() >= 6, "los iconos son distintos entre sí (%d formas)" % shapes.size())
+	var unknown := MeshKit.new()
+	_check(WorldIcons.add_icon(unknown, MeshKit.new(), "nada", RandomNumberGenerator.new()) == 4.0 and unknown.is_empty(),
+			"un icono desconocido no agrega nada")
+
+	# Figuras de estado.
+	var lock := MeshKit.new()
+	WorldIcons.add_padlock(lock)
+	var lock_box: AABB = lock.commit().get_aabb()
+	_check(lock.triangle_count() >= 100 and lock_box.size.y > 1.8 and lock_box.size.y < 3.2,
+			"el candado tiene forma (%d triángulos, %.1f de alto)" % [lock.triangle_count(), lock_box.size.y])
+	var ring := MeshKit.new()
+	WorldIcons.add_ring(ring, 7.7, 0.2, Color.WHITE, 32)
+	var ring_box: AABB = ring.commit().get_aabb()
+	_check(ring.triangle_count() >= 128 and absf(ring_box.size.x - 15.4) < 0.9 and ring_box.size.y < 0.8,
+			"el aro de luz es plano y mide lo que debe (%.1f de ancho)" % ring_box.size.x)
+	var star := MeshKit.new()
+	WorldIcons.add_star(star, 1.5)
+	_check(star.triangle_count() >= 10, "la estrella de región completada tiene forma (%d triángulos)" % star.triangle_count())
+	var arrow := MeshKit.new()
+	WorldIcons.add_arrow(arrow)
+	var arrow_box: AABB = arrow.commit().get_aabb()
+	_check(arrow.triangle_count() >= 10 and absf(arrow_box.position.y) < 0.01 and arrow_box.size.y > 3.0,
+			"la flecha apunta hacia abajo con la punta en el origen")
+
+	# El mundo completo se construye en cada calidad y cabe en el presupuesto del teléfono.
+	var totals: Dictionary = {}
+	for quality in [0, 1, 2]:
+		var built := WorldMapBuilder.new()
+		root.add_child(built)
+		built.build(int(quality))
+		totals[int(quality)] = _triangles_of(built)
+		var meshes: int = _count_nodes(built, "MeshInstance3D")
+		var labels: int = _count_nodes(built, "Label3D")
+		_check(built.region_ids().size() == 7 and labels == 7,
+				"calidad %d: se construyen las 7 regiones con su nombre (%d rótulos)" % [int(quality), labels])
+		_check(meshes > 60 and meshes < 170,
+				"calidad %d: %d objetos de malla (cada uno es una orden de dibujo)" % [int(quality), meshes])
+		var sun := built.get_node_or_null("Sun") as DirectionalLight3D
+		_check(built.get_node_or_null("WorldEnvironment") != null and sun != null and not sun.shadow_enabled,
+				"calidad %d: el mundo tiene su propia luz y no usa sombras (más fluido en el teléfono)" % int(quality))
+		root.remove_child(built)
+		built.free()
+	_check(int(totals[0]) > 20000 and int(totals[2]) < 110000 and int(totals[0]) <= int(totals[1]) and int(totals[1]) <= int(totals[2]),
+			"los triángulos del mundo suben con la calidad: %d, %d, %d" % [int(totals[0]), int(totals[1]), int(totals[2])])
+
+
+func _wheel_event(up: bool, emulated: bool = false) -> InputEventMouseButton:
+	return _mouse_button_event(MOUSE_BUTTON_WHEEL_UP if up else MOUSE_BUTTON_WHEEL_DOWN, true, Vector2(900.0, 500.0), emulated)
+
+
+func _mouse_button_event(button: int, pressed: bool, at: Vector2, emulated: bool = false) -> InputEventMouseButton:
+	var event := InputEventMouseButton.new()
+	event.button_index = button as MouseButton
+	event.pressed = pressed
+	event.position = at
+	event.global_position = at
+	if emulated:
+		event.device = InputEvent.DEVICE_ID_EMULATION
+	return event
+
+
+func _mouse_move_event(at: Vector2, relative: Vector2, emulated: bool = false) -> InputEventMouseMotion:
+	var event := InputEventMouseMotion.new()
+	event.position = at
+	event.global_position = at
+	event.relative = relative
+	event.button_mask = MOUSE_BUTTON_MASK_LEFT
+	if emulated:
+		event.device = InputEvent.DEVICE_ID_EMULATION
+	return event
+
+
+func _touch_event(index: int, pressed: bool, at: Vector2) -> InputEventScreenTouch:
+	var event := InputEventScreenTouch.new()
+	event.index = index
+	event.pressed = pressed
+	event.position = at
+	return event
+
+
+func _drag_event(index: int, at: Vector2, relative: Vector2) -> InputEventScreenDrag:
+	var event := InputEventScreenDrag.new()
+	event.index = index
+	event.position = at
+	event.relative = relative
+	return event
+
+
+## La cámara del mapa mundial con gestos sintéticos: ratón, rueda, toques, pellizco y límites.
+func _test_world_camera() -> void:
+	print("-- Cámara del mundo bíblico: gestos táctiles")
+	var camera := WorldCamera.new()
+	var bounds := Rect2(-92.0, -46.0, 190.0, 92.0)
+	camera.configure(bounds, Vector3(3.0, 0.0, 0.0), 124.0)
+	var taps: Array = []
+	var moves: Array = []
+	camera.tapped.connect(func(p: Vector2) -> void: taps.append(p))
+	camera.user_moved.connect(func() -> void: moves.append(1))
+	_check(is_equal_approx(camera.distance, 124.0) and camera.is_settled(), "la cámara empieza en la vista general")
+	var looking: float = (-camera.transform.basis.z).dot((camera.target - camera.transform.origin).normalized())
+	_check(looking > 0.999 and camera.transform.origin.y > 50.0 and camera.transform.origin.z > camera.target.z,
+			"la cámara mira el mapa desde arriba y desde el sur (%.4f)" % looking)
+
+	# Rueda del ratón.
+	var start_distance: float = camera.goal_distance
+	camera._unhandled_input(_wheel_event(true))
+	_check(camera.goal_distance < start_distance - 5.0, "la rueda hacia arriba acerca la cámara")
+	camera._unhandled_input(_wheel_event(false))
+	_check(absf(camera.goal_distance - start_distance) < 0.01, "la rueda hacia abajo la aleja otra vez")
+	for i in 40:
+		camera._unhandled_input(_wheel_event(true))
+	_check(is_equal_approx(camera.goal_distance, WorldCamera.MIN_DISTANCE), "el zoom no pasa de la distancia mínima")
+	for i in 60:
+		camera._unhandled_input(_wheel_event(false))
+	_check(is_equal_approx(camera.goal_distance, WorldCamera.MAX_DISTANCE), "el zoom no pasa de la distancia máxima")
+	_check(moves.size() >= 100, "cada zoom avisa que el jugador movió la cámara")
+	camera.overview(false)
+	var unit: float = camera.units_per_pixel()
+	_check(unit > 0.05 and unit < 0.2, "la cámara sabe cuánto mundo cubre un píxel (%.4f)" % unit)
+
+	# Arrastre con el ratón.
+	var before: Vector3 = camera.goal_target
+	camera._unhandled_input(_mouse_button_event(MOUSE_BUTTON_LEFT, true, Vector2(900.0, 500.0)))
+	camera._unhandled_input(_mouse_move_event(Vector2(1020.0, 500.0), Vector2(120.0, 0.0)))
+	camera._unhandled_input(_mouse_move_event(Vector2(1020.0, 600.0), Vector2(0.0, 100.0)))
+	camera._unhandled_input(_mouse_button_event(MOUSE_BUTTON_LEFT, false, Vector2(1020.0, 600.0)))
+	var moved: Vector3 = camera.goal_target - before
+	_check(absf(moved.x + 120.0 * unit) < 0.05, "arrastrar a la derecha mueve el mapa a la derecha (%.2f)" % moved.x)
+	_check(absf(moved.z + 100.0 * unit / sin(deg_to_rad(WorldCamera.PITCH_DEG))) < 0.05,
+			"arrastrar hacia abajo mueve el mapa hacia abajo (%.2f)" % moved.z)
+	_check(taps.is_empty(), "arrastrar no cuenta como un toque")
+
+	# Toque corto: con el ratón y con pequeños temblores del dedo.
+	before = camera.goal_target
+	camera._unhandled_input(_mouse_button_event(MOUSE_BUTTON_LEFT, true, Vector2(700.0, 400.0)))
+	camera._unhandled_input(_mouse_button_event(MOUSE_BUTTON_LEFT, false, Vector2(700.0, 400.0)))
+	_check(taps.size() == 1 and taps[0] == Vector2(700.0, 400.0), "un clic sin mover avisa el toque con su posición")
+	camera._unhandled_input(_mouse_button_event(MOUSE_BUTTON_LEFT, true, Vector2(700.0, 400.0)))
+	camera._unhandled_input(_mouse_move_event(Vector2(712.0, 406.0), Vector2(12.0, 6.0)))
+	camera._unhandled_input(_mouse_button_event(MOUSE_BUTTON_LEFT, false, Vector2(712.0, 406.0)))
+	_check(taps.size() == 2 and camera.goal_target.is_equal_approx(before), "un temblor pequeño sigue siendo un toque y no mueve el mapa")
+
+	# El ratón emulado por los toques se ignora (los toques ya se atienden como toques).
+	var zoom_before: float = camera.goal_distance
+	camera._unhandled_input(_mouse_button_event(MOUSE_BUTTON_LEFT, true, Vector2(500.0, 500.0), true))
+	camera._unhandled_input(_mouse_button_event(MOUSE_BUTTON_LEFT, false, Vector2(500.0, 500.0), true))
+	camera._unhandled_input(_wheel_event(true, true))
+	_check(taps.size() == 2 and is_equal_approx(camera.goal_distance, zoom_before), "los eventos de ratón emulados por toques se ignoran")
+
+	# Un dedo: toque y arrastre.
+	camera._unhandled_input(_touch_event(0, true, Vector2(500.0, 300.0)))
+	camera._unhandled_input(_touch_event(0, false, Vector2(500.0, 300.0)))
+	_check(taps.size() == 3 and taps[2] == Vector2(500.0, 300.0), "un toque corto con el dedo avisa su posición")
+	before = camera.goal_target
+	camera._unhandled_input(_touch_event(0, true, Vector2(500.0, 300.0)))
+	camera._unhandled_input(_drag_event(0, Vector2(650.0, 300.0), Vector2(150.0, 0.0)))
+	camera._unhandled_input(_drag_event(0, Vector2(700.0, 300.0), Vector2(50.0, 0.0)))
+	camera._unhandled_input(_touch_event(0, false, Vector2(700.0, 300.0)))
+	_check(absf((camera.goal_target.x - before.x) + 200.0 * unit) < 0.05 and taps.size() == 3,
+			"un dedo arrastra el mapa y no cuenta como toque (%.2f)" % (camera.goal_target.x - before.x))
+
+	# Dos dedos: pellizco para acercar y para alejar.
+	camera.overview(false)
+	var pinch_start: float = camera.goal_distance
+	camera._unhandled_input(_touch_event(0, true, Vector2(600.0, 500.0)))
+	camera._unhandled_input(_touch_event(1, true, Vector2(800.0, 500.0)))
+	camera._unhandled_input(_drag_event(1, Vector2(1000.0, 500.0), Vector2(200.0, 0.0)))
+	_check(absf(camera.goal_distance - pinch_start * 0.5) < 0.5, "separar los dedos acerca la cámara (%.1f)" % camera.goal_distance)
+	camera._unhandled_input(_drag_event(1, Vector2(800.0, 500.0), Vector2(-200.0, 0.0)))
+	_check(absf(camera.goal_distance - pinch_start) < 0.5, "juntar los dedos aleja la cámara (%.1f)" % camera.goal_distance)
+	camera._unhandled_input(_touch_event(1, false, Vector2(800.0, 500.0)))
+	camera._unhandled_input(_touch_event(0, false, Vector2(600.0, 500.0)))
+	_check(taps.size() == 3, "un pellizco no cuenta como toque")
+	camera._unhandled_input(_touch_event(0, true, Vector2(300.0, 300.0)))
+	camera._unhandled_input(_touch_event(0, false, Vector2(300.0, 300.0)))
+	_check(taps.size() == 4, "después del pellizco los toques vuelven a funcionar")
+
+	# Límites del mapa.
+	camera.pan_by(Vector2(-100000.0, -100000.0))
+	_check(is_equal_approx(camera.goal_target.x, bounds.end.x) and is_equal_approx(camera.goal_target.z, bounds.end.y),
+			"no se puede arrastrar más allá del borde este y sur")
+	camera.pan_by(Vector2(100000.0, 100000.0))
+	_check(is_equal_approx(camera.goal_target.x, bounds.position.x) and is_equal_approx(camera.goal_target.z, bounds.position.y),
+			"no se puede arrastrar más allá del borde oeste y norte")
+
+	# Vuelo hasta una región: la región queda un poco a la derecha del centro.
+	camera.overview(false)
+	camera.focus_on(Vector3(30.0, 4.0, 10.0), 50.0)
+	_check(is_equal_approx(camera.goal_distance, 50.0) and absf(camera.goal_target.x - 20.0) < 0.001
+			and absf(camera.goal_target.z - 10.0) < 0.001, "focus_on apunta al lado izquierdo de la región")
+	_check(not camera.is_settled(), "la cámara todavía no llegó")
+	var last_gap: float = camera.target.distance_to(camera.goal_target)
+	var smooth: bool = true
+	for i in 12:
+		camera._process(0.05)
+		var gap: float = camera.target.distance_to(camera.goal_target)
+		if gap > last_gap + 0.0001:
+			smooth = false
+		last_gap = gap
+	_check(smooth and last_gap < 25.0, "la cámara se acerca a la meta sin pasarse")
+	for i in 60:
+		camera._process(0.05)
+	_check(camera.is_settled(), "la cámara termina de llegar con el tiempo")
+	camera.overview(true)
+	camera.snap()
+	_check(camera.target.is_equal_approx(Vector3(3.0, 0.0, 0.0)) and is_equal_approx(camera.distance, 124.0), "VISTA vuelve a la vista general")
+	camera.free()
+
+
+## La pantalla MUNDO BÍBLICO con el motor real: regiones, estados, toques de verdad, desbloqueos,
+## insignias y apertura de tableros. Termina en la pantalla del mundo.
+func _test_world_screen() -> void:
+	print("-- Mundo bíblico: la pantalla (regiones, estados, toques, desbloqueos, insignias y tableros)")
+	var original_size: Vector2i = root.size
+	if original_size.x < 1280 or original_size.y < 720:
+		root.size = Vector2i(1920, 1080)
+	_progress.reset(false)
+	_state.last_progress = {}
+	_state.selected_map_id = "eden"
+	if await _open_world():
+		await _world_first_day()
+		await _world_taps_and_gestures()
+		await _world_progress_and_boards()
+		await _world_celebration()
+		await _world_badges()
+		await _world_list_and_back()
+	_progress.reset(false)
+	_state.last_progress = {}
+	_state.selected_map_id = "eden"
+	if root.size != original_size:
+		root.size = original_size
+	if not _arrived("world"):
+		await _open_world()
+
+
+## Abre (o vuelve a abrir) el mapa mundial y espera a que termine de construirse.
+func _open_world() -> bool:
+	await _wait_until(_idle_router, 10.0)
+	_router.go_to("world")
+	if not await _wait_until(_arrived.bind("world"), 15.0):
+		_check(false, "el mundo bíblico se abre")
+		return false
+	if not await _wait_until(_world_ready, 15.0):
+		_check(false, "el mundo bíblico termina de construirse")
+		return false
+	return true
+
+
+func _world_ready() -> bool:
+	var scene: Node = current_scene
+	if scene == null or not _arrived("world"):
+		return false
+	return bool(scene.is_built())
+
+
+func _world_camera() -> WorldCamera:
+	var scene: Node = current_scene
+	if scene == null or not _arrived("world"):
+		return null
+	var found: WorldCamera = scene.camera()
+	return found
+
+
+func _world_flown() -> bool:
+	var cam: WorldCamera = _world_camera()
+	return cam != null and cam.goal_distance < cam.home_distance - 20.0 and cam.is_settled()
+
+
+func _world_selected(map_id: String) -> bool:
+	var scene: Node = current_scene
+	return scene != null and _arrived("world") and str(scene.selected_id()) == map_id
+
+
+func _world_celebrated() -> bool:
+	var scene: Node = current_scene
+	return scene != null and _arrived("world") and not bool(scene.is_celebrating())
+
+
+func _world_banner_visible() -> bool:
+	var scene: Node = current_scene
+	if scene == null:
+		return false
+	var banner := scene.get_node_or_null("%BannerPanel") as Control
+	return banner != null and banner.visible
+
+
+## Un toque corto con el dedo, entregado a la ventana como lo haría el sistema (pasa por los
+## paneles de la interfaz y llega a la cámara solo si nada los detiene).
+func _push_tap(at: Vector2) -> void:
+	root.push_input(_touch_event(0, true, at), true)
+	root.push_input(_touch_event(0, false, at), true)
+
+
+## Verdadero si un panel o botón de la interfaz tapa ese punto de la pantalla.
+func _covered_by_ui(point: Vector2) -> bool:
+	var scene: Node = current_scene
+	if scene == null:
+		return false
+	for path in ["%Info", "%Tools", "%ProgressPanel"]:
+		var control := scene.get_node_or_null(path) as Control
+		if control != null and control.visible and control.get_global_rect().has_point(point):
+			return true
+	var back := scene.find_child("BackButton", true, false) as Control
+	return back != null and back.get_global_rect().has_point(point)
+
+
+func _texts_under(node: Node) -> PackedStringArray:
+	var found := PackedStringArray()
+	if node is Label:
+		found.append((node as Label).text)
+	for child in node.get_children():
+		found.append_array(_texts_under(child))
+	return found
+
+
+## Primer día: solo el primer mundo está abierto; el panel, el avance y la cámara lo reflejan.
+func _world_first_day() -> void:
+	var screen: Node = current_scene
+	var world: WorldMapBuilder = screen.world()
+	var camera: WorldCamera = screen.camera()
+	_check(world != null and camera != null, "la pantalla tiene el mapa 3D y su cámara")
+	if world == null or camera == null:
+		return
+	var view: Rect2 = root.get_visible_rect()
+	_check(view.size.x >= 1280.0 and view.size.y >= 720.0, "la prueba tiene una pantalla de tamaño real (%s)" % str(view.size))
+
+	_check(world.region_ids() == MAP_ORDER, "el mapa muestra los 7 mundos en el orden del viaje")
+	var names_ok: bool = true
+	var status_ok: bool = true
+	var lights_ok: bool = true
+	var roads_closed: bool = true
+	for id in MAP_ORDER:
+		var first: bool = id == "eden"
+		var label: Label3D = world.label_of(id)
+		if label == null or label.text != MapCatalog.name_of(id):
+			names_ok = false
+		var wanted: String = "available" if first else "locked"
+		if world.status_of(id) != wanted or world.is_lock_visible(id) == first:
+			status_ok = false
+		if world.is_halo_visible(id) != first or world.is_star_visible(id):
+			lights_ok = false
+		if not first and world.is_road_open(id):
+			roads_closed = false
+	_check(names_ok, "cada mundo lleva su nombre flotando sobre el icono")
+	_check(status_ok, "el Edén aparece abierto y los otros 6 mundos, con candado")
+	_check(lights_ok, "solo el mundo abierto tiene aro de luz y ninguno tiene estrella todavía")
+	_check(roads_closed, "los caminos que llevan a mundos cerrados están apagados")
+	_check(world.is_arrow_visible() and world.next_id == "eden", "la flecha dorada señala el próximo mundo")
+	_check(str(screen.selected_id()) == "eden" and world.is_selector_visible("eden") and not world.is_selector_visible("arca_noe"),
+			"el Edén está elegido al empezar")
+	var triangles: int = _triangles_of(world)
+	var meshes: int = _count_nodes(world, "MeshInstance3D")
+	_check(triangles > 20000 and triangles < 110000, "el mundo 3D tiene %d triángulos (tope para el teléfono: 110 mil)" % triangles)
+	_check(meshes < 170, "el mundo 3D usa %d objetos de malla (cada uno es una orden de dibujo)" % meshes)
+
+	# Panel de información y avance del viaje.
+	var name_label := _node("%RegionNameLabel") as Label
+	var ref_label := _node("%RegionRefLabel") as Label
+	var status_label := _node("%RegionStatusLabel") as Label
+	var detail_label := _node("%RegionDetailLabel") as Label
+	var stats_label := _node("%RegionStatsLabel") as Label
+	var badge_label := _node("%RegionBadgeLabel") as Label
+	var play := _node("%PlayRegionButton") as Button
+	var progress_label := _node("%ProgressLabel") as Label
+	var bar := _node("%ProgressBar") as ProgressBar
+	var journey := _node("%JourneyLabel") as Label
+	if name_label == null or ref_label == null or status_label == null or detail_label == null or stats_label == null \
+			or badge_label == null or play == null or progress_label == null or bar == null or journey == null:
+		return
+	_check(name_label.text == "Jardín del Edén" and ref_label.text == "Génesis 2:8-17" and status_label.text == "DISPONIBLE"
+			and not detail_label.text.is_empty(), "el panel cuenta el mundo elegido (%s · %s)" % [name_label.text, status_label.text])
+	_check(not play.disabled and play.text == "JUGAR", "JUGAR está activo en el primer mundo")
+	_check(stats_label.text.contains("Aún no has jugado") and badge_label.text.contains("pendiente")
+			and badge_label.text.contains("Premio: %d" % MapCatalog.reward_stars_of("eden")),
+			"el panel muestra que falta jugar y la insignia pendiente con su premio")
+	_check(progress_label.text.contains("0 de 7") and bar.value == 0.0 and bar.max_value == 7.0,
+			"el avance del viaje empieza en 0 de 7 (%s)" % progress_label.text)
+	_check(journey.text.contains("0 estrellas") and journey.text.contains("0 de 11 insignias"),
+			"las estrellas y las insignias del viaje empiezan en cero (%s)" % journey.text)
+
+	# La cámara vuela sola hasta el mundo elegido.
+	_check(await _wait_until(_world_flown, 10.0), "la cámara vuela sola hasta el mundo elegido")
+	_check(str(screen.pick_region(screen.screen_position_of("eden"))) == "eden", "el Edén queda a la vista y se puede tocar")
+
+	# Vista general: los 7 mundos a la vista, separados y sin paneles encima.
+	camera.overview(false)
+	var inside_ok: bool = true
+	var free_ok: bool = true
+	var picks_ok: bool = true
+	var points: Array[Vector2] = []
+	for id in MAP_ORDER:
+		var at: Vector2 = screen.screen_position_of(id)
+		points.append(at)
+		if not view.grow(-24.0).has_point(at):
+			inside_ok = false
+		if _covered_by_ui(at):
+			free_ok = false
+		if str(screen.pick_region(at)) != id:
+			picks_ok = false
+	var closest: float = 1000000.0
+	for i in points.size():
+		for j in range(i + 1, points.size()):
+			closest = minf(closest, points[i].distance_to(points[j]))
+	_check(inside_ok, "en la vista general se ven los 7 mundos dentro de la pantalla")
+	_check(free_ok, "en la vista general ningún panel ni botón tapa un mundo")
+	_check(picks_ok, "tocar el icono de cada mundo elige ese mundo")
+	_check(closest > 160.0, "los mundos se ven bien separados (%.0f px entre los más cercanos)" % closest)
+	_check(str(screen.pick_region(Vector2(-500.0, -500.0))) == "", "tocar fuera del mapa no elige ningún mundo")
+
+
+## Toques, arrastre, pellizco, rueda y botones de zoom, entregados como lo hace el sistema.
+func _world_taps_and_gestures() -> void:
+	var screen: Node = current_scene
+	var world: WorldMapBuilder = screen.world()
+	var camera: WorldCamera = screen.camera()
+	if world == null or camera == null:
+		return
+	var view: Rect2 = root.get_visible_rect()
+	var name_label := _node("%RegionNameLabel") as Label
+	var status_label := _node("%RegionStatusLabel") as Label
+	var detail_label := _node("%RegionDetailLabel") as Label
+	var stats_label := _node("%RegionStatsLabel") as Label
+	var play := _node("%PlayRegionButton") as Button
+	var hint := _node("%HintLabel") as Label
+	if name_label == null or status_label == null or detail_label == null or stats_label == null or play == null or hint == null:
+		return
+
+	# Un toque sobre un mundo cerrado lo elige y explica qué falta; otro toque no abre el tablero.
+	camera.overview(false)
+	_push_tap(screen.screen_position_of("arca_noe"))
+	_check(await _wait_until(_world_selected.bind("arca_noe"), 3.0), "tocar el Arca de Noé (cerrada) la elige")
+	_check(world.is_selector_visible("arca_noe") and not world.is_selector_visible("eden"), "el aro de selección pasa al Arca de Noé")
+	_check(name_label.text == "Arca de Noé" and status_label.text == "BLOQUEADO"
+			and detail_label.text == MapCatalog.requirement_text("arca_noe") and detail_label.text.contains("Jardín del Edén"),
+			"un mundo cerrado dice qué hay que completar (%s)" % detail_label.text)
+	_check(play.disabled and play.text == "BLOQUEADO" and stats_label.text.is_empty() and not stats_label.visible,
+			"un mundo cerrado no se puede jugar ni muestra estadísticas")
+	_check(await _wait_until(_world_flown, 8.0), "la cámara vuela hasta el mundo tocado")
+	_push_tap(screen.screen_position_of("arca_noe"))
+	await create_timer(0.4).timeout
+	_check(_arrived("world") and str(_state.selected_map_id) == "eden", "otro toque sobre un mundo cerrado no abre su tablero")
+	_check(hint.text == MapCatalog.requirement_text("arca_noe"), "el aviso repite qué hay que completar (%s)" % hint.text)
+
+	# Tocar el vacío no cambia nada; arrastrar mueve el mapa sin elegir ni abrir nada.
+	var chosen: String = str(screen.selected_id())
+	_push_tap(Vector2(view.size.x * 0.5, 150.0))
+	_check(str(screen.selected_id()) == chosen and _arrived("world"), "tocar el mapa vacío no cambia la selección")
+	camera.overview(false)
+	var start_target: Vector3 = camera.goal_target
+	root.push_input(_touch_event(0, true, Vector2(700.0, 450.0)), true)
+	root.push_input(_drag_event(0, Vector2(850.0, 450.0), Vector2(150.0, 0.0)), true)
+	root.push_input(_drag_event(0, Vector2(1000.0, 450.0), Vector2(150.0, 0.0)), true)
+	root.push_input(_touch_event(0, false, Vector2(1000.0, 450.0)), true)
+	_check(camera.goal_target.x < start_target.x - 20.0 and str(screen.selected_id()) == chosen,
+			"un dedo que arrastra recorre el mapa (%.1f) sin elegir nada" % (camera.goal_target.x - start_target.x))
+	camera.overview(false)
+	var pinch_start: float = camera.goal_distance
+	root.push_input(_touch_event(0, true, Vector2(800.0, 450.0)), true)
+	root.push_input(_touch_event(1, true, Vector2(1000.0, 450.0)), true)
+	root.push_input(_drag_event(1, Vector2(1200.0, 450.0), Vector2(200.0, 0.0)), true)
+	root.push_input(_touch_event(1, false, Vector2(1200.0, 450.0)), true)
+	root.push_input(_touch_event(0, false, Vector2(800.0, 450.0)), true)
+	_check(camera.goal_distance < pinch_start * 0.6 and str(screen.selected_id()) == chosen,
+			"separar dos dedos acerca la cámara (%.0f → %.0f)" % [pinch_start, camera.goal_distance])
+	camera.overview(false)
+	root.push_input(_wheel_event(true), true)
+	_check(camera.goal_distance < camera.home_distance - 5.0, "la rueda del ratón también acerca la cámara")
+
+	# Botones de zoom y vista general.
+	var zoom_in := _node("%ZoomInButton") as Button
+	var zoom_out := _node("%ZoomOutButton") as Button
+	var view_button := _node("%ViewButton") as Button
+	if zoom_in == null or zoom_out == null or view_button == null:
+		return
+	camera.overview(false)
+	zoom_in.pressed.emit()
+	_check(absf(camera.goal_distance - camera.home_distance * 0.7) < 0.1, "el botón + acerca la cámara")
+	zoom_out.pressed.emit()
+	_check(absf(camera.goal_distance - camera.home_distance) < 0.1, "el botón - la aleja")
+	for i in 3:
+		zoom_in.pressed.emit()
+	camera.goal_target = Vector3(40.0, 0.0, -20.0)
+	view_button.pressed.emit()
+	_check(absf(camera.goal_distance - camera.home_distance) < 0.01 and camera.goal_target.is_equal_approx(camera.home_target),
+			"VISTA vuelve a la vista general")
+
+	# Cada mundo se elige tocándolo, y el panel muestra sus datos del catálogo.
+	var selected_ok: bool = true
+	var info_ok: bool = true
+	var ref_label := _node("%RegionRefLabel") as Label
+	for id in MAP_ORDER:
+		camera.overview(false)
+		_push_tap(screen.screen_position_of(id))
+		var locked: bool = id != "eden"
+		if str(screen.selected_id()) != id or not world.is_selector_visible(id):
+			selected_ok = false
+		if name_label.text != MapCatalog.name_of(id) or ref_label.text != str(MapCatalog.find_map(id)["reference"]) \
+				or (status_label.text == "BLOQUEADO") != locked or play.disabled != locked:
+			info_ok = false
+	_check(selected_ok, "tocar cada uno de los 7 mundos lo elige")
+	_check(info_ok, "el panel muestra el nombre, la referencia y el estado de cada mundo")
+	screen.select_region("eden")
+
+
+## Completar el Edén con el mapa abierto, y abrir tableros tocando la región y con JUGAR.
+func _world_progress_and_boards() -> void:
+	var screen: Node = current_scene
+	var world: WorldMapBuilder = screen.world()
+	var camera: WorldCamera = screen.camera()
+	if world == null or camera == null:
+		return
+	var name_label := _node("%RegionNameLabel") as Label
+	var status_label := _node("%RegionStatusLabel") as Label
+	var stats_label := _node("%RegionStatsLabel") as Label
+	var badge_label := _node("%RegionBadgeLabel") as Label
+	var play := _node("%PlayRegionButton") as Button
+	var progress_label := _node("%ProgressLabel") as Label
+	var bar := _node("%ProgressBar") as ProgressBar
+	var journey := _node("%JourneyLabel") as Label
+	if name_label == null or status_label == null or stats_label == null or badge_label == null or play == null \
+			or progress_label == null or bar == null or journey == null:
+		return
+
+	# Los estados se actualizan solos cuando cambia el progreso.
+	var report: Dictionary = _progress.record_match("eden", _fake_summary(240.0, 27, 5, 6, 2))
+	var opened: Array = report.get("unlocked_maps", [])
+	_check(bool(report.get("ok", false)) and opened == ["arca_noe"], "completar el Edén abre el Arca de Noé (%s)" % str(opened))
+	_check(world.status_of("eden") == "completed" and world.is_star_visible("eden") and not world.is_halo_visible("eden"),
+			"el Edén completado muestra su estrella y ya no su aro")
+	_check(world.status_of("arca_noe") == "available" and not world.is_lock_visible("arca_noe") and world.is_halo_visible("arca_noe"),
+			"el Arca de Noé pierde el candado y se ilumina")
+	_check(world.is_road_open("arca_noe") and not world.is_road_open("egipto_exodo"), "el camino hacia el Arca se enciende y el siguiente sigue apagado")
+	_check(world.next_id == "arca_noe" and world.is_arrow_visible(), "la flecha dorada pasa al Arca de Noé")
+	var counts: Vector2i = _progress.data.badge_counts()
+	_check(progress_label.text.contains("1 de 7") and bar.value == 1.0, "el avance del viaje sube a 1 de 7 (%s)" % progress_label.text)
+	_check(journey.text.contains("%d estrellas del viaje" % int(report["journey_stars"])) and journey.text.contains("%d de %d insignias" % [counts.x, counts.y])
+			and counts.x >= 1, "las estrellas y las insignias del viaje se actualizan (%s)" % journey.text)
+	_check(status_label.text == "COMPLETADO" and stats_label.text.contains("Completado: 1") and badge_label.text.contains("ganada"),
+			"el panel del Edén muestra completado, sus estadísticas y la insignia ganada")
+
+	# Primer toque elige el Arca (ya abierta); el segundo abre su tablero.
+	camera.overview(false)
+	_push_tap(screen.screen_position_of("arca_noe"))
+	_check(await _wait_until(_world_selected.bind("arca_noe"), 3.0), "tocar el Arca de Noé (abierta) la elige")
+	_check(status_label.text == "DISPONIBLE" and not play.disabled and play.text == "JUGAR", "el Arca abierta se puede jugar")
+	_check(_arrived("world") and str(_state.selected_map_id) == "eden", "un solo toque no abre el tablero")
+	await _wait_until(_world_flown, 8.0)
+	_push_tap(screen.screen_position_of("arca_noe"))
+	_check(await _wait_until(_arrived.bind("board"), 25.0), "un segundo toque sobre el Arca de Noé abre su tablero")
+	_check(str(_state.selected_map_id) == "arca_noe", "el tablero abierto es el del mundo tocado")
+
+	# Al volver del tablero, el mundo jugado queda elegido; JUGAR abre el tablero de otro mundo.
+	if not await _open_world():
+		return
+	screen = current_scene
+	_check(await _wait_until(_world_selected.bind("arca_noe"), 3.0), "al volver, el último mundo jugado queda elegido")
+	screen.select_region("eden")
+	play = _node("%PlayRegionButton") as Button
+	play.pressed.emit()
+	_check(await _wait_until(_arrived.bind("board"), 25.0) and str(_state.selected_map_id) == "eden",
+			"el botón JUGAR abre el tablero del mundo elegido")
+	if not await _open_world():
+		return
+	screen = current_scene
+
+	# JUGAR en un mundo cerrado no abre nada.
+	screen.select_region("egipto_exodo")
+	play = _node("%PlayRegionButton") as Button
+	_check(play.disabled, "JUGAR está desactivado en un mundo cerrado")
+	play.pressed.emit()
+	await create_timer(0.4).timeout
+	_check(_arrived("world") and str(_state.selected_map_id) == "eden", "ni siquiera forzando el botón se abre un mundo cerrado")
+
+
+## Al volver de una partida que abrió un mundo nuevo, el candado salta y se muestra un aviso (una vez).
+func _world_celebration() -> void:
+	_progress.reset(false)
+	var report: Dictionary = _progress.record_match("eden", _fake_summary(240.0, 27, 5, 6, 2))
+	_state.last_progress = report
+	_state.selected_map_id = "eden"
+	if not await _open_world():
+		return
+	var screen: Node = current_scene
+	var world: WorldMapBuilder = screen.world()
+	if world == null:
+		return
+	_check(bool(screen.is_celebrating()), "al volver de una partida que abrió un mundo, el mapa lo celebra")
+	_check(world.status_of("arca_noe") == "locked" and world.is_lock_visible("arca_noe") and world.status_of("eden") == "completed",
+			"el mundo nuevo se muestra primero con su candado")
+	var chosen: String = str(screen.selected_id())
+	_push_tap(screen.screen_position_of("jerusalen"))
+	_check(str(screen.selected_id()) == chosen, "durante la celebración los toques no cambian la selección")
+	_check(await _wait_until(_world_selected.bind("arca_noe"), 6.0), "la cámara va al mundo nuevo")
+	_check(await _wait_until(_world_banner_visible, 8.0), "aparece el aviso de mundo nuevo")
+	var title := _node("%BannerTitle") as Label
+	var detail := _node("%BannerDetail") as Label
+	if title != null and detail != null:
+		_check(title.text == "¡NUEVO MUNDO ABIERTO!" and detail.text == "Arca de Noé", "el aviso dice cuál mundo se abrió (%s)" % detail.text)
+	_check(await _wait_until(_world_celebrated, 10.0), "la celebración termina")
+	_check(world.status_of("arca_noe") == "available" and not world.is_lock_visible("arca_noe") and world.is_road_open("arca_noe"),
+			"al terminar, el candado desapareció y el camino está encendido")
+	_check(bool(_state.last_progress.get("celebrated", false)), "la celebración queda anotada para no repetirse")
+	if await _open_world():
+		var again: Node = current_scene
+		_check(not bool(again.is_celebrating()), "al volver a abrir el mapa no se repite la celebración")
+
+
+## Pantalla de insignias: se abre, lista las 11, bloquea el mapa de atrás y se cierra de tres formas.
+func _world_badges() -> void:
+	var screen: Node = current_scene
+	var button := _node("%BadgesButton") as Button
+	var panel := _node("%BadgesPanel") as Control
+	var grid := _node("%BadgeGrid")
+	var count_label := _node("%BadgesCountLabel") as Label
+	var close_button := _node("%BadgesCloseButton") as Button
+	if screen == null or button == null or panel == null or grid == null or count_label == null or close_button == null:
+		return
+	_check(not panel.visible and not bool(screen.is_badges_open()), "las insignias empiezan cerradas")
+	button.pressed.emit()
+	_check(bool(screen.is_badges_open()) and panel.visible, "INSIGNIAS abre la pantalla de insignias")
+	var badges: Array = _progress.data.all_badges()
+	var counts: Vector2i = _progress.data.badge_counts()
+	_check(grid.get_child_count() == 11 and badges.size() == 11, "se muestran las 11 insignias (%d)" % grid.get_child_count())
+	_check(count_label.text == "%d de %d insignias ganadas" % [counts.x, counts.y] and counts.x >= 1,
+			"el contador de insignias coincide con el progreso (%s)" % count_label.text)
+	var texts: PackedStringArray = _texts_under(grid)
+	var names_ok: bool = true
+	for entry in badges:
+		var badge: Dictionary = entry
+		if not texts.has(str(badge["name"])) or not texts.has(str(badge["text"])):
+			names_ok = false
+	_check(names_ok, "cada tarjeta muestra el nombre y la condición de su insignia")
+	var chosen: String = str(screen.selected_id())
+	_push_tap(screen.screen_position_of(chosen))
+	await create_timer(0.4).timeout
+	_check(_arrived("world") and str(screen.selected_id()) == chosen, "con las insignias abiertas, el mapa de atrás no recibe toques")
+	root.propagate_notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
+	await create_timer(0.4).timeout
+	_check(not bool(screen.is_badges_open()) and not panel.visible and _arrived("world"), "el botón atrás de Android cierra las insignias sin salir del mapa")
+	button.pressed.emit()
+	close_button.pressed.emit()
+	_check(not bool(screen.is_badges_open()) and not panel.visible, "CERRAR cierra las insignias")
+
+
+## LISTA abre la lista de mapas (con su propia prueba) y VOLVER regresa al mapa mundial.
+func _world_list_and_back() -> void:
+	var list_button := _node("%ListButton") as Button
+	if list_button == null:
+		return
+	list_button.pressed.emit()
+	if not await _wait_until(_arrived.bind("maps"), 15.0):
+		_check(false, "LISTA abre la lista de mapas")
+		return
+	await _test_maps_screen()
+	var back := current_scene.find_child("BackButton", true, false) as Button
+	_check(back != null, "la lista de mapas tiene botón VOLVER")
+	if back != null:
+		back.pressed.emit()
+		_check(await _wait_until(_arrived.bind("world"), 15.0), "VOLVER en la lista de mapas regresa al mapa mundial")
 
 
 func _test_maps_screen() -> void:

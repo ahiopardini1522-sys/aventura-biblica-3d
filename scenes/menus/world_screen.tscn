@@ -1,0 +1,327 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/world_screen.gd" id="1_screen"]
+[ext_resource type="Script" path="res://scripts/maps/world_map_builder.gd" id="2_builder"]
+[ext_resource type="Script" path="res://scripts/maps/world_camera.gd" id="3_camera"]
+[ext_resource type="PackedScene" path="res://scenes/interfaces/screen_header.tscn" id="4_header"]
+
+[node name="WorldScreen" type="Node"]
+script = ExtResource("1_screen")
+
+[node name="World" type="Node3D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_builder")
+
+[node name="Camera" type="Camera3D" parent="."]
+unique_name_in_owner = true
+current = true
+script = ExtResource("3_camera")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Root" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Top" type="MarginContainer" parent="UI/Root"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 0
+
+[node name="Row" type="HBoxContainer" parent="UI/Root/Top"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 28
+
+[node name="Header" parent="UI/Root/Top/Row" instance=ExtResource("4_header")]
+layout_mode = 2
+size_flags_horizontal = 3
+title = "MUNDO BÍBLICO"
+
+[node name="ProgressPanel" type="PanelContainer" parent="UI/Root/Top/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(660, 0)
+layout_mode = 2
+
+[node name="ProgressBox" type="VBoxContainer" parent="UI/Root/Top/Row/ProgressPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ProgressLabel" type="Label" parent="UI/Root/Top/Row/ProgressPanel/ProgressBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Mundos completados: 0 de 7"
+
+[node name="ProgressBar" type="ProgressBar" parent="UI/Root/Top/Row/ProgressPanel/ProgressBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+max_value = 7.0
+show_percentage = false
+
+[node name="JourneyLabel" type="Label" parent="UI/Root/Top/Row/ProgressPanel/ProgressBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 28
+text = "0 estrellas del viaje  ·  0 de 11 insignias"
+
+[node name="HintLabel" type="Label" parent="UI/Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -800.0
+offset_top = 170.0
+offset_right = 800.0
+offset_bottom = 230.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"DimLabel"
+theme_override_colors/font_color = Color(0.96, 0.95, 0.91, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.04, 0.1, 0.9)
+theme_override_constants/outline_size = 10
+text = "Arrastra para recorrer el mundo  ·  Pellizca para acercar  ·  Toca una región"
+horizontal_alignment = 1
+
+[node name="Tools" type="GridContainer" parent="UI/Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -690.0
+offset_top = -224.0
+offset_right = -40.0
+offset_bottom = -36.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 3
+
+[node name="ZoomInButton" type="Button" parent="UI/Root/Tools"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 88)
+layout_mode = 2
+theme_override_font_sizes/font_size = 56
+text = "+"
+
+[node name="ZoomOutButton" type="Button" parent="UI/Root/Tools"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 88)
+layout_mode = 2
+theme_override_font_sizes/font_size = 56
+text = "-"
+
+[node name="ViewButton" type="Button" parent="UI/Root/Tools"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 88)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "VISTA"
+
+[node name="ListButton" type="Button" parent="UI/Root/Tools"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 88)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "LISTA"
+
+[node name="BadgesButton" type="Button" parent="UI/Root/Tools"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 88)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "INSIGNIAS"
+
+[node name="Info" type="PanelContainer" parent="UI/Root"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1120, 0)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -36.0
+offset_right = 1160.0
+offset_bottom = -36.0
+grow_vertical = 0
+
+[node name="InfoRow" type="HBoxContainer" parent="UI/Root/Info"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="InfoLeft" type="VBoxContainer" parent="UI/Root/Info/InfoRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="RegionNameLabel" type="Label" parent="UI/Root/Info/InfoRow/InfoLeft"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+theme_override_font_sizes/font_size = 50
+text = "Región"
+
+[node name="RegionRefLabel" type="Label" parent="UI/Root/Info/InfoRow/InfoLeft"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 28
+text = "Referencia"
+
+[node name="RegionStatusLabel" type="Label" parent="UI/Root/Info/InfoRow/InfoLeft"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ESTADO"
+
+[node name="RegionDetailLabel" type="Label" parent="UI/Root/Info/InfoRow/InfoLeft"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(540, 0)
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 27
+text = "Descripción"
+autowrap_mode = 3
+
+[node name="InfoRight" type="VBoxContainer" parent="UI/Root/Info/InfoRow"]
+custom_minimum_size = Vector2(440, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="RegionStatsLabel" type="Label" parent="UI/Root/Info/InfoRow/InfoRight"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(440, 0)
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 26
+text = "Estadísticas"
+autowrap_mode = 3
+
+[node name="RegionBadgeLabel" type="Label" parent="UI/Root/Info/InfoRow/InfoRight"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(440, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Insignia"
+autowrap_mode = 3
+
+[node name="PlayRegionButton" type="Button" parent="UI/Root/Info/InfoRow/InfoRight"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "JUGAR"
+
+[node name="BannerPanel" type="PanelContainer" parent="UI/Root"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -380.0
+offset_top = 260.0
+offset_right = 380.0
+offset_bottom = 260.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="BannerBox" type="VBoxContainer" parent="UI/Root/BannerPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="BannerTitle" type="Label" parent="UI/Root/BannerPanel/BannerBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "¡NUEVO MUNDO ABIERTO!"
+horizontal_alignment = 1
+
+[node name="BannerDetail" type="Label" parent="UI/Root/BannerPanel/BannerBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+text = "Mundo"
+horizontal_alignment = 1
+
+[node name="BadgesPanel" type="Control" parent="UI/Root"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Shade" type="ColorRect" parent="UI/Root/BadgesPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.04, 0.1, 0.82)
+
+[node name="Center" type="CenterContainer" parent="UI/Root/BadgesPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="BadgesCard" type="PanelContainer" parent="UI/Root/BadgesPanel/Center"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BadgesBox" type="VBoxContainer" parent="UI/Root/BadgesPanel/Center/BadgesCard"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="BadgesTitle" type="Label" parent="UI/Root/BadgesPanel/Center/BadgesCard/BadgesBox"]
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "INSIGNIAS"
+horizontal_alignment = 1
+
+[node name="BadgesCountLabel" type="Label" parent="UI/Root/BadgesPanel/Center/BadgesCard/BadgesBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "0 de 11 insignias ganadas"
+horizontal_alignment = 1
+
+[node name="BadgeGrid" type="GridContainer" parent="UI/Root/BadgesPanel/Center/BadgesCard/BadgesBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 14
+columns = 3
+
+[node name="BadgesCloseButton" type="Button" parent="UI/Root/BadgesPanel/Center/BadgesCard/BadgesBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "CERRAR"

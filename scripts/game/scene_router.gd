@@ -7,13 +7,17 @@ signal scene_changed(key: String)
 ## Todas las pantallas del juego. Cada clave se usa con SceneRouter.go_to("clave").
 const SCENES: Dictionary = {
 	"main_menu": "res://scenes/menus/main_menu.tscn",
-	"world": "res://scenes/menus/maps_screen.tscn",  # provisional: se cambia por el mapa mundial 3D
+	"world": "res://scenes/menus/world_screen.tscn",
 	"maps": "res://scenes/menus/maps_screen.tscn",
 	"multiplayer": "res://scenes/menus/multiplayer_screen.tscn",
 	"characters": "res://scenes/menus/characters_screen.tscn",
 	"settings": "res://scenes/menus/settings_screen.tscn",
 	"board": "res://scenes/boards/board_scene.tscn",
 	"victory": "res://scenes/boards/victory_scene.tscn",
+}
+## A dónde lleva "volver" desde cada pantalla (las que no están aquí vuelven al menú principal).
+const BACK_TARGETS: Dictionary = {
+	"maps": "world",
 }
 const FADE_TIME := 0.22
 const FADE_COLOR := Color(0.03, 0.04, 0.09)
@@ -65,7 +69,7 @@ func go_to(key: String) -> void:
 
 
 func go_back() -> void:
-	go_to("main_menu")
+	go_to(str(BACK_TARGETS.get(current_key, "main_menu")))
 
 
 func quit_game() -> void:

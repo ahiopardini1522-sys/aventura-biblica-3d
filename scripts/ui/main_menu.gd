@@ -5,7 +5,7 @@ extends ScreenBase
 
 func _ready() -> void:
 	%PlayButton.pressed.connect(_on_play_pressed)
-	%MapsButton.pressed.connect(SceneRouter.go_to.bind("maps"))
+	%MapsButton.pressed.connect(SceneRouter.go_to.bind("world"))
 	%MultiplayerButton.pressed.connect(SceneRouter.go_to.bind("multiplayer"))
 	%CharactersButton.pressed.connect(SceneRouter.go_to.bind("characters"))
 	%SettingsButton.pressed.connect(SceneRouter.go_to.bind("settings"))

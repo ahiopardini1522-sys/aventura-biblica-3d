@@ -76,6 +76,14 @@ static func requirement_of(id: String) -> String:
 	return str(unlock.get("requires", ""))
 
 
+## Frase que explica qué falta para abrir un mapa bloqueado ("" si no pide nada).
+static func requirement_text(id: String) -> String:
+	var needs: String = requirement_of(id)
+	if needs.is_empty():
+		return ""
+	return "Completa «%s» para abrir este mundo." % name_of(needs)
+
+
 ## Ids de los mapas que se abren al completar este.
 static func unlocked_by(id: String) -> Array[String]:
 	_ensure_loaded()

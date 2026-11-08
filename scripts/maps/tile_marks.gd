@@ -18,9 +18,11 @@ const NUMBER_STROKE := 0.05
 const CORNER := Vector2(0.25, -0.25)
 
 
-## El número de la casilla, abajo a la izquierda. El color depende de lo clara que sea la casilla.
-static func add_number(ink: MeshKit, tile: int, center: Vector3, tile_color: Color) -> void:
-	var color: Color = INK_DARK if tile_color.get_luminance() > 0.42 else INK_LIGHT
+## El número de la casilla, abajo a la izquierda. El color depende de lo clara que sea la casilla;
+## en un tablero de noche ("light_ink") siempre va en claro.
+static func add_number(ink: MeshKit, tile: int, center: Vector3, tile_color: Color,
+		light_ink: bool = false) -> void:
+	var color: Color = INK_DARK if tile_color.get_luminance() > 0.42 and not light_ink else INK_LIGHT
 	StrokeFont.add_text(ink, str(tile), Vector3(center.x - 0.12, BoardLayout.TILE_HEIGHT + 0.014, center.z + 0.2),
 			NUMBER_HEIGHT, NUMBER_STROKE, color)
 

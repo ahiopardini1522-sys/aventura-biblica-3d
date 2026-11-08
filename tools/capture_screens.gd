@@ -73,6 +73,7 @@ func _run() -> void:
 	await _capture_board()
 	await _capture_victory()
 	await _capture_scenery(SCENERY_MAPS)
+	await _capture_world()
 
 	_finished = true
 	print("CAPTURAS: listo (%s)" % _dir)
@@ -200,6 +201,68 @@ func _capture_scenery(map_ids: Array) -> void:
 		_camera.goal_distance = _camera.default_distance * 1.25
 		await create_timer(1.8).timeout
 		await _save("scenery_%s_side" % id)
+
+
+## El mapa mundial con un viaje a medias (Edén y Arca completados, Egipto abierto, el resto bloqueado):
+## vista general, cada tipo de región de cerca, las insignias y el momento en que se abre un mundo.
+func _capture_world() -> void:
+	var progress: Node = root.get_node_or_null("ProgressManager")
+	if progress == null:
+		return
+	progress.reset(false)
+	progress.record_match("eden", _fake_summary(260.0, 28, 5, 6, 3))
+	progress.record_match("arca_noe", _fake_summary(300.0, 30, 6, 7, 3))
+	_state.last_progress = {}
+	_state.select_map("egipto_exodo")
+	_router.go_to("world")
+	await _wait_for("world")
+	await create_timer(0.5).timeout
+	var screen: Node = current_scene
+	if screen == null or not screen.has_method("select_region"):
+		print("CAPTURAS: el mapa mundial no se abrió")
+		return
+	# Vista general (sin dejar que la cámara vuele sola hasta la región elegida).
+	screen.get_node("%ViewButton").pressed.emit()
+	screen.camera().snap()
+	await create_timer(1.8).timeout
+	await _save("world_overview")
+	for entry in [["eden", "world_eden"], ["egipto_exodo", "world_egipto"], ["monte_sinai", "world_monte"],
+			["jerusalen", "world_jerusalen"], ["belen", "world_belen"]]:
+		screen.select_region(str(entry[0]))
+		await create_timer(2.6).timeout
+		await _save(str(entry[1]))
+	screen.get_node("%ViewButton").pressed.emit()
+	await create_timer(1.6).timeout
+	screen.open_badges()
+	await create_timer(0.9).timeout
+	await _save("world_badges")
+	screen.close_badges()
+
+	# Al volver de una partida que abrió un mundo nuevo (Egipto), el candado salta.
+	progress.reset(false)
+	progress.record_match("eden", _fake_summary(260.0, 28, 5, 6, 3))
+	_state.last_progress = progress.record_match("arca_noe", _fake_summary(300.0, 30, 6, 7, 3))
+	_state.select_map("arca_noe")
+	_router.go_to("world")
+	await _wait_for("world")
+	await create_timer(2.0).timeout
+	await _save("world_unlock")
+	await create_timer(1.6).timeout
+	await _save("world_unlocked")
+
+
+func _fake_summary(duration: float, turns: int, correct: int, stars_first: int, stars_second: int) -> Dictionary:
+	return {
+		"finished": true, "winner": 0, "winner_name": "Jugador 1", "turns": turns, "duration": duration,
+		"total_rolls": turns * 2, "total_challenges": correct + 2, "total_correct": correct,
+		"players": [
+			{"index": 0, "name": "Jugador 1", "tile": 100, "stars": stars_first, "rank": 1, "winner": true,
+				"stats": {"rolls": turns, "ladders": 2, "snakes": 1, "specials": 3}},
+			{"index": 1, "name": "Jugador 2", "tile": 60, "stars": stars_second, "rank": 2, "winner": false,
+				"stats": {"rolls": turns, "ladders": 1, "snakes": 2, "specials": 1}},
+		],
+		"options": {},
+	}
 
 
 func _challenge_open() -> bool:

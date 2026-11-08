@@ -220,6 +220,7 @@ func _build_tiles() -> void:
 	var ink := MeshKit.new()
 	var color_a: Color = _color("tile_a", Color(0.92, 0.82, 0.60))
 	var color_b: Color = _color("tile_b", Color(0.84, 0.65, 0.40))
+	var night: bool = BoardStyle.is_night(_style)
 
 	for tile in range(1, layout.tile_count() + 1):
 		var cell: Vector2i = layout.grid_of(tile)
@@ -234,7 +235,7 @@ func _build_tiles() -> void:
 		_tiles_root.add_child(anchor)
 
 		BoardStyle.add_tile(surface, _style, center, color, rng)
-		TileMarks.add_number(ink, tile, center, color)
+		TileMarks.add_number(ink, tile, center, color, night)
 		if layout.is_challenge_tile(tile):
 			TileMarks.add_challenge(marks, ink, center)
 			_challenge_marks[tile] = true

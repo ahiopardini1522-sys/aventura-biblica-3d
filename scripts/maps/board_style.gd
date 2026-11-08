@@ -21,6 +21,12 @@ static func normalize(style: String) -> String:
 	return "sand"
 
 
+## Los tableros de noche (Belén) llevan los números en claro: con la luz tenue las casillas se ven
+## oscuras aunque su color base sea claro.
+static func is_night(style: String) -> bool:
+	return style == "village"
+
+
 ## Textura (de TextureKit) que da relieve a la superficie del tablero.
 static func texture_kind(style: String) -> String:
 	match style:

@@ -54,10 +54,7 @@ func _on_map_pressed(map_id: String) -> void:
 
 ## Frase que explica qué falta para abrir un mapa bloqueado.
 static func requirement_text(map_id: String) -> String:
-	var needs: String = MapCatalog.requirement_of(map_id)
-	if needs.is_empty():
-		return ""
-	return "Completa «%s» para abrir este mundo." % MapCatalog.name_of(needs)
+	return MapCatalog.requirement_text(map_id)
 
 
 func _select(map_id: String) -> void:
