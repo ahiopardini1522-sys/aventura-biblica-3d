@@ -208,6 +208,7 @@ func _capture_scenery(map_ids: Array) -> void:
 		_camera.goal_yaw = BoardCamera.INTRO_YAW
 		_camera.goal_pitch = BoardCamera.INTRO_PITCH
 		_camera.goal_distance = _camera.default_distance * BoardCamera.INTRO_ZOOM
+		_camera.goal_fov = BoardCamera.INTRO_FOV
 		await create_timer(1.8).timeout
 		await _save("scenery_%s_pano" % id)
 

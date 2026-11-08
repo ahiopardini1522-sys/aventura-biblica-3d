@@ -9,15 +9,19 @@ extends Camera3D
 
 signal user_moved
 
-const MIN_PITCH := 28.0
+## El jugador puede bajar la cámara hasta casi el horizonte para mirar el paisaje (montañas, cielo).
+const MIN_PITCH := 12.0
 const MAX_PITCH := 84.0
 const MAX_YAW := 70.0
 const ORBIT_SPEED := Vector2(0.14, 0.12) # grados por píxel (giro, inclinación)
 const SMOOTHING := 10.0
-## Entrada de la escena: la cámara empieza baja, mirando el paisaje hasta el horizonte, y sube a la vista de juego.
+const DEFAULT_FOV := 45.0
+## Entrada de la escena: la cámara empieza baja y con ángulo ancho, mirando el paisaje hasta el horizonte,
+## y sube a la vista de juego mientras el ángulo se cierra.
 const INTRO_YAW := -34.0
-const INTRO_PITCH := 17.0
+const INTRO_PITCH := 12.0
 const INTRO_ZOOM := 1.55
+const INTRO_FOV := 56.0
 const INTRO_HOLD := 0.5
 const INTRO_SECONDS := 2.3
 
@@ -40,6 +44,7 @@ var distance: float = 17.0
 var goal_yaw: float = 0.0
 var goal_pitch: float = 56.0
 var goal_distance: float = 17.0
+var goal_fov: float = DEFAULT_FOV
 
 var _touches: Dictionary = {}
 var _pinch_last: float = 0.0
@@ -54,7 +59,8 @@ var _shake_offset: Vector3 = Vector3.ZERO
 
 func _ready() -> void:
 	current = true
-	fov = 45.0
+	fov = DEFAULT_FOV
+	goal_fov = DEFAULT_FOV
 	far = 400.0
 	_snap_to_goal()
 
@@ -64,6 +70,7 @@ func _process(delta: float) -> void:
 	yaw = lerpf(yaw, goal_yaw, k)
 	pitch = lerpf(pitch, goal_pitch, k)
 	distance = lerpf(distance, goal_distance, k)
+	fov = lerpf(fov, goal_fov, k)
 	target = target.lerp(goal_target, k)
 	_update_shake(delta)
 	_apply()
@@ -91,6 +98,7 @@ func reset_view(animated: bool = true) -> void:
 		goal_yaw = default_yaw
 		goal_pitch = default_pitch
 		goal_distance = default_distance
+		goal_fov = DEFAULT_FOV
 		_snap_to_goal()
 		return
 	_tween = create_tween().set_parallel(true)
@@ -108,9 +116,11 @@ func play_intro() -> void:
 	yaw = INTRO_YAW
 	pitch = INTRO_PITCH
 	distance = default_distance * INTRO_ZOOM
+	fov = INTRO_FOV
 	goal_yaw = yaw
 	goal_pitch = pitch
 	goal_distance = distance
+	goal_fov = fov
 	_apply()
 	_tween = create_tween().set_parallel(true)
 	_tween.tween_property(self, "goal_yaw", default_yaw, INTRO_SECONDS).set_delay(INTRO_HOLD) \
@@ -118,6 +128,8 @@ func play_intro() -> void:
 	_tween.tween_property(self, "goal_pitch", default_pitch, INTRO_SECONDS).set_delay(INTRO_HOLD) \
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_tween.tween_property(self, "goal_distance", default_distance, INTRO_SECONDS).set_delay(INTRO_HOLD) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_tween.tween_property(self, "goal_fov", DEFAULT_FOV, INTRO_SECONDS).set_delay(INTRO_HOLD) \
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_tween.finished.connect(_on_intro_finished)
 	_intro_running = true
@@ -243,6 +255,7 @@ func _snap_to_goal() -> void:
 	yaw = goal_yaw
 	pitch = goal_pitch
 	distance = goal_distance
+	fov = goal_fov
 	target = goal_target
 	_apply()
 
@@ -258,6 +271,7 @@ func _kill_tween() -> void:
 		goal_yaw = default_yaw
 		goal_pitch = default_pitch
 		goal_distance = default_distance
+		goal_fov = DEFAULT_FOV
 
 
 func _apply() -> void:

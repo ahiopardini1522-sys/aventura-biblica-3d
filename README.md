@@ -38,7 +38,7 @@ Generadas automáticamente por GitHub Actions con render por software (en un tel
 7. Gana el primero que llega a la casilla 100: podio 3D, estadísticas de la partida y, si es la primera vez que se completa ese mundo, **premio en estrellas, insignia y el siguiente mundo abierto**. De vuelta en el mapa, una animación abre el candado.
 
 **Controles del mapa mundial:** un dedo arrastra, el pellizco acerca o aleja (también hay botones **+** y **−**), **VISTA** vuelve a la vista general, **LISTA** muestra la lista de mapas e **INSIGNIAS** abre la colección.
-**Controles del tablero:** un dedo gira la cámara, el pellizco acerca o aleja, **VISTA** la restaura y **PAUSAR** abre el menú de pausa. En Android, el botón o gesto de atrás pausa la partida, cierra las insignias y vuelve de la lista al mapa.
+**Controles del tablero:** al entrar, la cámara empieza baja y con ángulo ancho para mostrar el paisaje del mundo y sube sola hasta la vista de juego. Un dedo gira la cámara (se puede bajar hasta casi el horizonte para ver montañas y cielo), el pellizco acerca o aleja, **VISTA** la restaura y **PAUSAR** abre el menú de pausa. En Android, el botón o gesto de atrás pausa la partida, cierra las insignias y vuelve de la lista al mapa.
 
 ## Qué incluye la Etapa 3
 

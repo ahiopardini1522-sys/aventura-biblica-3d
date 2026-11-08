@@ -3339,21 +3339,31 @@ func _test_camera_and_dice() -> void:
 	# cámara a mitad de camino (por ejemplo, al lanzar el dado enseguida), no puede quedarse en esa vista baja.
 	_camera.play_intro()
 	_check(_camera.is_intro_running(), "la entrada de la escena está en marcha")
-	_check(absf(_camera.pitch - BoardCamera.INTRO_PITCH) < 0.001 and _camera.pitch < BoardCamera.MIN_PITCH,
+	_check(absf(_camera.pitch - BoardCamera.INTRO_PITCH) < 0.001 and _camera.pitch < _camera.default_pitch - 30.0,
 			"la entrada empieza con la cámara baja (%.0f°), mirando el paisaje" % _camera.pitch)
 	_check(_camera.distance > _camera.default_distance * 1.4, "la entrada empieza con la cámara alejada")
+	_check(_camera.fov > BoardCamera.DEFAULT_FOV + 5.0, "la entrada empieza con el ángulo ancho (%.0f°)" % _camera.fov)
 	_camera.focus_on(Vector3.ZERO)
 	_check(not _camera.is_intro_running(), "enfocar una ficha detiene la entrada")
-	_check(absf(_camera.goal_pitch - _camera.default_pitch) < 0.001 and absf(_camera.goal_yaw - _camera.default_yaw) < 0.001,
-			"al interrumpir la entrada, la cámara va a la inclinación y el giro de juego")
+	_check(absf(_camera.goal_pitch - _camera.default_pitch) < 0.001 and absf(_camera.goal_yaw - _camera.default_yaw) < 0.001
+			and absf(_camera.goal_fov - BoardCamera.DEFAULT_FOV) < 0.001,
+			"al interrumpir la entrada, la cámara va a la inclinación, el giro y el ángulo de juego")
 	_camera.reset_view(false)
 	_camera.play_intro()
 	_camera.orbit_by(Vector2.ZERO)
-	_check(not _camera.is_intro_running() and _camera.goal_pitch >= BoardCamera.MIN_PITCH,
+	_check(not _camera.is_intro_running() and absf(_camera.goal_pitch - _camera.default_pitch) < 0.001,
 			"un gesto del jugador durante la entrada tampoco deja la cámara baja")
 	_camera.reset_view(false)
-	_check(not _camera.is_intro_running() and absf(_camera.distance - _camera.default_distance) < 0.001,
-			"VISTA después de la entrada deja la cámara en la vista de juego")
+	_check(not _camera.is_intro_running() and absf(_camera.distance - _camera.default_distance) < 0.001
+			and absf(_camera.fov - BoardCamera.DEFAULT_FOV) < 0.001,
+			"VISTA después de la entrada deja la cámara y el ángulo en la vista de juego")
+	# El jugador puede bajar la cámara casi hasta el horizonte para ver el paisaje, y no más.
+	_camera.orbit_by(Vector2(0.0, -2000.0))
+	_check(absf(_camera.goal_pitch - BoardCamera.MIN_PITCH) < 0.001 and BoardCamera.MIN_PITCH <= 15.0,
+			"arrastrar hacia abajo baja la cámara hasta el límite (%.0f°)" % _camera.goal_pitch)
+	_camera.orbit_by(Vector2(0.0, 4000.0))
+	_check(absf(_camera.goal_pitch - BoardCamera.MAX_PITCH) < 0.001, "arrastrar hacia arriba sube la cámara hasta el límite (%.0f°)" % _camera.goal_pitch)
+	_camera.reset_view(false)
 
 	_dice.speed = 20.0
 	for value in range(1, 7):
