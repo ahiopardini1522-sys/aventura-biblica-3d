@@ -127,6 +127,7 @@ func _run() -> void:
 	_test_board_styles()
 	_test_world_logic()
 	_test_world_camera()
+	await _test_ambience()
 	await _test_menu_and_screens()
 	await _test_board_scene()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_PROGRESS_PATH))
@@ -1902,6 +1903,107 @@ func _test_screen(key: String) -> void:
 			_test_settings_screen()
 
 
+# ---------------------------------------------------------------- Sonidos ambientales
+
+## Cada mundo tiene su sonido en bucle: se generan por código, no están vacíos, no se pasan de volumen,
+## cierran el bucle sin salto, suenan distinto entre sí y los reproduce un nodo que va por el bus de música.
+func _test_ambience() -> void:
+	print("-- Sonidos ambientales de los mundos")
+	var kinds: Array[String] = AmbienceSynth.KINDS
+	_check(kinds.size() == 7, "hay un sonido ambiental para cada uno de los 7 mundos (%d)" % kinds.size())
+	_check(AmbienceSynth.has_kind("sea") and not AmbienceSynth.has_kind("") and not AmbienceSynth.has_kind("lluvia"),
+			"solo se aceptan los nombres de sonido conocidos")
+	var frames: int = AmbienceSynth.frames()
+	_check(frames == int(AmbienceSynth.SECONDS * float(AmbienceSynth.RATE)) and frames > 40000,
+			"cada bucle dura %.1f segundos (%d muestras)" % [AmbienceSynth.SECONDS, frames])
+
+	var hashes: Dictionary = {}
+	var total_ms: int = 0
+	for kind in kinds:
+		var started: int = Time.get_ticks_msec()
+		var stream: AudioStreamWAV = AmbienceSynth.ambience(kind)
+		var elapsed: int = Time.get_ticks_msec() - started
+		total_ms += elapsed
+		if stream == null:
+			_check(false, "el sonido '%s' se genera" % kind)
+			continue
+		_check(stream.format == AudioStreamWAV.FORMAT_16_BITS and not stream.stereo
+				and stream.mix_rate == AmbienceSynth.RATE and stream.data.size() == frames * 2,
+				"sonido '%s': audio de 16 bits, mono, %d Hz (%d ms)" % [kind, stream.mix_rate, elapsed])
+		_check(stream.loop_mode == AudioStreamWAV.LOOP_FORWARD and stream.loop_begin == 0 and stream.loop_end == frames,
+				"sonido '%s': se repite en bucle de principio a fin" % kind)
+		var data: PackedByteArray = stream.data
+		var first: int = data.decode_s16(0)
+		var previous: int = first
+		var peak: int = absi(first)
+		var energy: float = float(first * first)
+		var diff_energy: float = 0.0
+		var window: int = 2756
+		var window_energy: float = float(first * first)
+		var quietest: float = INF
+		var loudest: float = 0.0
+		for i in range(1, frames):
+			var value: int = data.decode_s16(i * 2)
+			peak = maxi(peak, absi(value))
+			energy += float(value * value)
+			diff_energy += float((value - previous) * (value - previous))
+			previous = value
+			window_energy += float(value * value)
+			if (i + 1) % window == 0:
+				quietest = minf(quietest, window_energy)
+				loudest = maxf(loudest, window_energy)
+				window_energy = 0.0
+		var rms: float = sqrt(energy / float(frames)) / 32767.0
+		var diff_rms: float = sqrt(diff_energy / float(frames - 1))
+		var seam: int = absi(first - previous)
+		_check(rms > 0.05 and rms < 0.2, "sonido '%s': volumen medio %.3f (ni mudo ni fuerte)" % [kind, rms])
+		_check(peak > 3000 and peak <= 31200, "sonido '%s': el pico (%d de 32767) no se recorta" % [kind, peak])
+		_check(float(seam) <= 5.0 * diff_rms + 100.0,
+				"sonido '%s': el final del bucle encaja con el principio (salto %d, normal %.0f)" % [kind, seam, diff_rms])
+		var movement: float = sqrt(loudest / maxf(quietest, 1.0))
+		_check(movement > 1.05, "sonido '%s': tiene movimiento, no es un zumbido plano (x%.2f)" % [kind, movement])
+		hashes[hash(data)] = kind
+	_check(hashes.size() == kinds.size(), "los 7 sonidos son distintos entre sí (%d)" % hashes.size())
+	_check(total_ms < 20000, "los 7 sonidos se generan en %d ms" % total_ms)
+	print("  (generar los 7 sonidos tardó %d ms en esta máquina)" % total_ms)
+	_check(AmbienceSynth.ambience("sea") == AmbienceSynth.ambience("sea"), "cada sonido se genera una sola vez")
+	_check(AmbienceSynth.ambience("no-existe") == AmbienceSynth.ambience(AmbienceSynth.FALLBACK),
+			"un nombre desconocido da el sonido del viento")
+
+	# Cada mundo del catálogo pide un sonido que existe, y los 7 son distintos.
+	var used: Dictionary = {}
+	var catalog_ok: bool = true
+	for map_id in MapCatalog.ids_in_order():
+		var sound: String = str(MapCatalog.find_map(map_id)["ambience"]["sound"])
+		used[sound] = true
+		if not AmbienceSynth.has_kind(sound):
+			catalog_ok = false
+	_check(catalog_ok and used.size() == 7, "los 7 mundos del catálogo piden 7 sonidos que existen (%d)" % used.size())
+
+	# El reproductor: bucle por el bus de música, entrada suave y silencio con un nombre desconocido.
+	var player := AmbiencePlayer.new()
+	player.name = "AmbienceTest"
+	root.add_child(player)
+	player.start("garden", 0.0)
+	_check(player.playing and player.kind == "garden" and str(player.bus) == "Music"
+			and player.stream == AmbienceSynth.ambience("garden"),
+			"el reproductor toca el sonido pedido por el bus de música")
+	_check(is_equal_approx(player.volume_db, AmbiencePlayer.VOLUME_DB),
+			"sin entrada suave suena al volumen final (%.1f dB)" % player.volume_db)
+	player.start("sea", 0.5, -20.0)
+	_check(player.playing and player.kind == "sea" and player.volume_db <= AmbiencePlayer.SILENT_DB + 1.0,
+			"con entrada suave empieza casi en silencio (%.1f dB)" % player.volume_db)
+	await create_timer(0.8).timeout
+	_check(is_equal_approx(player.volume_db, -20.0), "la entrada suave llega al volumen pedido (%.1f dB)" % player.volume_db)
+	player.start("lluvia")
+	_check(not player.playing and player.kind.is_empty(), "un sonido desconocido deja el reproductor en silencio")
+	player.start("night", 0.0)
+	player.fade_out(0.0)
+	_check(not player.playing and player.kind.is_empty(), "fade_out(0) lo apaga de golpe")
+	player.queue_free()
+	await create_timer(0.05).timeout
+
+
 # ---------------------------------------------------------------- Mapa mundial
 
 ## Mundo bíblico: disposición, relieve, caminos e iconos 3D (sin abrir la pantalla).
@@ -2381,6 +2483,9 @@ func _world_first_day() -> void:
 	_check(lights_ok, "solo el mundo abierto tiene aro de luz y ninguno tiene estrella todavía")
 	_check(roads_closed, "los caminos que llevan a mundos cerrados están apagados")
 	_check(world.is_arrow_visible() and world.next_id == "eden", "la flecha dorada señala el próximo mundo")
+	var world_sound: Node = screen.get_node_or_null("Ambience")
+	_check(world_sound != null and str(world_sound.get("kind")) == "sea" and bool(world_sound.get("playing")),
+			"el mapa mundial suena: oleaje de fondo")
 	_check(str(screen.selected_id()) == "eden" and world.is_selector_visible("eden") and not world.is_selector_visible("arca_noe"),
 			"el Edén está elegido al empezar")
 	var triangles: int = _triangles_of(world)
@@ -3084,6 +3189,11 @@ func _test_board_structure() -> void:
 			"las 100 casillas son una sola malla con geometría propia del estilo")
 	_check(tile_ink != null and _triangles_of(tile_ink) >= 100 * 12,
 			"los 100 números se dibujan como una sola malla de trazos")
+	var board_sound: Node = current_scene.get_node_or_null("Ambience")
+	var wanted_sound: String = str(MapCatalog.find_map("desierto_sinai")["ambience"]["sound"])
+	_check(board_sound != null and str(board_sound.get("kind")) == wanted_sound and bool(board_sound.get("playing"))
+			and str(board_sound.get("bus")) == "Music",
+			"el tablero suena como su mundo ('%s') por el bus de música" % wanted_sound)
 	_check(board.get_node_or_null("StartMarker") != null, "hay un punto de inicio")
 	_check(board.get_node_or_null("GoalMarker") != null, "hay una meta")
 	_check(board.get_node_or_null("DiceArea") != null, "hay una zona para el dado")

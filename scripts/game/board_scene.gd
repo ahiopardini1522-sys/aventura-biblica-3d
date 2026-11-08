@@ -43,6 +43,7 @@ func _ready() -> void:
 	_dice.position = dice_spot
 	_environment.apply_map(map_data, hash(str(map_data["id"])),
 			[Vector3(dice_spot.x, dice_spot.z, 4.0)])
+	_start_ambience()
 
 	roster = GameState.build_roster()
 	_spawn_tokens()
@@ -72,6 +73,16 @@ func _ready() -> void:
 	_flow.tokens = token_nodes
 	ProgressManager.record_start(str(map_data["id"]))
 	_flow.start(match_state)
+
+
+## Sonido ambiental del mundo (jardín, mar, viento...), en bucle y por el bus de música.
+## Se genera ahora, mientras la pantalla sigue en negro, para que no haya tirones durante la partida.
+func _start_ambience() -> void:
+	var ambience_data: Dictionary = map_data.get("ambience", {})
+	var player := AmbiencePlayer.new()
+	player.name = "Ambience"
+	add_child(player)
+	player.start(str(ambience_data.get("sound", "")))
 
 
 func _exit_tree() -> void:

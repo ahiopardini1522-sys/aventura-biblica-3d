@@ -16,6 +16,9 @@ const CAMERA_HOME := Vector3(3.0, 0.0, 10.0)
 const INTRO_DELAY := 1.1
 const HINT_SECONDS := 9.0
 const BANNER_SECONDS := 3.6
+## Oleaje y gaviotas de fondo, bajito, mientras se mira el mapa.
+const WORLD_SOUND := "sea"
+const WORLD_SOUND_DB := -15.0
 const HINT_TEXT := "Arrastra para recorrer el mundo  ·  Pellizca para acercar  ·  Toca una región"
 
 @onready var _world: WorldMapBuilder = %World
@@ -47,6 +50,7 @@ func _ready() -> void:
 
 	_world.build(SettingsManager.quality)
 	_camera.configure(CAMERA_BOUNDS, CAMERA_HOME, OVERVIEW_DISTANCE)
+	_start_ambience()
 
 	# Un mundo que se abrió en la última partida se muestra primero bloqueado y se abre con una
 	# animación; el resto de las regiones muestran su estado real.
@@ -68,6 +72,13 @@ func _ready() -> void:
 		_fly_to_selection_later()
 	else:
 		_celebrate(opened)
+
+
+func _start_ambience() -> void:
+	var player := AmbiencePlayer.new()
+	player.name = "Ambience"
+	add_child(player)
+	player.start(WORLD_SOUND, AmbiencePlayer.FADE_IN, WORLD_SOUND_DB)
 
 
 # ---------------------------------------------------------------- Consultas (también para las pruebas)
