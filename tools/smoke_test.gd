@@ -3335,6 +3335,26 @@ func _test_camera_and_dice() -> void:
 	_check(absf(_camera.goal_distance - _camera.default_distance) < 0.001, "VISTA restablece la cámara")
 	_check(not _camera.user_override, "VISTA devuelve la cámara al juego")
 
+	# La entrada de la escena empieza baja, para que se vea el paisaje. Si el juego o el jugador mueven la
+	# cámara a mitad de camino (por ejemplo, al lanzar el dado enseguida), no puede quedarse en esa vista baja.
+	_camera.play_intro()
+	_check(_camera.is_intro_running(), "la entrada de la escena está en marcha")
+	_check(absf(_camera.pitch - BoardCamera.INTRO_PITCH) < 0.001 and _camera.pitch < BoardCamera.MIN_PITCH,
+			"la entrada empieza con la cámara baja (%.0f°), mirando el paisaje" % _camera.pitch)
+	_check(_camera.distance > _camera.default_distance * 1.4, "la entrada empieza con la cámara alejada")
+	_camera.focus_on(Vector3.ZERO)
+	_check(not _camera.is_intro_running(), "enfocar una ficha detiene la entrada")
+	_check(absf(_camera.goal_pitch - _camera.default_pitch) < 0.001 and absf(_camera.goal_yaw - _camera.default_yaw) < 0.001,
+			"al interrumpir la entrada, la cámara va a la inclinación y el giro de juego")
+	_camera.reset_view(false)
+	_camera.play_intro()
+	_camera.orbit_by(Vector2.ZERO)
+	_check(not _camera.is_intro_running() and _camera.goal_pitch >= BoardCamera.MIN_PITCH,
+			"un gesto del jugador durante la entrada tampoco deja la cámara baja")
+	_camera.reset_view(false)
+	_check(not _camera.is_intro_running() and absf(_camera.distance - _camera.default_distance) < 0.001,
+			"VISTA después de la entrada deja la cámara en la vista de juego")
+
 	_dice.speed = 20.0
 	for value in range(1, 7):
 		var rolled: int = _dice.roll(value)

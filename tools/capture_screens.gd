@@ -11,7 +11,7 @@ extends SceneTree
 const SCREENS := ["main_menu", "maps", "multiplayer", "characters", "settings", "board"]
 const TIME_LIMIT := 480.0
 ## Mundos de los que se toman capturas del escenario 3D (vista normal, baja y lateral).
-const SCENERY_MAPS := ["eden", "arca_noe", "egipto_exodo", "monte_sinai", "jerusalen", "belen"]
+const SCENERY_MAPS := ["eden", "arca_noe", "egipto_exodo", "desierto_sinai", "monte_sinai", "jerusalen", "belen"]
 
 var _dir: String = ""
 var _router: Node
@@ -233,6 +233,7 @@ func _capture_world() -> void:
 	# Vista general (sin dejar que la cámara vuele sola hasta la región elegida).
 	screen.get_node("%ViewButton").pressed.emit()
 	screen.camera().snap()
+	screen._dismiss_hint()
 	await create_timer(1.8).timeout
 	await _save("world_overview")
 	for entry in [["eden", "world_eden"], ["egipto_exodo", "world_egipto"], ["monte_sinai", "world_monte"],

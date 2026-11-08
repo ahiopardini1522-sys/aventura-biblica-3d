@@ -23,6 +23,8 @@ const INTRO_SECONDS := 2.3
 
 var target: Vector3 = Vector3.ZERO
 var goal_target: Vector3 = Vector3.ZERO
+## Verdadero mientras corre la entrada de la escena (la cámara baja que sube a la vista de juego).
+var _intro_running: bool = false
 ## Verdadero cuando el jugador movió la cámara a mano: las ayudas automáticas se detienen.
 var user_override: bool = false
 var default_yaw: float = 0.0
@@ -117,6 +119,12 @@ func play_intro() -> void:
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_tween.tween_property(self, "goal_distance", default_distance, INTRO_SECONDS).set_delay(INTRO_HOLD) \
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_tween.finished.connect(_on_intro_finished)
+	_intro_running = true
+
+
+func _on_intro_finished() -> void:
+	_intro_running = false
 
 
 ## Acerca (factor < 1) o aleja (factor > 1) la cámara.
@@ -168,6 +176,10 @@ func shake(strength: float = 0.12, duration: float = 0.4) -> void:
 
 func is_shaking() -> bool:
 	return _shake_left > 0.0
+
+
+func is_intro_running() -> bool:
+	return _intro_running
 
 
 func _mark_user_moved() -> void:
@@ -235,9 +247,17 @@ func _snap_to_goal() -> void:
 	_apply()
 
 
+## Detiene la animación en curso. Si era la entrada de la escena y se interrumpe (el primer turno, un
+## gesto del jugador), la cámara no puede quedarse en la vista baja: las metas pasan a la vista de juego
+## y la suavización la lleva hasta allí.
 func _kill_tween() -> void:
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
+	if _intro_running:
+		_intro_running = false
+		goal_yaw = default_yaw
+		goal_pitch = default_pitch
+		goal_distance = default_distance
 
 
 func _apply() -> void:
