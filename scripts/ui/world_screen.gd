@@ -422,7 +422,19 @@ func _fade_hint() -> void:
 	_hint_tween.tween_property(hint, "modulate:a", 0.0, 0.8)
 
 
+## Apaga la pista de arriba enseguida (por ejemplo, cuando sale un aviso grande).
+func _dismiss_hint() -> void:
+	var hint := %HintLabel as Label
+	if hint.modulate.a <= 0.0:
+		return
+	if _hint_tween != null and _hint_tween.is_valid():
+		_hint_tween.kill()
+	_hint_tween = create_tween()
+	_hint_tween.tween_property(hint, "modulate:a", 0.0, 0.25)
+
+
 func _show_banner(title: String, detail: String) -> void:
+	_dismiss_hint()
 	%BannerTitle.text = title
 	%BannerDetail.text = detail
 	var panel := %BannerPanel as Control

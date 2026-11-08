@@ -2017,7 +2017,8 @@ func _test_world_logic() -> void:
 		var mesh: ArrayMesh = model.commit()
 		_check(_winding_ratio(mesh) > 0.999, "icono '%s': el orden de los vértices coincide con las normales" % icon)
 		var box: AABB = mesh.get_aabb()
-		_check(box.position.y > -1.2 and box.end.y < height + 1.5 and absf(box.position.x) < 10.0 and absf(box.end.x) < 10.0
+		# Las rocas van medio hundidas en el suelo (hasta ≈1.6 bajo la plataforma, donde no se ven).
+		_check(box.position.y > -1.7 and box.end.y < height + 1.5 and absf(box.position.x) < 10.0 and absf(box.end.x) < 10.0
 				and absf(box.position.z) < 10.0 and absf(box.end.z) < 10.0,
 				"icono '%s': cabe en la plataforma (%s)" % [icon, str(box)])
 		var decor := MeshKit.new()
@@ -2681,6 +2682,8 @@ func _world_list_and_back() -> void:
 	var list_button := _node("%ListButton") as Button
 	if list_button == null:
 		return
+	# La lista de mapas se arma al abrirse: se parte de una partida nueva, como en el primer día.
+	_progress.reset(false)
 	list_button.pressed.emit()
 	if not await _wait_until(_arrived.bind("maps"), 15.0):
 		_check(false, "LISTA abre la lista de mapas")

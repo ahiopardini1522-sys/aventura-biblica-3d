@@ -36,7 +36,7 @@ const LOCK_SCALE := 1.8
 # Luz del mapa: las mismas energías de la escena del tablero (ver MapEnvironment).
 const SUN_ENERGY := 0.26
 const AMBIENT_ENERGY := 0.28
-const FOG_DENSITY := 0.0022
+const FOG_DENSITY := 0.0013
 
 ## Cordilleras y cerros: (x, z, radio, altura). Todos dentro del continente y lejos de las plataformas.
 const RANGES: Array = [
@@ -50,7 +50,7 @@ const RANGES: Array = [
 	Vector4(-64.0, 30.0, 14.0, 8.0),
 ]
 
-const COLOR_LOCKED := Color(0.46, 0.48, 0.56)
+const COLOR_LOCKED := Color(0.62, 0.64, 0.74)
 const COLOR_NIGHT := Color(0.58, 0.66, 1.0)
 const GOLD := Color(1.0, 0.86, 0.36)
 
