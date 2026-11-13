@@ -1,0 +1,14 @@
+[A sin enviar nada] 0.04 s  abierta
+[B ping primero] 0.02 s  abierta
+[C cierra el cliente] 0.02 s  abierta
+[B ping primero] 0.02 s  mensaje: pong
+[A sin enviar nada] 10.03 s  mensaje: {"t":"error","code":"handshake_timeout","msg":"No llegó el saludo a tiempo."}
+[C cierra el cliente] 10.01 s  mensaje: {"t":"error","code":"handshake_timeout","msg":"No llegó el saludo a tiempo."}
+[C cierra el cliente] 10.01 s  el cliente cierra por su cuenta
+[B ping primero] 10.02 s  mensaje: {"t":"error","code":"handshake_timeout","msg":"No llegó el saludo a tiempo."}
+[B ping primero] 10.02 s  CERRADA código=4005 razón=handshake_timeout limpia=true
+[B ping primero] 10.02 s  terminó; estado final 3
+[C cierra el cliente] 20.03 s  CERRADA código=4005 razón=handshake_timeout limpia=true
+[C cierra el cliente] 20.03 s  terminó; estado final 3
+[A sin enviar nada] 20.05 s  CERRADA código=4005 razón=handshake_timeout limpia=true
+[A sin enviar nada] 20.05 s  terminó; estado final 3

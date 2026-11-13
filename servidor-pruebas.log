@@ -1,0 +1,326 @@
+
+> aventura-biblica-online@0.1.0 test
+> node --test
+
+TAP version 13
+# Subtest: el saludo correcto devuelve welcome con un código de sesión
+ok 1 - el saludo correcto devuelve welcome con un código de sesión
+  ---
+  duration_ms: 1.775884
+  type: 'test'
+  ...
+# Subtest: un saludo sin versión, con otra versión o con un identificador inválido se rechaza
+ok 2 - un saludo sin versión, con otra versión o con un identificador inválido se rechaza
+  ---
+  duration_ms: 0.369298
+  type: 'test'
+  ...
+# Subtest: el nombre se limpia: sin caracteres de control, sin espacios de más y con largo máximo
+ok 3 - el nombre se limpia: sin caracteres de control, sin espacios de más y con largo máximo
+  ---
+  duration_ms: 0.467437
+  type: 'test'
+  ...
+# Subtest: antes del saludo solo se aceptan ping y hello
+ok 4 - antes del saludo solo se aceptan ping y hello
+  ---
+  duration_ms: 0.200983
+  type: 'test'
+  ...
+# Subtest: un mensaje que no es JSON válido o no trae tipo se rechaza
+ok 5 - un mensaje que no es JSON válido o no trae tipo se rechaza
+  ---
+  duration_ms: 0.374887
+  type: 'test'
+  ...
+# Subtest: después del saludo, stats cuenta a los jugadores conectados
+ok 6 - después del saludo, stats cuenta a los jugadores conectados
+  ---
+  duration_ms: 0.257309
+  type: 'test'
+  ...
+# Subtest: las conexiones sin saludo no cuentan como jugadores
+ok 7 - las conexiones sin saludo no cuentan como jugadores
+  ---
+  duration_ms: 0.169426
+  type: 'test'
+  ...
+# Subtest: saludar dos veces cuenta como mensaje inválido
+ok 8 - saludar dos veces cuenta como mensaje inválido
+  ---
+  duration_ms: 0.134072
+  type: 'test'
+  ...
+# Subtest: tres mensajes inválidos seguidos después del saludo cortan la conexión
+ok 9 - tres mensajes inválidos seguidos después del saludo cortan la conexión
+  ---
+  duration_ms: 0.337229
+  type: 'test'
+  ...
+# Subtest: reanudar: con el código de sesión el jugador recupera su sesión
+ok 10 - reanudar: con el código de sesión el jugador recupera su sesión
+  ---
+  duration_ms: 0.346424
+  type: 'test'
+  ...
+# Subtest: reanudar con la conexión anterior todavía abierta reemplaza a la anterior
+ok 11 - reanudar con la conexión anterior todavía abierta reemplaza a la anterior
+  ---
+  duration_ms: 0.25141
+  type: 'test'
+  ...
+# Subtest: saludar con el mismo jugador sin código reemplaza la conexión y crea otra sesión
+ok 12 - saludar con el mismo jugador sin código reemplaza la conexión y crea otra sesión
+  ---
+  duration_ms: 0.139701
+  type: 'test'
+  ...
+# Subtest: la sesión vence a los 15 minutos de cortarse la conexión
+ok 13 - la sesión vence a los 15 minutos de cortarse la conexión
+  ---
+  duration_ms: 0.111649
+  type: 'test'
+  ...
+# Subtest: un código de sesión de otro jugador, inventado o mal formado no se reanuda
+ok 14 - un código de sesión de otro jugador, inventado o mal formado no se reanuda
+  ---
+  duration_ms: 0.136947
+  type: 'test'
+  ...
+# Subtest: bye: la despedida cierra la conexión y borra la sesión
+ok 15 - bye: la despedida cierra la conexión y borra la sesión
+  ---
+  duration_ms: 0.126661
+  type: 'test'
+  ...
+# Subtest: limitador de velocidad: demasiados mensajes seguidos cortan la conexión
+ok 16 - limitador de velocidad: demasiados mensajes seguidos cortan la conexión
+  ---
+  duration_ms: 0.209056
+  type: 'test'
+  ...
+# Subtest: un mensaje demasiado grande o binario se rechaza
+ok 17 - un mensaje demasiado grande o binario se rechaza
+  ---
+  duration_ms: 0.105159
+  type: 'test'
+  ...
+# Subtest: el servidor limita las conexiones totales y por dirección
+ok 18 - el servidor limita las conexiones totales y por dirección
+  ---
+  duration_ms: 0.15212
+  type: 'test'
+  ...
+# Subtest: sin dirección conocida no se aplica el límite por dirección
+ok 19 - sin dirección conocida no se aplica el límite por dirección
+  ---
+  duration_ms: 0.06612
+  type: 'test'
+  ...
+# Subtest: si no llega el saludo a tiempo, sweep cierra la conexión
+ok 20 - si no llega el saludo a tiempo, sweep cierra la conexión
+  ---
+  duration_ms: 0.214004
+  type: 'test'
+  ...
+# Subtest: sweep borra las sesiones vencidas y nextWake avisa cuándo volver
+ok 21 - sweep borra las sesiones vencidas y nextWake avisa cuándo volver
+  ---
+  duration_ms: 0.087342
+  type: 'test'
+  ...
+# Subtest: sesiones guardadas: se limita su cantidad y se descartan primero las que antes vencen
+ok 22 - sesiones guardadas: se limita su cantidad y se descartan primero las que antes vencen
+  ---
+  duration_ms: 0.136015
+  type: 'test'
+  ...
+# Subtest: estado guardado: las sesiones sobreviven a un reinicio del servidor
+ok 23 - estado guardado: las sesiones sobreviven a un reinicio del servidor
+  ---
+  duration_ms: 0.29821
+  type: 'test'
+  ...
+# Subtest: estado guardado dañado o con datos raros se ignora sin romper nada
+ok 24 - estado guardado dañado o con datos raros se ignora sin romper nada
+  ---
+  duration_ms: 0.157999
+  type: 'test'
+  ...
+# Subtest: una sesión huérfana tras un reinicio empieza a vencer en el primer sweep
+ok 25 - una sesión huérfana tras un reinicio empieza a vencer en el primer sweep
+  ---
+  duration_ms: 0.068022
+  type: 'test'
+  ...
+# Subtest: cerrar una conexión desconocida no hace nada
+ok 26 - cerrar una conexión desconocida no hace nada
+  ---
+  duration_ms: 0.0664
+  type: 'test'
+  ...
+# Subtest: restaurar una conexión vieja no le quita el lugar a la conexión activa del mismo jugador
+ok 27 - restaurar una conexión vieja no le quita el lugar a la conexión activa del mismo jugador
+  ---
+  duration_ms: 0.128414
+  type: 'test'
+  ...
+# Subtest: encode y decode son inversos para objetos con tipo
+ok 28 - encode y decode son inversos para objetos con tipo
+  ---
+  duration_ms: 0.789052
+  type: 'test'
+  ...
+# Subtest: decode rechaza lo que no es un objeto JSON con tipo de texto
+ok 29 - decode rechaza lo que no es un objeto JSON con tipo de texto
+  ---
+  duration_ms: 0.248185
+  type: 'test'
+  ...
+# Subtest: cleanName quita controles, invisibles y espacios repetidos
+ok 30 - cleanName quita controles, invisibles y espacios repetidos
+  ---
+  duration_ms: 0.247444
+  type: 'test'
+  ...
+# Subtest: validación de identificadores
+ok 31 - validación de identificadores
+  ---
+  duration_ms: 0.246002
+  type: 'test'
+  ...
+# Subtest: test/support/cloudflare_hooks.mjs
+ok 3 - test/support/cloudflare_hooks.mjs
+  ---
+  duration_ms: 23.837686
+  type: 'test'
+  ...
+# Subtest: test/support/cloudflare_workers_stub.mjs
+ok 4 - test/support/cloudflare_workers_stub.mjs
+  ---
+  duration_ms: 28.642983
+  type: 'test'
+  ...
+# Subtest: test/support/fake_cloudflare.mjs
+ok 5 - test/support/fake_cloudflare.mjs
+  ---
+  duration_ms: 24.792388
+  type: 'test'
+  ...
+# Subtest: el Worker responde /health y rechaza lo demás
+ok 35 - el Worker responde /health y rechaza lo demás
+  ---
+  duration_ms: 3.600931
+  type: 'test'
+  ...
+# Subtest: el Worker reenvía /ws al Hub con la petición original
+ok 36 - el Worker reenvía /ws al Hub con la petición original
+  ---
+  duration_ms: 0.352583
+  type: 'test'
+  ...
+# Subtest: el Hub configura la respuesta automática de ping
+ok 37 - el Hub configura la respuesta automática de ping
+  ---
+  duration_ms: 0.345763
+  type: 'test'
+  ...
+# Subtest: saludo completo: welcome al cliente, sesión guardada y datos pegados al WebSocket
+ok 38 - saludo completo: welcome al cliente, sesión guardada y datos pegados al WebSocket
+  ---
+  duration_ms: 1.55482
+  type: 'test'
+  ...
+# Subtest: un mensaje inválido recibe error y la conexión se cierra con el código acordado
+ok 39 - un mensaje inválido recibe error y la conexión se cierra con el código acordado
+  ---
+  duration_ms: 0.388918
+  type: 'test'
+  ...
+# Subtest: un mensaje binario se rechaza
+ok 40 - un mensaje binario se rechaza
+  ---
+  duration_ms: 0.292742
+  type: 'test'
+  ...
+# Subtest: mismo jugador desde otro lugar: la conexión vieja recibe bye y se cierra
+ok 41 - mismo jugador desde otro lugar: la conexión vieja recibe bye y se cierra
+  ---
+  duration_ms: 0.938018
+  type: 'test'
+  ...
+# Subtest: demasiadas conexiones desde una dirección: se rechaza con aviso
+ok 42 - demasiadas conexiones desde una dirección: se rechaza con aviso
+  ---
+  duration_ms: 0.998259
+  type: 'test'
+  ...
+# Subtest: al cortarse la conexión, la sesión empieza a vencer y se guarda
+ok 43 - al cortarse la conexión, la sesión empieza a vencer y se guarda
+  ---
+  duration_ms: 0.531794
+  type: 'test'
+  ...
+# Subtest: el cierre sin saludo previo no rompe nada
+ok 44 - el cierre sin saludo previo no rompe nada
+  ---
+  duration_ms: 0.372422
+  type: 'test'
+  ...
+# Subtest: hibernación: un Hub nuevo recupera las conexiones y las sesiones
+ok 45 - hibernación: un Hub nuevo recupera las conexiones y las sesiones
+  ---
+  duration_ms: 0.905559
+  type: 'test'
+  ...
+# Subtest: hibernación: una conexión cerrada mientras dormía deja la sesión para limpiar
+ok 46 - hibernación: una conexión cerrada mientras dormía deja la sesión para limpiar
+  ---
+  duration_ms: 1.067843
+  type: 'test'
+  ...
+# Subtest: alarma: borra las sesiones vencidas y no deja alarmas innecesarias
+ok 47 - alarma: borra las sesiones vencidas y no deja alarmas innecesarias
+  ---
+  duration_ms: 0.320674
+  type: 'test'
+  ...
+# Subtest: un WebSocket desconocido que escribe se cierra sin afectar a los demás
+ok 48 - un WebSocket desconocido que escribe se cierra sin afectar a los demás
+  ---
+  duration_ms: 5.89885
+  type: 'test'
+  ...
+# Subtest: stats y bye pasan por el Hub
+ok 49 - stats y bye pasan por el Hub
+  ---
+  duration_ms: 0.958549
+  type: 'test'
+  ...
+# Subtest: si la alarma suena un instante antes de la hora, la siguiente se pide para otro momento (no el mismo)
+ok 50 - si la alarma suena un instante antes de la hora, la siguiente se pide para otro momento (no el mismo)
+  ---
+  duration_ms: 0.689111
+  type: 'test'
+  ...
+# Subtest: nunca se programa una alarma para menos de 250 ms después de ahora
+ok 51 - nunca se programa una alarma para menos de 250 ms después de ahora
+  ---
+  duration_ms: 0.411232
+  type: 'test'
+  ...
+# Subtest: el Hub deja un aviso corto en el registro cuando suena la alarma
+ok 52 - el Hub deja un aviso corto en el registro cuando suena la alarma
+  ---
+  duration_ms: 0.296638
+  type: 'test'
+  ...
+1..52
+# tests 52
+# suites 0
+# pass 52
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 172.375928

@@ -1,0 +1,48 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+=== PRUEBA EN LÍNEA (servidor real): http://127.0.0.1:8787  ejecución a811c73cec73 ===
+Motor: 4.7.2-stable (official)
+-- Conexión, saludo y latido
+  ok     el cliente se conecta y recibe el welcome del servidor
+  ok     el servidor entrega un código de sesión válido
+  ok     primera conexión: sesión nueva y al menos 1 jugador en línea
+  ok     el ping de texto recibe su pong (17 ms)
+  ok     el latido mantiene la conexión
+  ok     stop() deja el cliente en reposo
+-- Dos jugadores a la vez
+  ok     dos dispositivos distintos se conectan a la vez
+  ok     stats cuenta al menos 2 jugadores en línea (2)
+  ok     cada jugador tiene su propia sesión
+-- Corte de red y reanudación de la sesión
+  ok     el cliente se conecta
+  ok     al cortarse la conexión pasa a esperar para reintentar
+  ok     reconecta solo después de la espera
+  ok     el servidor reconoce la sesión anterior (reanudada)
+  ok     el contador de reintentos vuelve a cero
+  ok     se puede reanudar varias veces seguidas
+-- El mismo jugador desde otro dispositivo
+  ok     el primer dispositivo se conecta
+  ok     el dispositivo anterior recibe el aviso de reemplazo
+  ok     el motivo es 'replaced' y no reintenta
+  ok     el dispositivo nuevo queda conectado
+  ok     el dispositivo nuevo reanuda la sesión con el código que tenía
+-- Despedida voluntaria
+  ok     el cliente se conecta
+  ok     vuelve a conectarse
+  ok     tras la despedida el servidor ya no guarda la sesión anterior
+-- Errores del protocolo con la conexión real
+  ok     se abre una conexión sin cliente
+  ok     la conexión se abre
+  ok     el servidor cierra la conexión ante un mensaje inválido
+   (aviso de error recibido: ''; motivo del cierre: 'bad_message')
+  ok     el servidor explica el motivo ('bad_message') en el aviso o en el cierre
+  ok     el código de cierre llega al juego intacto (4002)
+  ok     el saludo recibe respuesta
+  ok     el servidor corta a quien manda demasiados mensajes
+  ok     el cierre por límite de velocidad llega como 4003 (4003)
+-- Servidor que no responde
+  ok     si no hay servidor, pasa a esperar para reintentar
+  ok     el fallo de conexión cuenta como un reintento (código de cierre -1)
+  ok     stop() cancela los reintentos
+
+=== RESULTADO: 34 controles, 0 fallos ===

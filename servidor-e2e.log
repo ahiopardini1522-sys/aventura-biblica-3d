@@ -1,0 +1,21 @@
+Servidor: http://127.0.0.1:8787   WebSocket: ws://127.0.0.1:8787/ws   (ejecución 1ffa017aa527)
+  ok     GET /health responde ok (35 ms)
+  ok     saludo: llega welcome con código de sesión (10 ms)
+  ok     el texto "ping" se contesta con "pong" (12 ms)
+  ok     stats cuenta a los jugadores conectados (19 ms)
+  ok     reanudar: tras cortar la conexión, el código recupera la sesión (34 ms)
+  ok     el mismo jugador desde otro lugar reemplaza a la conexión anterior (4000) (16 ms)
+  ok     versión de protocolo distinta: error bad_version y cierre 4001 (9 ms)
+  ok     mensaje que no es JSON antes del saludo: error y cierre 4002 (6 ms)
+  ok     pedir stats sin saludar: hello_required y cierre 4002 (6 ms)
+  ok     identificador de jugador inválido: bad_client y cierre 4002 (6 ms)
+  ok     tres mensajes desconocidos seguidos cortan la conexión (4002) (10 ms)
+  ok     mensaje demasiado grande: too_big y cierre 4002 (10 ms)
+  ok     demasiados mensajes seguidos: rate_limited y cierre 4003 (29 ms)
+  ok     bye: la despedida cierra (1000) y descarta la sesión (14 ms)
+  ok     sin saludo (solo el texto "ping"), el servidor cierra la conexión a los ~10 s (4005) (10036 ms)
+  ok     tras 13 s sin hablar (el servidor puede hibernar) todo sigue funcionando (13070 ms)
+  ok     sin enviar nada, a los ~10 s el servidor avisa (handshake_timeout) y empieza a cerrar (14270 ms)
+         nota: el aviso llegó a los 10.3 s y el cierre quedó en curso (estado 2): el motor lo completa más tarde
+
+17 de 17 comprobaciones correctas.
