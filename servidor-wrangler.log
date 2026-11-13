@@ -1,0 +1,64 @@
+
+ ⛅️ wrangler 4.162.0
+────────────────────
+Your Worker has access to the following bindings:
+Binding            Resource            Mode
+env.HUB (Hub)      Durable Object      local
+
+⎔ Starting local server...
+[wrangler:info] Ready on http://127.0.0.1:8787
+[wrangler:info] GET /health 200 OK (145ms)
+[wrangler:info] GET /health 200 OK (3ms)
+[hub] despertó: 0 conexiones y 0 sesiones recuperadas
+[hub] alarma programada en 9999 ms
+[wrangler:info] GET /ws 101 Switching Protocols (14ms)
+[wrangler:info] GET /ws 101 Switching Protocols (17ms)
+[wrangler:info] GET /ws 101 Switching Protocols (17ms)
+[wrangler:info] GET /health 200 OK (18ms)
+[wrangler:info] GET /ws 101 Switching Protocols (3ms)
+[wrangler:info] GET /ws 101 Switching Protocols (6ms)
+[wrangler:info] GET /ws 101 Switching Protocols (4ms)
+[wrangler:info] GET /ws 101 Switching Protocols (3ms)
+[wrangler:info] GET /ws 101 Switching Protocols (20ms)
+[wrangler:info] GET /ws 101 Switching Protocols (3ms)
+[wrangler:info] GET /ws 101 Switching Protocols (6ms)
+[wrangler:info] GET /ws 101 Switching Protocols (2ms)
+[wrangler:info] GET /ws 101 Switching Protocols (4ms)
+[wrangler:info] GET /ws 101 Switching Protocols (2ms)
+[wrangler:info] GET /ws 101 Switching Protocols (2ms)
+[wrangler:info] GET /ws 101 Switching Protocols (2ms)
+[wrangler:info] GET /ws 101 Switching Protocols (2ms)
+[wrangler:info] GET /ws 101 Switching Protocols (4ms)
+[wrangler:info] GET /ws 101 Switching Protocols (2ms)
+[wrangler:info] GET /ws 101 Switching Protocols (2ms)
+[wrangler:info] GET /ws 101 Switching Protocols (2ms)
+[hub] alarma: conexiones=2 cierres=1 sesiones=11
+[hub] alarma programada en 250 ms
+[hub] alarma: conexiones=1 cierres=1 sesiones=11
+[hub] alarma programada en 889780 ms
+[hub] alarma programada en 10000 ms
+[wrangler:info] GET /ws 101 Switching Protocols (5ms)
+[wrangler:info] GET /ws 101 Switching Protocols (5ms)
+[wrangler:info] GET /ws 101 Switching Protocols (7ms)
+[wrangler:info] GET /ws 101 Switching Protocols (7ms)
+[hub] alarma: conexiones=3 cierres=0 sesiones=11
+[hub] alarma programada en 1268 ms
+[hub] alarma: conexiones=0 cierres=3 sesiones=11
+[hub] alarma programada en 875709 ms
+[hub] despertó: 0 conexiones y 11 sesiones recuperadas
+[hub] alarma programada en 10000 ms
+[wrangler:info] GET /ws 101 Switching Protocols (8ms)
+[wrangler:info] GET /ws 101 Switching Protocols (3ms)
+[wrangler:info] GET /ws 101 Switching Protocols (3ms)
+[wrangler:info] GET /ws 101 Switching Protocols (3ms)
+[wrangler:info] GET /ws 101 Switching Protocols (3ms)
+[wrangler:info] GET /ws 101 Switching Protocols (3ms)
+[wrangler:info] GET /ws 101 Switching Protocols (3ms)
+[wrangler:info] GET /ws 101 Switching Protocols (2ms)
+[wrangler:info] GET /ws 101 Switching Protocols (3ms)
+[hub] alarma: conexiones=0 cierres=0 sesiones=11
+[hub] alarma programada en 855490 ms
+[hub] alarma programada en 10000 ms
+[wrangler:info] GET /ws 101 Switching Protocols (5ms)
+[wrangler:info] GET /ws 101 Switching Protocols (4ms)
+[wrangler:info] GET /ws 101 Switching Protocols (3ms)

@@ -1,0 +1,164 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (84 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Dice[39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | AmbiencePlayer[39m[0m
+[   2% ] [90m[1mupdate_scripts_classes[22m | AmbienceSynth[39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | AudioSynth[39m[0m
+[   4% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | Effects[39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | GameFlow[39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | GameRules[39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | JsonLoader[39m[0m
+[  11% ] [90m[1mupdate_scripts_classes[22m | MatchState[39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | MessageBank[39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | ProgressData[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  17% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  20% ] [90m[1mupdate_scripts_classes[22m | AnimalKit[39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | FxKit[39m[0m
+[  22% ] [90m[1mupdate_scripts_classes[22m | MeshKit[39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | PropKit[39m[0m
+[  24% ] [90m[1mupdate_scripts_classes[22m | StrokeFont[39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | TerrainKit[39m[0m
+[  27% ] [90m[1mupdate_scripts_classes[22m | TextureKit[39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | WaterKit[39m[0m
+[  29% ] [90m[1mupdate_scripts_classes[22m | SceneryArca[39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | SceneryBelen[39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | SceneryEden[39m[0m
+[  32% ] [90m[1mupdate_scripts_classes[22m | SceneryEgipto[39m[0m
+[  34% ] [90m[1mupdate_scripts_classes[22m | SceneryFactory[39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | SceneryJerusalen[39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | SceneryKit[39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | ScenerySinai[39m[0m
+[  38% ] [90m[1mupdate_scripts_classes[22m | BoardBuilder[39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | BoardCamera[39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | BoardLandmarks[39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | BoardLayout[39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | BoardStyle[39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | EnvFactory[39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | LandscapeBuilder[39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | MapCatalog[39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | MapEnvironment[39m[0m
+[  49% ] [90m[1mupdate_scripts_classes[22m | MenuBackdrop[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | MeshFactory[39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | PropFactory[39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | TileMarks[39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | WorldCamera[39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | WorldIcons[39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | WorldMapBuilder[39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | OnlineClient[39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | OnlineConfig[39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  61% ] [90m[1mupdate_scripts_classes[22m | OnlineProtocol[39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | OnlineTransport[39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | WebSocketTransport[39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | CharacterCatalog[39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | CharacterPreview[39m[0m
+[  67% ] [90m[1mupdate_scripts_classes[22m | PlayerToken[39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | BibleReference[39m[0m
+[  69% ] [90m[1mupdate_scripts_classes[22m | Challenge[39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | ChallengeBank[39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | ChallengeDeck[39m[0m
+[  72% ] [90m[1mupdate_scripts_classes[22m | VerseProvider[39m[0m
+[  74% ] [90m[1mupdate_scripts_classes[22m | BoardHud[39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | ChallengePanel[39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  77% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  82% ] [90m[1mupdate_scripts_classes[22m | PauseMenu[39m[0m
+[  83% ] [90m[1mupdate_scripts_classes[22m | ProgressTrack[39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | ScreenBase[39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | ScreenHeader[39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  88% ] [90m[1mupdate_scripts_classes[22m | StarIcon[39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | UiFx[39m[0m
+[  90% ] [90m[1mupdate_scripts_classes[22m | UiTheme[39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | VictoryHud[39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  95% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  97% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started Scanning actions... (16 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | board.jpg[39m[0m
+[   5% ] [90m[1m_update_scan_actions[22m | challenge_question.jpg[39m[0m
+[  11% ] [90m[1m_update_scan_actions[22m | multiplayer_online.jpg[39m[0m
+[  17% ] [90m[1m_update_scan_actions[22m | scenery_arca_noe.jpg[39m[0m
+[  23% ] [90m[1m_update_scan_actions[22m | scenery_belen.jpg[39m[0m
+[  29% ] [90m[1m_update_scan_actions[22m | scenery_desierto_sinai.jpg[39m[0m
+[  35% ] [90m[1m_update_scan_actions[22m | scenery_eden.jpg[39m[0m
+[  41% ] [90m[1m_update_scan_actions[22m | scenery_egipto_exodo.jpg[39m[0m
+[  47% ] [90m[1m_update_scan_actions[22m | scenery_jerusalen.jpg[39m[0m
+[  52% ] [90m[1m_update_scan_actions[22m | scenery_monte_sinai.jpg[39m[0m
+[  58% ] [90m[1m_update_scan_actions[22m | victory.jpg[39m[0m
+[  64% ] [90m[1m_update_scan_actions[22m | world_badges.jpg[39m[0m
+[  70% ] [90m[1m_update_scan_actions[22m | world_eden.jpg[39m[0m
+[  76% ] [90m[1m_update_scan_actions[22m | world_overview.jpg[39m[0m
+[  82% ] [90m[1m_update_scan_actions[22m | world_unlocked.jpg[39m[0m
+[  88% ] [90m[1m_update_scan_actions[22m | icon.svg[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (16 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   5% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  11% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  17% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  23% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  29% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  35% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  41% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  47% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  52% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  58% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  64% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  70% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  76% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  82% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  88% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing pre-reimport operations...[39m[0m
+[   0% ] [90m[1mreimport[22m | board.jpg[39m[0m
+[   5% ] [90m[1mreimport[22m | challenge_question.jpg[39m[0m
+[  11% ] [90m[1mreimport[22m | multiplayer_online.jpg[39m[0m
+[  17% ] [90m[1mreimport[22m | scenery_arca_noe.jpg[39m[0m
+[  23% ] [90m[1mreimport[22m | scenery_belen.jpg[39m[0m
+[  29% ] [90m[1mreimport[22m | scenery_desierto_sinai.jpg[39m[0m
+[  35% ] [90m[1mreimport[22m | scenery_eden.jpg[39m[0m
+[  41% ] [90m[1mreimport[22m | scenery_egipto_exodo.jpg[39m[0m
+[  47% ] [90m[1mreimport[22m | scenery_jerusalen.jpg[39m[0m
+[  52% ] [90m[1mreimport[22m | scenery_monte_sinai.jpg[39m[0m
+[  58% ] [90m[1mreimport[22m | victory.jpg[39m[0m
+[  64% ] [90m[1mreimport[22m | world_badges.jpg[39m[0m
+[  70% ] [90m[1mreimport[22m | world_eden.jpg[39m[0m
+[  76% ] [90m[1mreimport[22m | world_overview.jpg[39m[0m
+[  82% ] [90m[1mreimport[22m | world_unlocked.jpg[39m[0m
+[  88% ] [90m[1mreimport[22m | icon.svg[39m[0m
+[  94% ] [90m[1mreimport[22m | Finalizing Asset Import...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (16 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing post-reimport operations...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+cannot connect to daemon at tcp:5037: Connection refused

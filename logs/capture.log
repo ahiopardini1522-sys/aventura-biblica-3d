@@ -1,0 +1,131 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:372)
+OpenGL API 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.4 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 20.1.2, 256 bits)
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5208:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5208:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1342:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5208:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5731:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2721:(snd_pcm_open_noupdate) Unknown PCM default
+ERROR: Condition "status < 0" is true. Returning: ERR_CANT_OPEN
+   at: init_output_device (drivers/alsa/audio_driver_alsa.cpp:97)
+WARNING: All audio drivers failed, falling back to the dummy driver.
+     at: initialize (servers/audio/audio_server.cpp:258)
+
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+CAPTURAS: main_menu -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/main_menu.png (1600x720, error 0)
+CAPTURAS:   main_menu: objetos 584, triángulos 25366, llamadas de dibujo 266
+CAPTURAS: life -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/life.png (1600x720, error 0)
+CAPTURAS:   life: objetos 1075, triángulos 25772, llamadas de dibujo 274
+CAPTURAS: maps -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/maps.png (1600x720, error 0)
+CAPTURAS:   maps: objetos 653, triángulos 28860, llamadas de dibujo 275
+CAPTURAS: multiplayer -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/multiplayer.png (1600x720, error 0)
+CAPTURAS:   multiplayer: objetos 710, triángulos 27154, llamadas de dibujo 273
+CAPTURAS: characters -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/characters.png (1600x720, error 0)
+CAPTURAS:   characters: objetos 465, triángulos 27728, llamadas de dibujo 280
+CAPTURAS: settings -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/settings.png (1600x720, error 0)
+CAPTURAS:   settings: objetos 588, triángulos 28158, llamadas de dibujo 293
+CAPTURAS: settings_rules -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/settings_rules.png (1600x720, error 0)
+CAPTURAS:   settings_rules: objetos 734, triángulos 30778, llamadas de dibujo 293
+CAPTURAS: board -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/board.png (1600x720, error 0)
+CAPTURAS:   board: objetos 457, triángulos 33464, llamadas de dibujo 264
+CAPTURAS: board_angle -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/board_angle.png (1600x720, error 0)
+CAPTURAS:   board_angle: objetos 406, triángulos 33310, llamadas de dibujo 245
+CAPTURAS: board_top -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/board_top.png (1600x720, error 0)
+CAPTURAS:   board_top: objetos 366, triángulos 30864, llamadas de dibujo 205
+CAPTURAS: board_dice -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/board_dice.png (1600x720, error 0)
+CAPTURAS:   board_dice: objetos 417, triángulos 32852, llamadas de dibujo 262
+CAPTURAS: challenge_question -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/challenge_question.png (1600x720, error 0)
+CAPTURAS:   challenge_question: objetos 774, triángulos 36614, llamadas de dibujo 296
+CAPTURAS: challenge_answered -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/challenge_answered.png (1600x720, error 0)
+CAPTURAS:   challenge_answered: objetos 829, triángulos 36726, llamadas de dibujo 300
+CAPTURAS: board_next_turn -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/board_next_turn.png (1600x720, error 0)
+CAPTURAS:   board_next_turn: objetos 539, triángulos 33778, llamadas de dibujo 270
+CAPTURAS: board_ladder -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/board_ladder.png (1600x720, error 0)
+CAPTURAS:   board_ladder: objetos 447, triángulos 31282, llamadas de dibujo 218
+CAPTURAS: board_snake -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/board_snake.png (1600x720, error 0)
+CAPTURAS:   board_snake: objetos 465, triángulos 29928, llamadas de dibujo 223
+CAPTURAS: pause -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/pause.png (1600x720, error 0)
+CAPTURAS:   pause: objetos 613, triángulos 36566, llamadas de dibujo 283
+CAPTURAS: board_goal -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/board_goal.png (1600x720, error 0)
+CAPTURAS:   board_goal: objetos 421, triángulos 32968, llamadas de dibujo 263
+CAPTURAS: victory -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/victory.png (1600x720, error 0)
+CAPTURAS:   victory: objetos 758, triángulos 22062, llamadas de dibujo 265
+CAPTURAS: scenery_eden -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_eden.png (1600x720, error 0)
+CAPTURAS:   scenery_eden: objetos 334, triángulos 52606, llamadas de dibujo 173
+CAPTURAS: scenery_eden_low -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_eden_low.png (1600x720, error 0)
+CAPTURAS:   scenery_eden_low: objetos 335, triángulos 52566, llamadas de dibujo 174
+CAPTURAS: scenery_eden_side -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_eden_side.png (1600x720, error 0)
+CAPTURAS:   scenery_eden_side: objetos 332, triángulos 52522, llamadas de dibujo 171
+CAPTURAS: scenery_eden_pano -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_eden_pano.png (1600x720, error 0)
+CAPTURAS:   scenery_eden_pano: objetos 350, triángulos 52968, llamadas de dibujo 189
+CAPTURAS: scenery_arca_noe -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_arca_noe.png (1600x720, error 0)
+CAPTURAS:   scenery_arca_noe: objetos 322, triángulos 41544, llamadas de dibujo 168
+CAPTURAS: scenery_arca_noe_low -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_arca_noe_low.png (1600x720, error 0)
+CAPTURAS:   scenery_arca_noe_low: objetos 323, triángulos 43272, llamadas de dibujo 169
+CAPTURAS: scenery_arca_noe_side -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_arca_noe_side.png (1600x720, error 0)
+CAPTURAS:   scenery_arca_noe_side: objetos 326, triángulos 43368, llamadas de dibujo 172
+CAPTURAS: scenery_arca_noe_pano -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_arca_noe_pano.png (1600x720, error 0)
+CAPTURAS:   scenery_arca_noe_pano: objetos 332, triángulos 43560, llamadas de dibujo 178
+CAPTURAS: scenery_egipto_exodo -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_egipto_exodo.png (1600x720, error 0)
+CAPTURAS:   scenery_egipto_exodo: objetos 333, triángulos 49022, llamadas de dibujo 174
+CAPTURAS: scenery_egipto_exodo_low -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_egipto_exodo_low.png (1600x720, error 0)
+CAPTURAS:   scenery_egipto_exodo_low: objetos 334, triángulos 49166, llamadas de dibujo 175
+CAPTURAS: scenery_egipto_exodo_side -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_egipto_exodo_side.png (1600x720, error 0)
+CAPTURAS:   scenery_egipto_exodo_side: objetos 334, triángulos 49166, llamadas de dibujo 175
+CAPTURAS: scenery_egipto_exodo_pano -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_egipto_exodo_pano.png (1600x720, error 0)
+CAPTURAS:   scenery_egipto_exodo_pano: objetos 345, triángulos 50030, llamadas de dibujo 186
+CAPTURAS: scenery_desierto_sinai -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_desierto_sinai.png (1600x720, error 0)
+CAPTURAS:   scenery_desierto_sinai: objetos 423, triángulos 32970, llamadas de dibujo 262
+CAPTURAS: scenery_desierto_sinai_low -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_desierto_sinai_low.png (1600x720, error 0)
+CAPTURAS:   scenery_desierto_sinai_low: objetos 524, triángulos 36178, llamadas de dibujo 363
+CAPTURAS: scenery_desierto_sinai_side -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_desierto_sinai_side.png (1600x720, error 0)
+CAPTURAS:   scenery_desierto_sinai_side: objetos 521, triángulos 36026, llamadas de dibujo 360
+CAPTURAS: scenery_desierto_sinai_pano -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_desierto_sinai_pano.png (1600x720, error 0)
+CAPTURAS:   scenery_desierto_sinai_pano: objetos 548, triángulos 37298, llamadas de dibujo 387
+CAPTURAS: scenery_monte_sinai -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_monte_sinai.png (1600x720, error 0)
+CAPTURAS:   scenery_monte_sinai: objetos 324, triángulos 44532, llamadas de dibujo 169
+CAPTURAS: scenery_monte_sinai_low -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_monte_sinai_low.png (1600x720, error 0)
+CAPTURAS:   scenery_monte_sinai_low: objetos 325, triángulos 44610, llamadas de dibujo 170
+CAPTURAS: scenery_monte_sinai_side -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_monte_sinai_side.png (1600x720, error 0)
+CAPTURAS:   scenery_monte_sinai_side: objetos 325, triángulos 44610, llamadas de dibujo 170
+CAPTURAS: scenery_monte_sinai_pano -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_monte_sinai_pano.png (1600x720, error 0)
+CAPTURAS:   scenery_monte_sinai_pano: objetos 332, triángulos 45762, llamadas de dibujo 177
+CAPTURAS: scenery_jerusalen -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_jerusalen.png (1600x720, error 0)
+CAPTURAS:   scenery_jerusalen: objetos 331, triángulos 62447, llamadas de dibujo 171
+CAPTURAS: scenery_jerusalen_low -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_jerusalen_low.png (1600x720, error 0)
+CAPTURAS:   scenery_jerusalen_low: objetos 331, triángulos 62447, llamadas de dibujo 171
+CAPTURAS: scenery_jerusalen_side -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_jerusalen_side.png (1600x720, error 0)
+CAPTURAS:   scenery_jerusalen_side: objetos 331, triángulos 62447, llamadas de dibujo 171
+CAPTURAS: scenery_jerusalen_pano -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_jerusalen_pano.png (1600x720, error 0)
+CAPTURAS:   scenery_jerusalen_pano: objetos 342, triángulos 63051, llamadas de dibujo 182
+CAPTURAS: scenery_belen -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_belen.png (1600x720, error 0)
+CAPTURAS:   scenery_belen: objetos 337, triángulos 53877, llamadas de dibujo 174
+CAPTURAS: scenery_belen_low -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_belen_low.png (1600x720, error 0)
+CAPTURAS:   scenery_belen_low: objetos 340, triángulos 54899, llamadas de dibujo 177
+CAPTURAS: scenery_belen_side -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_belen_side.png (1600x720, error 0)
+CAPTURAS:   scenery_belen_side: objetos 340, triángulos 54899, llamadas de dibujo 177
+CAPTURAS: scenery_belen_pano -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/scenery_belen_pano.png (1600x720, error 0)
+CAPTURAS:   scenery_belen_pano: objetos 340, triángulos 54899, llamadas de dibujo 177
+CAPTURAS: world_overview -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/world_overview.png (1600x720, error 0)
+CAPTURAS:   world_overview: objetos 377, triángulos 39867, llamadas de dibujo 101
+CAPTURAS: world_eden -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/world_eden.png (1600x720, error 0)
+CAPTURAS:   world_eden: objetos 364, triángulos 32388, llamadas de dibujo 58
+CAPTURAS: world_egipto -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/world_egipto.png (1600x720, error 0)
+CAPTURAS:   world_egipto: objetos 340, triángulos 34411, llamadas de dibujo 64
+CAPTURAS: world_monte -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/world_monte.png (1600x720, error 0)
+CAPTURAS:   world_monte: objetos 317, triángulos 37879, llamadas de dibujo 77
+CAPTURAS: world_jerusalen -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/world_jerusalen.png (1600x720, error 0)
+CAPTURAS:   world_jerusalen: objetos 308, triángulos 32382, llamadas de dibujo 62
+CAPTURAS: world_belen -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/world_belen.png (1600x720, error 0)
+CAPTURAS:   world_belen: objetos 296, triángulos 28672, llamadas de dibujo 55
+CAPTURAS: world_badges -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/world_badges.png (1600x720, error 0)
+CAPTURAS:   world_badges: objetos 957, triángulos 45719, llamadas de dibujo 170
+CAPTURAS: world_unlock -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/world_unlock.png (1600x720, error 0)
+CAPTURAS:   world_unlock: objetos 515, triángulos 34815, llamadas de dibujo 70
+CAPTURAS: world_unlocked -> /home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots/world_unlocked.png (1600x720, error 0)
+CAPTURAS:   world_unlocked: objetos 394, triángulos 34945, llamadas de dibujo 68
+CAPTURAS: listo (/home/runner/work/aventura-biblica-3d/aventura-biblica-3d/shots)

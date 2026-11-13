@@ -1,0 +1,283 @@
+== aapt2 dump badging (resumen) ==
+package: name='com.aventurabiblica.game3d' versionCode='4' versionName='0.4.0-alfa.1' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+install-location:'auto'
+minSdkVersion:'24'
+targetSdkVersion:'36'
+application-label:'El Camino de la Vida'
+application-icon-160:'res/mipmap-anydpi-v26/icon.xml'
+application-icon-240:'res/mipmap-anydpi-v26/icon.xml'
+application-icon-320:'res/mipmap-anydpi-v26/icon.xml'
+application-icon-480:'res/mipmap-anydpi-v26/icon.xml'
+application-icon-640:'res/mipmap-anydpi-v26/icon.xml'
+application-icon-65534:'res/mipmap-anydpi-v26/icon.xml'
+application: label='El Camino de la Vida' icon='res/mipmap-anydpi-v26/icon.xml'
+application-isGame
+application-debuggable
+uses-permission: name='android.permission.INTERNET'
+feature-group: label=''
+  uses-gl-es: '0x30000'
+  uses-feature: name='android.hardware.faketouch'
+  uses-implied-feature: name='android.hardware.faketouch' reason='default feature for all apps'
+other-activities
+other-receivers
+supports-screens: 'small' 'normal' 'large' 'xlarge'
+supports-any-density: 'true'
+locales: '--_--' 'af' 'am' 'ar' 'as' 'az' 'be' 'bg' 'bn' 'bs' 'ca' 'cs' 'da' 'de' 'el' 'en' 'en-AU' 'en-CA' 'en-GB' 'en-IN' 'en-XC' 'es' 'es-ES' 'es-US' 'et' 'eu' 'fa' 'fi' 'fr' 'fr-CA' 'gl' 'gu' 'hi' 'hr' 'hu' 'hy' 'in' 'is' 'it' 'iw' 'ja' 'ka' 'kk' 'km' 'kn' 'ko' 'ky' 'lo' 'lt' 'lv' 'mk' 'ml' 'mn' 'mr' 'ms' 'my' 'nb' 'ne' 'nl' 'or' 'pa' 'pl' 'pt' 'pt-BR' 'pt-PT' 'ro' 'ru' 'si' 'sk' 'sl' 'sq' 'sr' 'sr-Latn' 'sv' 'sw' 'ta' 'te' 'th' 'tl' 'tr' 'uk' 'ur' 'uz' 'vi' 'zh' 'zh-CN' 'zh-HK' 'zh-TW' 'zu'
+densities: '160' '240' '320' '480' '640' '65534'
+native-code: 'arm64-v8a'
+
+== permisos declarados ==
+warn: resource com.godot.game:mipmap/themed_icon for config 'anydpi-v26' is a file reference to 'res/mipmap-anydpi-v26/themed_icon.xml' but no such path exists.
+package: com.aventurabiblica.game3d
+uses-permission: name='android.permission.INTERNET'
+
+== AndroidManifest.xml (SDK mínimo, orientación y actividad de inicio) ==
+        A: http://schemas.android.com/apk/res/android:minSdkVersion(0x0101020c)=24
+        A: http://schemas.android.com/apk/res/android:targetSdkVersion(0x01010270)=36
+        A: http://schemas.android.com/apk/res/android:glEsVersion(0x01010281)=0x00030000
+        A: http://schemas.android.com/apk/res/android:label(0x01010001)=@0x7f0b0008
+          E: activity (line=37)
+            A: http://schemas.android.com/apk/res/android:screenOrientation(0x0101001e)=11
+          E: activity-alias (line=49)
+                    A: http://schemas.android.com/apk/res/android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
+                    A: http://schemas.android.com/apk/res/android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")
+          E: activity (line=66)
+      E: uses-permission (line=0)
+
+== contenido del APK (assets y bibliotecas) ==
+  1374336  2026-11-13 23:05   lib/arm64-v8a/libc++_shared.so
+ 76181608  2026-11-13 23:05   lib/arm64-v8a/libgodot_android.so
+    16908  2026-11-13 23:05   assets/data/maps/maps.json
+     2026  2026-11-13 23:05   assets/data/messages/messages.json
+    93800  2026-11-13 23:05   assets/data/questions/challenges.json
+      818  2026-11-13 23:05   assets/data/verses/translations.json
+     7621  2026-11-13 23:05   assets/data/verses/verse_references.json
+      230  2026-11-13 23:05   assets/data/online.json
+     1125  2026-11-13 23:05   assets/scripts/ui/main_menu.gdc
+     7398  2026-11-13 23:05   assets/scripts/ui/settings_screen.gdc
+     4135  2026-11-13 23:05   assets/scripts/ui/maps_screen.gdc
+     3179  2026-11-13 23:05   assets/scripts/ui/multiplayer_screen.gdc
+     6306  2026-11-13 23:05   assets/scripts/ui/victory_hud.gdc
+     2047  2026-11-13 23:05   assets/scripts/ui/ui_fx.gdc
+      529  2026-11-13 23:05   assets/scripts/ui/screen_header.gdc
+     2386  2026-11-13 23:05   assets/scripts/ui/life_screen.gdc
+     1522  2026-11-13 23:05   assets/scripts/ui/star_icon.gdc
+     5210  2026-11-13 23:05   assets/scripts/ui/ui_theme.gdc
+      555  2026-11-13 23:05   assets/scripts/ui/screen_base.gdc
+     2994  2026-11-13 23:05   assets/scripts/ui/pause_menu.gdc
+     3899  2026-11-13 23:05   assets/scripts/ui/progress_track.gdc
+    12878  2026-11-13 23:05   assets/scripts/ui/world_screen.gdc
+     9062  2026-11-13 23:05   assets/.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex
+      192  2026-11-13 23:05   assets/icon.svg.import
+     2207  2026-11-13 23:05   assets/.godot/exported/133200997/export-6e2e3b1a75c9173d155f551286637457-board_scene.scn
+      764  2026-11-13 23:05   assets/.godot/exported/133200997/export-5c40d588737ad254cffa7abb41fe2f84-dice.scn
+     1339  2026-11-13 23:05   assets/.godot/exported/133200997/export-ace0811b174717a9318b4c4f55d6f20e-victory_scene.scn
+     4564  2026-11-13 23:05   assets/.godot/exported/133200997/export-66682203c1d69e0630b1f250a49bf79d-challenge_panel.scn
+     3981  2026-11-13 23:05   assets/.godot/exported/133200997/export-16adbc0d45c60c8afaa65fed57206994-character_preview.scn
+     2104  2026-11-13 23:05   assets/.godot/exported/133200997/export-a4d2fa2fef49303b50313c2dd13ed326-player_token.scn
+     5651  2026-11-13 23:05   assets/.godot/exported/133200997/export-08c33b4c9cd1b18937bc8721046dbc0c-board_hud.scn
+     2340  2026-11-13 23:05   assets/.godot/exported/133200997/export-27964d81ec41313118329ac465f2496e-pause_menu.scn
+     1237  2026-11-13 23:05   assets/.godot/exported/133200997/export-78a6071a2e528b7efdc66b9056134016-screen_header.scn
+     4226  2026-11-13 23:05   assets/.godot/exported/133200997/export-9a8030b4fe8fb5752158f3eb474f38ec-victory_hud.scn
+     1540  2026-11-13 23:05   assets/.godot/exported/133200997/export-58dc7b82f52738812b4c9ee981c018f0-map_environment.scn
+     3382  2026-11-13 23:05   assets/.godot/exported/133200997/export-f76fa1261caca0e739da39b625964e17-characters_screen.scn
+     3470  2026-11-13 23:05   assets/.godot/exported/133200997/export-0f08c4e1ef6bc57b8eb68664fa7666e0-life_screen.scn
+     4321  2026-11-13 23:05   assets/.godot/exported/133200997/export-f47f7d670953862d9d781ab785fd547c-main_menu.scn
+     3584  2026-11-13 23:05   assets/.godot/exported/133200997/export-af1c3d04b411fd8036460c4f8f7eb7fd-maps_screen.scn
+     1114  2026-11-13 23:05   assets/.godot/exported/133200997/export-5e753c47f2ff722b8557a175e59fee79-menu_backdrop.scn
+     4722  2026-11-13 23:05   assets/.godot/exported/133200997/export-31031e3f5a958f1a25897bfc0e9477d0-multiplayer_screen.scn
+     7363  2026-11-13 23:05   assets/.godot/exported/133200997/export-0dde05ec557ea1b7a8ed7c147790d83a-settings_screen.scn
+     6933  2026-11-13 23:05   assets/.godot/exported/133200997/export-981ab61754244a704e50a2c42b5cf328-world_screen.scn
+     6159  2026-11-13 23:05   assets/scripts/dice/dice.gdc
+     1304  2026-11-13 23:05   assets/scripts/game/ambience_player.gdc
+     9074  2026-11-13 23:05   assets/scripts/game/ambience_synth.gdc
+     4770  2026-11-13 23:05   assets/scripts/game/audio_synth.gdc
+     4077  2026-11-13 23:05   assets/scripts/game/board_scene.gdc
+     8961  2026-11-13 23:05   assets/scripts/game/effects.gdc
+    18465  2026-11-13 23:05   assets/scripts/game/game_flow.gdc
+     3193  2026-11-13 23:05   assets/scripts/game/game_rules.gdc
+     2200  2026-11-13 23:05   assets/scripts/game/game_state.gdc
+      596  2026-11-13 23:05   assets/scripts/game/json_loader.gdc
+     8619  2026-11-13 23:05   assets/scripts/game/match_state.gdc
+     1190  2026-11-13 23:05   assets/scripts/game/message_bank.gdc
+     7542  2026-11-13 23:05   assets/scripts/game/progress_data.gdc
+     1718  2026-11-13 23:05   assets/scripts/game/progress_manager.gdc
+     2759  2026-11-13 23:05   assets/scripts/game/scene_router.gdc
+     7166  2026-11-13 23:05   assets/scripts/game/settings_manager.gdc
+     9310  2026-11-13 23:05   assets/scripts/game/victory_scene.gdc
+     6484  2026-11-13 23:05   assets/scripts/maps/kit/animal_kit.gdc
+     6453  2026-11-13 23:05   assets/scripts/maps/kit/fx_kit.gdc
+    11831  2026-11-13 23:05   assets/scripts/maps/kit/mesh_kit.gdc
+     8400  2026-11-13 23:05   assets/scripts/maps/kit/prop_kit.gdc
+     2777  2026-11-13 23:05   assets/scripts/maps/kit/stroke_font.gdc
+     2645  2026-11-13 23:05   assets/scripts/maps/kit/terrain_kit.gdc
+     6916  2026-11-13 23:05   assets/scripts/maps/kit/texture_kit.gdc
+     5766  2026-11-13 23:05   assets/scripts/maps/kit/water_kit.gdc
+     7099  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_arca.gdc
+     8923  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_belen.gdc
+     7743  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_eden.gdc
+     9276  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_egipto.gdc
+      984  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_factory.gdc
+     9769  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_jerusalen.gdc
+     3293  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_kit.gdc
+     6220  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_sinai.gdc
+    14728  2026-11-13 23:05   assets/scripts/maps/board_builder.gdc
+     6124  2026-11-13 23:05   assets/scripts/maps/board_camera.gdc
+     7934  2026-11-13 23:05   assets/scripts/maps/board_landmarks.gdc
+     7951  2026-11-13 23:05   assets/scripts/maps/board_layout.gdc
+     9781  2026-11-13 23:05   assets/scripts/maps/board_style.gdc
+     1054  2026-11-13 23:05   assets/scripts/maps/env_factory.gdc
+     4356  2026-11-13 23:05   assets/scripts/maps/landscape_builder.gdc
+     4259  2026-11-13 23:05   assets/scripts/maps/map_catalog.gdc
+     5219  2026-11-13 23:05   assets/scripts/maps/map_environment.gdc
+     6050  2026-11-13 23:05   assets/scripts/maps/menu_backdrop.gdc
+     2941  2026-11-13 23:05   assets/scripts/maps/mesh_factory.gdc
+     3723  2026-11-13 23:05   assets/scripts/maps/prop_factory.gdc
+     2827  2026-11-13 23:05   assets/scripts/maps/tile_marks.gdc
+     5666  2026-11-13 23:05   assets/scripts/maps/world_camera.gdc
+    14028  2026-11-13 23:05   assets/scripts/maps/world_icons.gdc
+    25726  2026-11-13 23:05   assets/scripts/maps/world_map_builder.gdc
+     8752  2026-11-13 23:05   assets/scripts/online/online_client.gdc
+     2547  2026-11-13 23:05   assets/scripts/online/online_config.gdc
+     3753  2026-11-13 23:05   assets/scripts/online/online_manager.gdc
+     2600  2026-11-13 23:05   assets/scripts/online/online_protocol.gdc
+      592  2026-11-13 23:05   assets/scripts/online/online_transport.gdc
+     1542  2026-11-13 23:05   assets/scripts/online/websocket_transport.gdc
+     1978  2026-11-13 23:05   assets/scripts/players/character_catalog.gdc
+      827  2026-11-13 23:05   assets/scripts/players/character_preview.gdc
+     7326  2026-11-13 23:05   assets/scripts/players/player_token.gdc
+     5087  2026-11-13 23:05   assets/scripts/questions/bible_reference.gdc
+     4753  2026-11-13 23:05   assets/scripts/questions/challenge.gdc
+     2296  2026-11-13 23:05   assets/scripts/questions/challenge_bank.gdc
+     2215  2026-11-13 23:05   assets/scripts/questions/challenge_deck.gdc
+     2536  2026-11-13 23:05   assets/scripts/questions/verse_provider.gdc
+    11136  2026-11-13 23:05   assets/scripts/ui/board_hud.gdc
+     8696  2026-11-13 23:05   assets/scripts/ui/challenge_panel.gdc
+     1840  2026-11-13 23:05   assets/scripts/ui/characters_screen.gdc
+       47  2026-11-13 23:05   assets/scripts/ui/main_menu.gd.remap
+       53  2026-11-13 23:05   assets/scripts/ui/settings_screen.gd.remap
+       49  2026-11-13 23:05   assets/scripts/ui/maps_screen.gd.remap
+       56  2026-11-13 23:05   assets/scripts/ui/multiplayer_screen.gd.remap
+       49  2026-11-13 23:05   assets/scripts/ui/victory_hud.gd.remap
+       43  2026-11-13 23:05   assets/scripts/ui/ui_fx.gd.remap
+       51  2026-11-13 23:05   assets/scripts/ui/screen_header.gd.remap
+       49  2026-11-13 23:05   assets/scripts/ui/life_screen.gd.remap
+       47  2026-11-13 23:05   assets/scripts/ui/star_icon.gd.remap
+       46  2026-11-13 23:05   assets/scripts/ui/ui_theme.gd.remap
+       49  2026-11-13 23:05   assets/scripts/ui/screen_base.gd.remap
+       48  2026-11-13 23:05   assets/scripts/ui/pause_menu.gd.remap
+       52  2026-11-13 23:05   assets/scripts/ui/progress_track.gd.remap
+       50  2026-11-13 23:05   assets/scripts/ui/world_screen.gd.remap
+      104  2026-11-13 23:05   assets/scenes/boards/board_scene.tscn.remap
+       97  2026-11-13 23:05   assets/scenes/boards/dice.tscn.remap
+      106  2026-11-13 23:05   assets/scenes/boards/victory_scene.tscn.remap
+      108  2026-11-13 23:05   assets/scenes/challenges/challenge_panel.tscn.remap
+      110  2026-11-13 23:05   assets/scenes/characters/character_preview.tscn.remap
+      105  2026-11-13 23:05   assets/scenes/characters/player_token.tscn.remap
+      102  2026-11-13 23:05   assets/scenes/interfaces/board_hud.tscn.remap
+      103  2026-11-13 23:05   assets/scenes/interfaces/pause_menu.tscn.remap
+      106  2026-11-13 23:05   assets/scenes/interfaces/screen_header.tscn.remap
+      104  2026-11-13 23:05   assets/scenes/interfaces/victory_hud.tscn.remap
+      108  2026-11-13 23:05   assets/scenes/maps/map_environment.tscn.remap
+      110  2026-11-13 23:05   assets/scenes/menus/characters_screen.tscn.remap
+      104  2026-11-13 23:05   assets/scenes/menus/life_screen.tscn.remap
+      102  2026-11-13 23:05   assets/scenes/menus/main_menu.tscn.remap
+      104  2026-11-13 23:05   assets/scenes/menus/maps_screen.tscn.remap
+      106  2026-11-13 23:05   assets/scenes/menus/menu_backdrop.tscn.remap
+      111  2026-11-13 23:05   assets/scenes/menus/multiplayer_screen.tscn.remap
+      108  2026-11-13 23:05   assets/scenes/menus/settings_screen.tscn.remap
+      105  2026-11-13 23:05   assets/scenes/menus/world_screen.tscn.remap
+       44  2026-11-13 23:05   assets/scripts/dice/dice.gd.remap
+       55  2026-11-13 23:05   assets/scripts/game/ambience_player.gd.remap
+       54  2026-11-13 23:05   assets/scripts/game/ambience_synth.gd.remap
+       51  2026-11-13 23:05   assets/scripts/game/audio_synth.gd.remap
+       51  2026-11-13 23:05   assets/scripts/game/board_scene.gd.remap
+       47  2026-11-13 23:05   assets/scripts/game/effects.gd.remap
+       49  2026-11-13 23:05   assets/scripts/game/game_flow.gd.remap
+       50  2026-11-13 23:05   assets/scripts/game/game_rules.gd.remap
+       50  2026-11-13 23:05   assets/scripts/game/game_state.gd.remap
+       51  2026-11-13 23:05   assets/scripts/game/json_loader.gd.remap
+       51  2026-11-13 23:05   assets/scripts/game/match_state.gd.remap
+       52  2026-11-13 23:05   assets/scripts/game/message_bank.gd.remap
+       53  2026-11-13 23:05   assets/scripts/game/progress_data.gd.remap
+       56  2026-11-13 23:05   assets/scripts/game/progress_manager.gd.remap
+       52  2026-11-13 23:05   assets/scripts/game/scene_router.gd.remap
+       56  2026-11-13 23:05   assets/scripts/game/settings_manager.gd.remap
+       53  2026-11-13 23:05   assets/scripts/game/victory_scene.gd.remap
+       54  2026-11-13 23:05   assets/scripts/maps/kit/animal_kit.gd.remap
+       50  2026-11-13 23:05   assets/scripts/maps/kit/fx_kit.gd.remap
+       52  2026-11-13 23:05   assets/scripts/maps/kit/mesh_kit.gd.remap
+       52  2026-11-13 23:05   assets/scripts/maps/kit/prop_kit.gd.remap
+       55  2026-11-13 23:05   assets/scripts/maps/kit/stroke_font.gd.remap
+       55  2026-11-13 23:05   assets/scripts/maps/kit/terrain_kit.gd.remap
+       55  2026-11-13 23:05   assets/scripts/maps/kit/texture_kit.gd.remap
+       53  2026-11-13 23:05   assets/scripts/maps/kit/water_kit.gd.remap
+       60  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_arca.gd.remap
+       61  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_belen.gd.remap
+       60  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_eden.gd.remap
+       62  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_egipto.gd.remap
+       63  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_factory.gd.remap
+       65  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_jerusalen.gd.remap
+       59  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_kit.gd.remap
+       61  2026-11-13 23:05   assets/scripts/maps/scenery/scenery_sinai.gd.remap
+       53  2026-11-13 23:05   assets/scripts/maps/board_builder.gd.remap
+       52  2026-11-13 23:05   assets/scripts/maps/board_camera.gd.remap
+       55  2026-11-13 23:05   assets/scripts/maps/board_landmarks.gd.remap
+       52  2026-11-13 23:05   assets/scripts/maps/board_layout.gd.remap
+       51  2026-11-13 23:05   assets/scripts/maps/board_style.gd.remap
+       51  2026-11-13 23:05   assets/scripts/maps/env_factory.gd.remap
+       57  2026-11-13 23:05   assets/scripts/maps/landscape_builder.gd.remap
+       51  2026-11-13 23:05   assets/scripts/maps/map_catalog.gd.remap
+       55  2026-11-13 23:05   assets/scripts/maps/map_environment.gd.remap
+       53  2026-11-13 23:05   assets/scripts/maps/menu_backdrop.gd.remap
+       52  2026-11-13 23:05   assets/scripts/maps/mesh_factory.gd.remap
+       52  2026-11-13 23:05   assets/scripts/maps/prop_factory.gd.remap
+       50  2026-11-13 23:05   assets/scripts/maps/tile_marks.gd.remap
+       52  2026-11-13 23:05   assets/scripts/maps/world_camera.gd.remap
+       51  2026-11-13 23:05   assets/scripts/maps/world_icons.gd.remap
+       57  2026-11-13 23:05   assets/scripts/maps/world_map_builder.gd.remap
+       55  2026-11-13 23:05   assets/scripts/online/online_client.gd.remap
+       55  2026-11-13 23:05   assets/scripts/online/online_config.gd.remap
+       56  2026-11-13 23:05   assets/scripts/online/online_manager.gd.remap
+       57  2026-11-13 23:05   assets/scripts/online/online_protocol.gd.remap
+       58  2026-11-13 23:05   assets/scripts/online/online_transport.gd.remap
+       61  2026-11-13 23:05   assets/scripts/online/websocket_transport.gd.remap
+       60  2026-11-13 23:05   assets/scripts/players/character_catalog.gd.remap
+       60  2026-11-13 23:05   assets/scripts/players/character_preview.gd.remap
+       55  2026-11-13 23:05   assets/scripts/players/player_token.gd.remap
+       60  2026-11-13 23:05   assets/scripts/questions/bible_reference.gd.remap
+       54  2026-11-13 23:05   assets/scripts/questions/challenge.gd.remap
+       59  2026-11-13 23:05   assets/scripts/questions/challenge_bank.gd.remap
+       59  2026-11-13 23:05   assets/scripts/questions/challenge_deck.gd.remap
+       59  2026-11-13 23:05   assets/scripts/questions/verse_provider.gd.remap
+       47  2026-11-13 23:05   assets/scripts/ui/board_hud.gd.remap
+       53  2026-11-13 23:05   assets/scripts/ui/challenge_panel.gd.remap
+       55  2026-11-13 23:05   assets/scripts/ui/characters_screen.gd.remap
+    11651  2026-11-13 23:05   assets/.godot/global_script_class_cache.cfg
+     1222  2026-11-13 23:05   assets/icon.svg
+     3838  2026-11-13 23:05   assets/.godot/uid_cache.bin
+     1937  2026-11-13 23:05   assets/project.binary
+    16748  2026-11-13 23:05   assets/assets.sparsepck
+       94  2026-11-13 23:05   assets/_cl_
+
+== apksigner verify ==
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Android Debug, O=Android, C=US
+Signer #1 certificate SHA-256 digest: ea271daa7694e277d6b9a3c8cf334fb43ff518046f157527bcb53152ba19e079
+Signer #1 certificate SHA-1 digest: 2415b7f006b4d41031f462409bf6c7c5572988dc
+Signer #1 certificate MD5 digest: f662dd7990a4c2b9fc36ac17d5c5031c
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 2048
+Signer #1 public key SHA-256 digest: 356dbfe95131ae4c5b7c22ea4d267d87a8528e66959aaf171d76bbf90a6a8b1b
+Signer #1 public key SHA-1 digest: b02511cc56a7257aadd6c9a479879a4562916537
+Signer #1 public key MD5 digest: c25c218074538c2f6d3b1f2988215e18
+
+== tamaño ==
+-rw-r--r-- 1 runner runner 29112893 Nov 13 23:05 build/android/aventura-biblica-3d-debug.apk
