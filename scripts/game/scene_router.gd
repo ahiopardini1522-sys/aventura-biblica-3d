@@ -7,6 +7,7 @@ signal scene_changed(key: String)
 ## Todas las pantallas del juego. Cada clave se usa con SceneRouter.go_to("clave").
 const SCENES: Dictionary = {
 	"main_menu": "res://scenes/menus/main_menu.tscn",
+	"life": "res://scenes/menus/life_screen.tscn",
 	"world": "res://scenes/menus/world_screen.tscn",
 	"maps": "res://scenes/menus/maps_screen.tscn",
 	"multiplayer": "res://scenes/menus/multiplayer_screen.tscn",

@@ -1,0 +1,114 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/life_screen.gd" id="1_life"]
+[ext_resource type="PackedScene" path="res://scenes/menus/menu_backdrop.tscn" id="2_backdrop"]
+[ext_resource type="PackedScene" path="res://scenes/interfaces/screen_header.tscn" id="3_header"]
+
+[node name="LifeScreen" type="Node"]
+script = ExtResource("1_life")
+
+[node name="Backdrop" parent="." instance=ExtResource("2_backdrop")]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Root" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Shade" type="ColorRect" parent="UI/Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.04, 0.1, 0.45)
+
+[node name="Margin" type="MarginContainer" parent="UI/Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 96
+theme_override_constants/margin_top = 44
+theme_override_constants/margin_right = 96
+theme_override_constants/margin_bottom = 44
+
+[node name="VBox" type="VBoxContainer" parent="UI/Root/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Header" parent="UI/Root/Margin/VBox" instance=ExtResource("3_header")]
+layout_mode = 2
+title = "EL CAMINO DE LA VIDA"
+
+[node name="Content" type="HBoxContainer" parent="UI/Root/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 32
+
+[node name="InfoPanel" type="PanelContainer" parent="UI/Root/Margin/VBox/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(760, 0)
+layout_mode = 2
+
+[node name="Info" type="VBoxContainer" parent="UI/Root/Margin/VBox/Content/InfoPanel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="IntroTitle" type="Label" parent="UI/Root/Margin/VBox/Content/InfoPanel/Info"]
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+text = "Un viaje de fe en 3D"
+
+[node name="IntroText" type="Label" parent="UI/Root/Margin/VBox/Content/InfoPanel/Info"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Gira la ruleta, avanza con tu vehículo y elige tu camino: cada decisión cambia el viaje. Responde desafíos bíblicos, gana monedas y llega a la meta."
+autowrap_mode = 3
+
+[node name="StatusLabel" type="Label" parent="UI/Root/Margin/VBox/Content/InfoPanel/Info"]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "En construcción: la primera partida llega con la etapa 2."
+autowrap_mode = 3
+
+[node name="StartButton" type="Button" parent="UI/Root/Margin/VBox/Content/InfoPanel/Info"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 112)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+disabled = true
+text = "EMPEZAR VIAJE"
+
+[node name="ClassicButton" type="Button" parent="UI/Root/Margin/VBox/Content/InfoPanel/Info"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+text = "JUGAR AVENTURA BÍBLICA"
+
+[node name="StagePanel" type="PanelContainer" parent="UI/Root/Margin/VBox/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Scroll" type="ScrollContainer" parent="UI/Root/Margin/VBox/Content/StagePanel"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="StageList" type="VBoxContainer" parent="UI/Root/Margin/VBox/Content/StagePanel/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12

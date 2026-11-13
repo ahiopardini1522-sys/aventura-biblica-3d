@@ -29,6 +29,7 @@ extends SceneTree
 ## teléfono real.
 
 const MENU_BUTTONS := {
+	"LifeButton": "life",
 	"MapsButton": "world",
 	"MultiplayerButton": "multiplayer",
 	"CharactersButton": "characters",
@@ -1857,7 +1858,7 @@ func _test_menu_and_screens() -> void:
 	if menu == null:
 		return
 	_check(menu.get_node_or_null("%TitleBlock") != null, "el menú muestra el bloque del título")
-	for button_name in ["PlayButton", "MapsButton", "MultiplayerButton", "CharactersButton", "SettingsButton"]:
+	for button_name in ["LifeButton", "PlayButton", "MapsButton", "MultiplayerButton", "CharactersButton", "SettingsButton"]:
 		var button := menu.get_node_or_null("%" + button_name) as Button
 		_check(button != null and not button.text.is_empty() and not button.disabled, "botón %s existe y está activo" % button_name)
 
@@ -1904,6 +1905,8 @@ func _test_menu_and_screens() -> void:
 
 func _test_screen(key: String) -> void:
 	match key:
+		"life":
+			_test_life_screen()
 		"world":
 			await _test_world_screen()
 		"maps":
@@ -1914,6 +1917,21 @@ func _test_screen(key: String) -> void:
 			_test_characters_screen()
 		"settings":
 			_test_settings_screen()
+
+
+## EL CAMINO DE LA VIDA (etapa 1): la pantalla del modo nuevo muestra el plan y sus etapas.
+func _test_life_screen() -> void:
+	var scene: Node = current_scene
+	var list := scene.get_node_or_null("%StageList") as VBoxContainer
+	_check(list != null, "la pantalla del Camino tiene la lista de etapas")
+	if list == null:
+		return
+	var constants: Dictionary = (scene.get_script() as Script).get_script_constant_map()
+	var stages: Array = constants.get("STAGES", [])
+	_check(stages.size() >= 8, "el Camino declara sus etapas (%d)" % stages.size())
+	_check(list.get_child_count() == stages.size(), "la lista muestra una fila por etapa")
+	var start := scene.get_node_or_null("%StartButton") as Button
+	_check(start != null and start.disabled, "EMPEZAR VIAJE existe y sigue bloqueado hasta la etapa 2")
 
 
 # ---------------------------------------------------------------- Conexión en línea (fase 4.1)

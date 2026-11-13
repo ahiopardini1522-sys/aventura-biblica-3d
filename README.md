@@ -1,4 +1,9 @@
-# AVENTURA BÍBLICA 3D
+# EL CAMINO DE LA VIDA (antes AVENTURA BÍBLICA 3D)
+
+> **En transformación:** el proyecto se está convirtiendo en **EL CAMINO DE LA VIDA**, un juego de tablero 3D cristiano con ruleta, caminos
+> que se bifurcan, decisiones, monedas y desafíos bíblicos. Va por etapas ([plan](docs/camino/PLAN.md)); hoy está hecha la **etapa 1 (base)**:
+> el modo nuevo aparece en el menú principal pero todavía no se puede jugar. **AVENTURA BÍBLICA** (escaleras y serpientes) se conserva
+> completo como modo del menú, y lo que sigue en este documento describe ese modo.
 
 Juego de tablero 3D para Android con temática bíblica (escaleras y serpientes con desafíos), hecho con **Godot 4.7** y **GDScript**.
 Orientación horizontal, interfaz táctil y recursos provisionales creados por código, sin modelos externos.

@@ -8,7 +8,7 @@ extends SceneTree
 ## Además de los menús, juega unos turnos de verdad en el tablero (con tiradas forzadas) para
 ## fotografiar el dado, una escalera, una serpiente, un desafío, la pausa y la victoria.
 
-const SCREENS := ["main_menu", "maps", "multiplayer", "characters", "settings", "board"]
+const SCREENS := ["main_menu", "life", "maps", "multiplayer", "characters", "settings", "board"]
 const TIME_LIMIT := 480.0
 ## Mundos de los que se toman capturas del escenario 3D (vista normal, baja y lateral).
 const SCENERY_MAPS := ["eden", "arca_noe", "egipto_exodo", "desierto_sinai", "monte_sinai", "jerusalen", "belen"]
