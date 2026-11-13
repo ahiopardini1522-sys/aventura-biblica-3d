@@ -1,0 +1,2374 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+=== PRUEBA DE HUMO: Aventura Bíblica 3D ===
+Motor: 4.7.2-stable (official)
+  ok     autoloads cargados (SettingsManager, ProgressManager, GameState, SceneRouter)
+-- Configuración del proyecto
+  ok     la escena principal existe (res://scenes/menus/main_menu.tscn)
+  ok     orientación horizontal con sensor
+  ok     renderizador de compatibilidad (OpenGL)
+  ok     compresión ETC2/ASTC activada (necesaria para Android)
+  ok     existe el icono del juego
+  ok     export_presets.cfg se puede leer
+  ok     el preset de exportación es Android
+  ok     se exporta arm64-v8a
+  ok     exportación APK directa (sin Gradle)
+  ok     nombre de paquete válido (com.aventurabiblica.game3d)
+  ok     la exportación incluye los archivos .json de data/
+  ok     el APK declara el permiso de Internet (necesario para jugar en línea)
+  ok     la carpeta del servidor (server/) no viaja en el APK
+  ok     la versión del APK coincide con la del proyecto
+  ok     OnlineManager está registrado como autoload
+-- Scripts: compilación
+  ok     se encontraron los scripts del juego (80)
+  ok     compila res://scripts/dice/dice.gd
+  ok     compila res://scripts/game/ambience_player.gd
+  ok     compila res://scripts/game/ambience_synth.gd
+  ok     compila res://scripts/game/audio_synth.gd
+  ok     compila res://scripts/game/board_scene.gd
+  ok     compila res://scripts/game/effects.gd
+  ok     compila res://scripts/game/game_flow.gd
+  ok     compila res://scripts/game/game_rules.gd
+  ok     compila res://scripts/game/game_state.gd
+  ok     compila res://scripts/game/json_loader.gd
+  ok     compila res://scripts/game/match_state.gd
+  ok     compila res://scripts/game/message_bank.gd
+  ok     compila res://scripts/game/progress_data.gd
+  ok     compila res://scripts/game/progress_manager.gd
+  ok     compila res://scripts/game/scene_router.gd
+  ok     compila res://scripts/game/settings_manager.gd
+  ok     compila res://scripts/game/victory_scene.gd
+  ok     compila res://scripts/maps/board_builder.gd
+  ok     compila res://scripts/maps/board_camera.gd
+  ok     compila res://scripts/maps/board_landmarks.gd
+  ok     compila res://scripts/maps/board_layout.gd
+  ok     compila res://scripts/maps/board_style.gd
+  ok     compila res://scripts/maps/env_factory.gd
+  ok     compila res://scripts/maps/landscape_builder.gd
+  ok     compila res://scripts/maps/map_catalog.gd
+  ok     compila res://scripts/maps/map_environment.gd
+  ok     compila res://scripts/maps/menu_backdrop.gd
+  ok     compila res://scripts/maps/mesh_factory.gd
+  ok     compila res://scripts/maps/prop_factory.gd
+  ok     compila res://scripts/maps/tile_marks.gd
+  ok     compila res://scripts/maps/world_camera.gd
+  ok     compila res://scripts/maps/world_icons.gd
+  ok     compila res://scripts/maps/world_map_builder.gd
+  ok     compila res://scripts/maps/kit/animal_kit.gd
+  ok     compila res://scripts/maps/kit/fx_kit.gd
+  ok     compila res://scripts/maps/kit/mesh_kit.gd
+  ok     compila res://scripts/maps/kit/prop_kit.gd
+  ok     compila res://scripts/maps/kit/stroke_font.gd
+  ok     compila res://scripts/maps/kit/terrain_kit.gd
+  ok     compila res://scripts/maps/kit/texture_kit.gd
+  ok     compila res://scripts/maps/kit/water_kit.gd
+  ok     compila res://scripts/maps/scenery/scenery_arca.gd
+  ok     compila res://scripts/maps/scenery/scenery_belen.gd
+  ok     compila res://scripts/maps/scenery/scenery_eden.gd
+  ok     compila res://scripts/maps/scenery/scenery_egipto.gd
+  ok     compila res://scripts/maps/scenery/scenery_factory.gd
+  ok     compila res://scripts/maps/scenery/scenery_jerusalen.gd
+  ok     compila res://scripts/maps/scenery/scenery_kit.gd
+  ok     compila res://scripts/maps/scenery/scenery_sinai.gd
+  ok     compila res://scripts/online/online_client.gd
+  ok     compila res://scripts/online/online_config.gd
+  ok     compila res://scripts/online/online_manager.gd
+  ok     compila res://scripts/online/online_protocol.gd
+  ok     compila res://scripts/online/online_transport.gd
+  ok     compila res://scripts/online/websocket_transport.gd
+  ok     compila res://scripts/players/character_catalog.gd
+  ok     compila res://scripts/players/character_preview.gd
+  ok     compila res://scripts/players/player_token.gd
+  ok     compila res://scripts/questions/bible_reference.gd
+  ok     compila res://scripts/questions/challenge.gd
+  ok     compila res://scripts/questions/challenge_bank.gd
+  ok     compila res://scripts/questions/challenge_deck.gd
+  ok     compila res://scripts/questions/verse_provider.gd
+  ok     compila res://scripts/ui/board_hud.gd
+  ok     compila res://scripts/ui/challenge_panel.gd
+  ok     compila res://scripts/ui/characters_screen.gd
+  ok     compila res://scripts/ui/life_screen.gd
+  ok     compila res://scripts/ui/main_menu.gd
+  ok     compila res://scripts/ui/maps_screen.gd
+  ok     compila res://scripts/ui/multiplayer_screen.gd
+  ok     compila res://scripts/ui/pause_menu.gd
+  ok     compila res://scripts/ui/progress_track.gd
+  ok     compila res://scripts/ui/screen_base.gd
+  ok     compila res://scripts/ui/screen_header.gd
+  ok     compila res://scripts/ui/settings_screen.gd
+  ok     compila res://scripts/ui/star_icon.gd
+  ok     compila res://scripts/ui/ui_fx.gd
+  ok     compila res://scripts/ui/ui_theme.gd
+  ok     compila res://scripts/ui/victory_hud.gd
+  ok     compila res://scripts/ui/world_screen.gd
+-- Escenas: carga e instancia
+  ok     se encontraron las escenas del juego (19)
+  ok     carga e instancia res://scenes/boards/board_scene.tscn
+  ok     carga e instancia res://scenes/boards/dice.tscn
+  ok     carga e instancia res://scenes/boards/victory_scene.tscn
+  ok     carga e instancia res://scenes/challenges/challenge_panel.tscn
+  ok     carga e instancia res://scenes/characters/character_preview.tscn
+  ok     carga e instancia res://scenes/characters/player_token.tscn
+  ok     carga e instancia res://scenes/interfaces/board_hud.tscn
+  ok     carga e instancia res://scenes/interfaces/pause_menu.tscn
+  ok     carga e instancia res://scenes/interfaces/screen_header.tscn
+  ok     carga e instancia res://scenes/interfaces/victory_hud.tscn
+  ok     carga e instancia res://scenes/maps/map_environment.tscn
+  ok     carga e instancia res://scenes/menus/characters_screen.tscn
+  ok     carga e instancia res://scenes/menus/life_screen.tscn
+  ok     carga e instancia res://scenes/menus/main_menu.tscn
+  ok     carga e instancia res://scenes/menus/maps_screen.tscn
+  ok     carga e instancia res://scenes/menus/menu_backdrop.tscn
+  ok     carga e instancia res://scenes/menus/multiplayer_screen.tscn
+  ok     carga e instancia res://scenes/menus/settings_screen.tscn
+  ok     carga e instancia res://scenes/menus/world_screen.tscn
+  ok     ruta del router 'main_menu' existe (res://scenes/menus/main_menu.tscn)
+  ok     ruta del router 'life' existe (res://scenes/menus/life_screen.tscn)
+  ok     ruta del router 'world' existe (res://scenes/menus/world_screen.tscn)
+  ok     ruta del router 'maps' existe (res://scenes/menus/maps_screen.tscn)
+  ok     ruta del router 'multiplayer' existe (res://scenes/menus/multiplayer_screen.tscn)
+  ok     ruta del router 'characters' existe (res://scenes/menus/characters_screen.tscn)
+  ok     ruta del router 'settings' existe (res://scenes/menus/settings_screen.tscn)
+  ok     ruta del router 'board' existe (res://scenes/boards/board_scene.tscn)
+  ok     ruta del router 'victory' existe (res://scenes/boards/victory_scene.tscn)
+-- Rutas res:// referenciadas
+  ok     se revisaron las referencias res:// (81)
+  ok     no hay referencias a archivos inexistentes []
+-- Datos (mapas, preguntas, versículos)
+  ok     el catálogo tiene 7 mapas (7)
+  ok     los mapas están en el orden del viaje ["eden", "arca_noe", "egipto_exodo", "desierto_sinai", "monte_sinai", "jerusalen", "belen"]
+  ok     los 7 mapas están hechos y son jugables
+  ok     el primer mapa (Jardín del Edén) es el que está abierto desde el inicio
+  ok     tablero válido: eden []
+  ok     eden: tablero de 100 casillas (inicio, meta y recorrido en zigzag)
+  ok     eden: 6 escaleras y 7 serpientes (6 y 7)
+  ok     eden: 20 casillas de desafío bíblico (20)
+  ok     eden: 4 recompensas y 4 obstáculos (4 y 4)
+  ok     eden: tiene estilo de escenario (eden) y de tablero (garden)
+  ok     eden: tiene icono 3D en el mapa mundial (tree)
+  ok     eden: da una insignia y estrellas del viaje al completarse
+  ok     eden: tiene sonido ambiente (garden)
+  ok     eden: tiene su propia iluminación (sol, ambiente, niebla y dirección)
+  ok     tablero válido: arca_noe []
+  ok     arca_noe: tablero de 100 casillas (inicio, meta y recorrido en zigzag)
+  ok     arca_noe: 6 escaleras y 7 serpientes (6 y 7)
+  ok     arca_noe: 20 casillas de desafío bíblico (20)
+  ok     arca_noe: 4 recompensas y 4 obstáculos (4 y 4)
+  ok     arca_noe: tiene estilo de escenario (arca) y de tablero (deck)
+  ok     arca_noe: tiene icono 3D en el mapa mundial (ark)
+  ok     arca_noe: da una insignia y estrellas del viaje al completarse
+  ok     arca_noe: tiene sonido ambiente (sea)
+  ok     arca_noe: tiene su propia iluminación (sol, ambiente, niebla y dirección)
+  ok     tablero válido: egipto_exodo []
+  ok     egipto_exodo: tablero de 100 casillas (inicio, meta y recorrido en zigzag)
+  ok     egipto_exodo: 6 escaleras y 7 serpientes (6 y 7)
+  ok     egipto_exodo: 20 casillas de desafío bíblico (20)
+  ok     egipto_exodo: 4 recompensas y 4 obstáculos (4 y 4)
+  ok     egipto_exodo: tiene estilo de escenario (egipto) y de tablero (causeway)
+  ok     egipto_exodo: tiene icono 3D en el mapa mundial (pyramid)
+  ok     egipto_exodo: da una insignia y estrellas del viaje al completarse
+  ok     egipto_exodo: tiene sonido ambiente (wind)
+  ok     egipto_exodo: tiene su propia iluminación (sol, ambiente, niebla y dirección)
+  ok     tablero válido: desierto_sinai []
+  ok     desierto_sinai: tablero de 100 casillas (inicio, meta y recorrido en zigzag)
+  ok     desierto_sinai: 6 escaleras y 7 serpientes (6 y 7)
+  ok     desierto_sinai: 20 casillas de desafío bíblico (20)
+  ok     desierto_sinai: 4 recompensas y 4 obstáculos (4 y 4)
+  ok     desierto_sinai: tiene estilo de escenario (desierto) y de tablero (sand)
+  ok     desierto_sinai: tiene icono 3D en el mapa mundial (tent)
+  ok     desierto_sinai: da una insignia y estrellas del viaje al completarse
+  ok     desierto_sinai: tiene sonido ambiente (desert)
+  ok     desierto_sinai: tiene su propia iluminación (sol, ambiente, niebla y dirección)
+  ok     tablero válido: monte_sinai []
+  ok     monte_sinai: tablero de 100 casillas (inicio, meta y recorrido en zigzag)
+  ok     monte_sinai: 6 escaleras y 7 serpientes (6 y 7)
+  ok     monte_sinai: 20 casillas de desafío bíblico (20)
+  ok     monte_sinai: 4 recompensas y 4 obstáculos (4 y 4)
+  ok     monte_sinai: tiene estilo de escenario (sinai) y de tablero (rock)
+  ok     monte_sinai: tiene icono 3D en el mapa mundial (mountain)
+  ok     monte_sinai: da una insignia y estrellas del viaje al completarse
+  ok     monte_sinai: tiene sonido ambiente (mountain)
+  ok     monte_sinai: tiene su propia iluminación (sol, ambiente, niebla y dirección)
+  ok     tablero válido: jerusalen []
+  ok     jerusalen: tablero de 100 casillas (inicio, meta y recorrido en zigzag)
+  ok     jerusalen: 6 escaleras y 7 serpientes (6 y 7)
+  ok     jerusalen: 20 casillas de desafío bíblico (20)
+  ok     jerusalen: 4 recompensas y 4 obstáculos (4 y 4)
+  ok     jerusalen: tiene estilo de escenario (jerusalen) y de tablero (city)
+  ok     jerusalen: tiene icono 3D en el mapa mundial (temple)
+  ok     jerusalen: da una insignia y estrellas del viaje al completarse
+  ok     jerusalen: tiene sonido ambiente (city)
+  ok     jerusalen: tiene su propia iluminación (sol, ambiente, niebla y dirección)
+  ok     tablero válido: belen []
+  ok     belen: tablero de 100 casillas (inicio, meta y recorrido en zigzag)
+  ok     belen: 6 escaleras y 7 serpientes (6 y 7)
+  ok     belen: 20 casillas de desafío bíblico (20)
+  ok     belen: 4 recompensas y 4 obstáculos (4 y 4)
+  ok     belen: tiene estilo de escenario (belen) y de tablero (village)
+  ok     belen: tiene icono 3D en el mapa mundial (stable)
+  ok     belen: da una insignia y estrellas del viaje al completarse
+  ok     belen: tiene sonido ambiente (night)
+  ok     belen: tiene su propia iluminación (sol, ambiente, niebla y dirección)
+  ok     los ids de mapa no se repiten
+  ok     cada mapa tiene su propio estilo de escenario y de tablero (no es el mismo tablero con otros colores)
+  ok     cada mapa tiene su propio lugar en el mapa mundial
+  ok     cada mapa tiene sus propias escaleras y serpientes
+  ok     cada mapa tiene su propia insignia
+  ok     el primer mapa no pide nada para abrirse
+  ok     arca_noe se abre al completar eden
+  ok     completar eden abre solo arca_noe
+  ok     egipto_exodo se abre al completar arca_noe
+  ok     completar arca_noe abre solo egipto_exodo
+  ok     desierto_sinai se abre al completar egipto_exodo
+  ok     completar egipto_exodo abre solo desierto_sinai
+  ok     monte_sinai se abre al completar desierto_sinai
+  ok     completar desierto_sinai abre solo monte_sinai
+  ok     jerusalen se abre al completar monte_sinai
+  ok     completar monte_sinai abre solo jerusalen
+  ok     belen se abre al completar jerusalen
+  ok     completar jerusalen abre solo belen
+  ok     el último mapa no abre ninguno más
+  ok     se conserva el Desierto del Sinaí de la etapa anterior
+  ok     el Desierto del Sinaí conserva sus 6 escaleras
+  ok     el Desierto del Sinaí conserva sus 7 serpientes
+  ok     hay referencias bíblicas (48)
+  ok     referencias bíblicas revisadas
+-- Trazado del tablero
+  ok     100 casillas
+  ok     la casilla 1 está abajo a la izquierda
+  ok     la casilla 10 cierra la primera fila
+  ok     la fila 2 empieza a la derecha (zigzag)
+  ok     la casilla 20 cierra la fila 2
+  ok     la meta (100) queda arriba a la izquierda
+  ok     cada casilla está pegada a la siguiente (recorrido continuo)
+  ok     las 100 casillas tienen posiciones distintas
+  ok     el inicio mira hacia la cámara (x < 0, z > 0)
+  ok     la casilla 3 sube por la escalera a la 22
+  ok     la casilla 98 baja por la serpiente a la 78
+  ok     una casilla normal no salta
+  ok     el trazado del mapa jugable es válido
+  ok     la validación detecta escaleras/serpientes mal definidas
+  ok     el desierto tiene sus 8 casillas especiales [17, 29, 43, 52, 66, 74, 83, 89]
+  ok     la casilla 17 es una recompensa que avanza 2 casillas
+  ok     hay recompensas de tirada extra (66) y de estrellas (83)
+  ok     hay obstáculos que retroceden (52) y que hacen perder el turno (74)
+  ok     una casilla normal no es especial
+  ok     una casilla tranquila no tiene desafío, escalera, serpiente ni casilla especial
+  ok     la validación detecta una casilla especial en el inicio
+  ok     la validación detecta una casilla especial fuera del tablero
+  ok     la validación detecta una casilla especial sobre una escalera
+  ok     la validación detecta una casilla especial sobre un desafío
+  ok     la validación detecta una casilla especial tipo de obstáculo en una recompensa
+  ok     la validación detecta una casilla especial tipo de recompensa en un obstáculo
+  ok     la validación detecta una casilla especial avanzar 0 casillas
+  ok     la validación detecta una casilla especial retroceder 9 casillas
+  ok     la validación detecta una casilla especial 0 estrellas
+  ok     la validación detecta una casilla especial sin nombre
+  ok     la validación detecta una casilla especial repetida
+  ok     ficha 1 de 1 cabe en la casilla
+  ok     1 fichas ocupan posiciones distintas
+  ok     ficha 1 de 2 cabe en la casilla
+  ok     ficha 2 de 2 cabe en la casilla
+  ok     2 fichas ocupan posiciones distintas
+  ok     ficha 1 de 3 cabe en la casilla
+  ok     ficha 2 de 3 cabe en la casilla
+  ok     ficha 3 de 3 cabe en la casilla
+  ok     3 fichas ocupan posiciones distintas
+  ok     ficha 1 de 4 cabe en la casilla
+  ok     ficha 2 de 4 cabe en la casilla
+  ok     ficha 3 de 4 cabe en la casilla
+  ok     ficha 4 de 4 cabe en la casilla
+  ok     4 fichas ocupan posiciones distintas
+-- Reglas: dado, movimiento, escaleras y serpientes
+  ok     la meta es la casilla 100
+  ok     hay casillas de desafío válidas (20)
+  ok     un mapa sin casillas de desafío recibe un reparto por defecto
+  ok     un movimiento normal recorre las casillas una por una (10 + 4 = 14)
+  ok     pasar por encima de una escalera no la activa (solo cuenta caer en ella)
+  ok     las 6 escaleras suben a su casilla superior desde cada tirada posible (32 casos)
+  ok     las 7 serpientes bajan a su casilla inferior desde cada tirada posible (42 casos)
+  ok     caer justo en la meta gana la partida
+  ok     pasarse de la meta deja la ficha en la meta, nunca fuera del tablero
+  ok     con tirada exacta, pasarse de la meta deja la ficha donde estaba
+  ok     con tirada exacta, el número justo gana
+  ok     ninguna tirada desde ninguna casilla saca la ficha del tablero (1200 casos)
+  ok     el recorrido de cada tirada es continuo y de 6 casillas como máximo
+  ok     retroceder nunca baja de la casilla 1
+  ok     avanzar por premio se detiene en la meta
+  ok     un premio que cae en una serpiente no la activa
+  ok     las estrellas del desafío van de 1 a 3
+  ok     las opciones de juego se corrigen si vienen fuera de rango
+  ok     una casilla especial de avanzar avanza lo indicado
+  ok     con varios jugadores perder el turno se mantiene
+  ok     con un solo jugador perder el turno se convierte en retroceder 1 casilla
+  ok     los valores de una casilla especial se limitan a lo permitido
+-- Partida: turnos, premios, castigos y victoria
+  ok     con 1 jugador(es) los turnos se alternan en orden
+  ok     con 1 jugador(es) no se puede tirar fuera de turno
+  ok     con 2 jugador(es) los turnos se alternan en orden
+  ok     con 2 jugador(es) no se puede tirar fuera de turno
+  ok     con 3 jugador(es) los turnos se alternan en orden
+  ok     con 3 jugador(es) no se puede tirar fuera de turno
+  ok     con 4 jugador(es) los turnos se alternan en orden
+  ok     con 4 jugador(es) no se puede tirar fuera de turno
+  ok     cada jugador tiene su propia casilla
+  ok     caer en una casilla de desafío (la 5) lo plantea
+  ok     con los desafíos desactivados no se plantea ninguno
+  ok     una escalera no plantea desafío
+  ok     acertar da estrellas y avanza las casillas de premio
+  ok     el premio de tirada extra repite el turno del mismo jugador
+  ok     después de la tirada extra el turno sigue su orden
+  ok     el premio de solo estrellas no mueve la ficha
+  ok     fallar retrocede las casillas configuradas y no da estrellas
+  ok     el castigo nunca manda la ficha antes de la casilla 1
+  ok     con castigo desactivado fallar no cambia nada
+  ok     el jugador castigado aparece como turno perdido
+  ok     perder el turno salta al jugador castigado una sola vez ([1, 2, 1])
+  ok     con un solo jugador perder el turno no se marca
+  ok     el primero que llega a la meta gana
+  ok     después de la victoria nadie más puede tirar
+  ok     después de la victoria el turno no avanza
+  ok     el resumen indica quién ganó
+  ok     el resumen ordena a los jugadores con el ganador primero
+  ok     llegar a la meta con un premio también gana
+  ok     sin ganador, el orden sale por casilla y luego por estrellas
+  ok     con tirada exacta la ficha espera el número justo
+-- Casillas especiales: recompensas y obstáculos
+  ok     caer en la casilla 17 activa su recompensa
+  ok     pasar por encima de una casilla especial no la activa
+  ok     una casilla normal no activa nada
+  ok     sin casilla especial en la casilla actual no pasa nada
+  ok     solo el jugador que tiene el turno recibe el efecto
+  ok     el jugador en turno sí recibe el efecto
+  ok     cada casilla especial de los 7 mapas hace lo que dice (112 comprobaciones) []
+  ok     caer por una escalera o una serpiente no activa casillas especiales
+  ok     los mapas usan los 5 tipos de casilla especial (["advance", "back", "extra_roll", "stars", "skip"])
+  ok     con un solo jugador la casilla de perder turno retrocede 1 casilla
+  ok     la casilla de perder turno salta al jugador una sola vez ([1, 2, 1])
+-- Partidas simuladas completas en los 7 tableros
+  ok     eden: las 120 partidas simuladas terminan con un ganador (120)
+  ok     eden: casillas dentro del tablero, un solo ganador en la casilla 100 y turnos válidos
+  ok     eden: se usaron sus 6 escaleras y sus 7 serpientes (6 y 7)
+  ok     eden: se activaron sus casillas especiales (8 de 8, 5 tipos)
+  ok     eden: se plantearon desafíos (1299)
+  ok     eden: la duración de las partidas es razonable (media 66 tiradas, la más corta 17)
+  ok     arca_noe: las 120 partidas simuladas terminan con un ganador (120)
+  ok     arca_noe: casillas dentro del tablero, un solo ganador en la casilla 100 y turnos válidos
+  ok     arca_noe: se usaron sus 6 escaleras y sus 7 serpientes (6 y 7)
+  ok     arca_noe: se activaron sus casillas especiales (8 de 8, 5 tipos)
+  ok     arca_noe: se plantearon desafíos (1307)
+  ok     arca_noe: la duración de las partidas es razonable (media 61 tiradas, la más corta 11)
+  ok     egipto_exodo: las 120 partidas simuladas terminan con un ganador (120)
+  ok     egipto_exodo: casillas dentro del tablero, un solo ganador en la casilla 100 y turnos válidos
+  ok     egipto_exodo: se usaron sus 6 escaleras y sus 7 serpientes (6 y 7)
+  ok     egipto_exodo: se activaron sus casillas especiales (8 de 8, 5 tipos)
+  ok     egipto_exodo: se plantearon desafíos (1159)
+  ok     egipto_exodo: la duración de las partidas es razonable (media 62 tiradas, la más corta 14)
+  ok     desierto_sinai: las 120 partidas simuladas terminan con un ganador (120)
+  ok     desierto_sinai: casillas dentro del tablero, un solo ganador en la casilla 100 y turnos válidos
+  ok     desierto_sinai: se usaron sus 6 escaleras y sus 7 serpientes (6 y 7)
+  ok     desierto_sinai: se activaron sus casillas especiales (8 de 8, 5 tipos)
+  ok     desierto_sinai: se plantearon desafíos (1280)
+  ok     desierto_sinai: la duración de las partidas es razonable (media 62 tiradas, la más corta 17)
+  ok     monte_sinai: las 120 partidas simuladas terminan con un ganador (120)
+  ok     monte_sinai: casillas dentro del tablero, un solo ganador en la casilla 100 y turnos válidos
+  ok     monte_sinai: se usaron sus 6 escaleras y sus 7 serpientes (6 y 7)
+  ok     monte_sinai: se activaron sus casillas especiales (8 de 8, 5 tipos)
+  ok     monte_sinai: se plantearon desafíos (1236)
+  ok     monte_sinai: la duración de las partidas es razonable (media 66 tiradas, la más corta 13)
+  ok     jerusalen: las 120 partidas simuladas terminan con un ganador (120)
+  ok     jerusalen: casillas dentro del tablero, un solo ganador en la casilla 100 y turnos válidos
+  ok     jerusalen: se usaron sus 6 escaleras y sus 7 serpientes (6 y 7)
+  ok     jerusalen: se activaron sus casillas especiales (8 de 8, 5 tipos)
+  ok     jerusalen: se plantearon desafíos (1184)
+  ok     jerusalen: la duración de las partidas es razonable (media 59 tiradas, la más corta 13)
+  ok     belen: las 120 partidas simuladas terminan con un ganador (120)
+  ok     belen: casillas dentro del tablero, un solo ganador en la casilla 100 y turnos válidos
+  ok     belen: se usaron sus 6 escaleras y sus 7 serpientes (6 y 7)
+  ok     belen: se activaron sus casillas especiales (8 de 8, 5 tipos)
+  ok     belen: se plantearon desafíos (1264)
+  ok     belen: la duración de las partidas es razonable (media 59 tiradas, la más corta 10)
+  ok     ganan jugadores distintos según la suerte ({ 3: 64, 0: 436, 2: 120, 1: 220 })
+      (la partida más larga tuvo 195 tiradas)
+-- Progreso: desbloqueo, recompensas, insignias, estadísticas y guardado
+  ok     el primer mapa está disponible desde el comienzo
+  ok     los otros 6 mapas empiezan bloqueados
+  ok     empieza sin avance y con 11 insignias por ganar (7 de mapa y 4 generales)
+  ok     se cuentan las partidas empezadas de un mapa que existe
+  ok     una partida sin terminar no completa el mapa
+  ok     un mapa que no existe no se anota
+  ok     con 2 mapas completados aún no se gana la insignia Viajero
+  ok     al completar el tercer mapa se gana Viajero junto con la insignia del mapa
+  ok     con 24 aciertos y 52 estrellas aún no se ganan Sabio ni Coleccionista
+  ok     con 30 aciertos y 65 estrellas se ganan Sabio y Coleccionista
+  ok     los 7 mapas se completan en orden: cada uno da su recompensa, su insignia y abre el siguiente []
+  ok     al completar los 7 mundos se gana la insignia Peregrino (estrellas del viaje: 185)
+  ok     se ganan las 11 insignias
+  ok     las estadísticas de la región suman la partida { "plays": 1, "completions": 1, "best_time": 300.0, "best_turns": 30, "challenges": 8, "correct": 6, "stars": 13, "best_stars": 9, "ladders": 3, "snakes": 3, "rolls": 60, "specials": 4 }
+  ok     repetir un mapa no repite la recompensa
+  ok     se guarda el mejor tiempo y los mejores turnos de la región
+  ok     una partida peor no cambia los récords
+  ok     el progreso se guarda y se vuelve a leer igual
+  ok     un archivo dañado no rompe el progreso
+  ok     completar un mapa deja abierto el siguiente aunque el archivo no lo diga
+  ok     abrir todos los mapas no los marca como completados
+  ok     el jugador solo puede elegir el mapa que tiene abierto
+  ok     elegir un mapa bloqueado no cambia la selección
+  ok     si la selección apunta a un mapa bloqueado vuelve al primero
+  ok     el gestor anota el mapa completado y abre el siguiente
+  ok     el progreso se guarda en un archivo del teléfono
+  ok     al completar un mapa se puede elegir el siguiente
+  ok     se pueden abrir todos los mapas solo en esta sesión
+  ok     al volver a abrir el juego el progreso sigue ahí y los mapas abiertos de prueba no se guardaron
+  ok     un archivo de progreso dañado empieza una partida nueva sin fallar
+-- Referencias bíblicas
+  ok     la lista tiene los 66 libros
+  ok     los libros suman 1189 capítulos (1189)
+  ok     Salmos tiene 150 capítulos (también como 'Salmo')
+  ok     los libros se reconocen sin tildes
+  ok     Judas tiene 1 capítulo y Apocalipsis 22
+  ok     referencia válida: Génesis 7:12
+  ok     referencia válida: Éxodo 14:21-22
+  ok     referencia válida: Éxodo 19-20
+  ok     referencia válida: Josué 3
+  ok     referencia válida: 1 Samuel 17:48-50
+  ok     referencia válida: Salmo 23:1
+  ok     referencia válida: Salmos 119:176
+  ok     referencia válida: Mateo 2:1; Lucas 2:4-7
+  ok     referencia válida: 2 Samuel 5; 1 Reyes 6
+  ok     referencia válida: Judas 1:25
+  ok     referencia inválida detectada: ''
+  ok     referencia inválida detectada: 'Génesis'
+  ok     referencia inválida detectada: 'Génesis 51:1'
+  ok     referencia inválida detectada: 'Foo 1:1'
+  ok     referencia inválida detectada: 'Juan 3:0'
+  ok     referencia inválida detectada: 'Salmos 151'
+  ok     referencia inválida detectada: 'Judas 2'
+  ok     referencia inválida detectada: 'Mateo 5:9-3'
+  ok     referencia inválida detectada: 'Juan 3:16-'
+  ok     referencia inválida detectada: 'Éxodo 20-19'
+  ok     referencia inválida detectada: 'Juan x:1'
+  ok     referencia inválida detectada: 'Lucas 2:4; Pedro 3:1'
+  ok     una referencia con dos partes se separa bien
+  ok     la referencia del mapa 'eden' es válida (Génesis 2:8-17)
+  ok     la referencia del mapa 'arca_noe' es válida (Génesis 6-8)
+  ok     la referencia del mapa 'egipto_exodo' es válida (Éxodo 12-14)
+  ok     la referencia del mapa 'desierto_sinai' es válida (Éxodo 16-17)
+  ok     la referencia del mapa 'monte_sinai' es válida (Éxodo 19-20)
+  ok     la referencia del mapa 'jerusalen' es válida (2 Samuel 5; 1 Reyes 6)
+  ok     la referencia del mapa 'belen' es válida (Lucas 2:1-20; Mateo 2:1-12)
+-- Desafíos bíblicos
+  ok     todos los desafíos del banco son válidos []
+  ok     el banco tiene 240 desafíos o más (251)
+  ok     hay 10 o más desafíos de tipo multiple_choice (63)
+  ok     hay 10 o más desafíos de tipo true_false (50)
+  ok     hay 10 o más desafíos de tipo character (45)
+  ok     hay 10 o más desafíos de tipo complete_verse (43)
+  ok     hay 10 o más desafíos de tipo event (50)
+  ok     no hay enunciados repetidos, textos demasiado largos, pistas que revelen el personaje ni versículos mal enlazados
+  ok     hay desafíos de las tres dificultades
+  ok     verdadero o falso tiene afirmaciones verdaderas y falsas ({ 0: 27, 1: 23 })
+  ok     mezclar las opciones conserva cuál es la respuesta correcta
+  ok     se conservan los desafíos generales de la etapa anterior (111)
+  ok     eden: tiene 20 desafíos propios, 4 de cada tipo { "multiple_choice": 4, "true_false": 4, "character": 4, "complete_verse": 4, "event": 4 }
+  ok     eden: sus desafíos son válidos, llevan la etiqueta del mapa y sus versículos están enlazados
+  ok     arca_noe: tiene 20 desafíos propios, 4 de cada tipo { "multiple_choice": 4, "true_false": 4, "character": 4, "complete_verse": 4, "event": 4 }
+  ok     arca_noe: sus desafíos son válidos, llevan la etiqueta del mapa y sus versículos están enlazados
+  ok     egipto_exodo: tiene 20 desafíos propios, 4 de cada tipo { "multiple_choice": 4, "true_false": 4, "character": 4, "complete_verse": 4, "event": 4 }
+  ok     egipto_exodo: sus desafíos son válidos, llevan la etiqueta del mapa y sus versículos están enlazados
+  ok     desierto_sinai: tiene 20 desafíos propios, 4 de cada tipo { "multiple_choice": 4, "true_false": 4, "character": 4, "complete_verse": 4, "event": 4 }
+  ok     desierto_sinai: sus desafíos son válidos, llevan la etiqueta del mapa y sus versículos están enlazados
+  ok     monte_sinai: tiene 20 desafíos propios, 4 de cada tipo { "multiple_choice": 4, "true_false": 4, "character": 4, "complete_verse": 4, "event": 4 }
+  ok     monte_sinai: sus desafíos son válidos, llevan la etiqueta del mapa y sus versículos están enlazados
+  ok     jerusalen: tiene 20 desafíos propios, 4 de cada tipo { "multiple_choice": 4, "true_false": 4, "character": 4, "complete_verse": 4, "event": 4 }
+  ok     jerusalen: sus desafíos son válidos, llevan la etiqueta del mapa y sus versículos están enlazados
+  ok     belen: tiene 20 desafíos propios, 4 de cada tipo { "multiple_choice": 4, "true_false": 4, "character": 4, "complete_verse": 4, "event": 4 }
+  ok     belen: sus desafíos son válidos, llevan la etiqueta del mapa y sus versículos están enlazados
+  ok     un mapa sin desafíos propios no devuelve ninguno
+  ok     la etiqueta 'general' vale para todos los mapas y la de un mapa se conserva al mezclar
+  ok     un desafío de un mapa que no existe se detecta
+  ok     con la misma semilla el mazo reparte los mismos desafíos
+  ok     cada 5 desafíos salen los cinco tipos
+  ok     el mazo no repite desafíos mientras quedan sin salir (60 sacados)
+  ok     se puede pedir un tipo concreto de desafío
+  ok     eden: los primeros 20 desafíos de una partida son los propios del mapa, sin repetir
+  ok     eden: el mazo nunca saca desafíos de otro mapa (100 sacados)
+  ok     arca_noe: los primeros 20 desafíos de una partida son los propios del mapa, sin repetir
+  ok     arca_noe: el mazo nunca saca desafíos de otro mapa (100 sacados)
+  ok     egipto_exodo: los primeros 20 desafíos de una partida son los propios del mapa, sin repetir
+  ok     egipto_exodo: el mazo nunca saca desafíos de otro mapa (100 sacados)
+  ok     desierto_sinai: los primeros 20 desafíos de una partida son los propios del mapa, sin repetir
+  ok     desierto_sinai: el mazo nunca saca desafíos de otro mapa (100 sacados)
+  ok     monte_sinai: los primeros 20 desafíos de una partida son los propios del mapa, sin repetir
+  ok     monte_sinai: el mazo nunca saca desafíos de otro mapa (100 sacados)
+  ok     jerusalen: los primeros 20 desafíos de una partida son los propios del mapa, sin repetir
+  ok     jerusalen: el mazo nunca saca desafíos de otro mapa (100 sacados)
+  ok     belen: los primeros 20 desafíos de una partida son los propios del mapa, sin repetir
+  ok     belen: el mazo nunca saca desafíos de otro mapa (100 sacados)
+  ok     se puede pedir un tipo concreto dentro de un mapa y sale uno de ese mapa
+  ok     ninguna versión con derechos está activa (RVR1960 requiere autorización)
+  ok     sin autorización el juego no muestra texto bíblico
+  ok     RVR1960 está preparada en la estructura pero desactivada
+  ok     la estructura muestra el texto cuando una versión está activa (versión falsa de prueba)
+  ok     al quitar la versión de prueba vuelve a no haber texto
+  ok     mensajes motivadores de 'start' (3)
+  ok     mensajes motivadores de 'challenge' (3)
+  ok     mensajes motivadores de 'correct' (5)
+  ok     mensajes motivadores de 'wrong' (5)
+  ok     mensajes motivadores de 'ladder' (3)
+  ok     mensajes motivadores de 'snake' (3)
+  ok     mensajes motivadores de 'skip' (2)
+  ok     mensajes motivadores de 'last_stretch' (2)
+  ok     mensajes motivadores de 'victory' (3)
+  ok     las referencias de versículos son válidas y no incluyen texto con derechos
+-- Personajes y jugadores
+  ok     hay al menos 4 personajes para 4 jugadores
+  ok     personaje completo: moises
+  ok     personaje completo: david
+  ok     personaje completo: ester
+  ok     personaje completo: rut
+  ok     personaje completo: daniel
+  ok     personaje completo: josue
+  ok     los ids de personaje no se repiten
+  ok     lista de 1 jugador(es) sin personajes repetidos
+  ok     el jugador 1 usa el personaje elegido
+  ok     lista de 2 jugador(es) sin personajes repetidos
+  ok     el jugador 1 usa el personaje elegido
+  ok     lista de 3 jugador(es) sin personajes repetidos
+  ok     el jugador 1 usa el personaje elegido
+  ok     lista de 4 jugador(es) sin personajes repetidos
+  ok     el jugador 1 usa el personaje elegido
+  ok     el número de jugadores se limita a 4
+  ok     el número de jugadores no baja de 1
+-- Mallas 3D (orientación de las caras)
+  ok     el tubo de las serpientes tiene las caras hacia afuera
+  ok     el terreno tiene una superficie
+  ok     el terreno tiene las caras hacia arriba
+  ok     la cinta del río tiene las caras hacia arriba
+  ok     la altura del terreno es un número válido
+-- Herramientas 3D (mallas, texturas, terreno, agua, efectos)
+  ok     una caja tiene 12 triángulos
+  ok     caja: tiene triángulos (12)
+  ok     caja: el orden de los vértices coincide con las normales
+  ok     caja: las caras miran hacia afuera
+  ok     cilindro: tiene triángulos (32)
+  ok     cilindro: el orden de los vértices coincide con las normales
+  ok     cilindro: las caras miran hacia afuera
+  ok     cono: tiene triángulos (7)
+  ok     cono: el orden de los vértices coincide con las normales
+  ok     cono: las caras miran hacia afuera
+  ok     pirámide: tiene triángulos (4)
+  ok     pirámide: el orden de los vértices coincide con las normales
+  ok     pirámide: las caras miran hacia afuera
+  ok     una pirámide tiene 4 caras
+  ok     tronco de pirámide: tiene triángulos (12)
+  ok     tronco de pirámide: el orden de los vértices coincide con las normales
+  ok     tronco de pirámide: las caras miran hacia afuera
+  ok     esfera irregular: tiene triángulos (64)
+  ok     esfera irregular: el orden de los vértices coincide con las normales
+  ok     esfera irregular: las caras miran hacia afuera
+  ok     cúpula: tiene triángulos (84)
+  ok     cúpula: el orden de los vértices coincide con las normales
+  ok     cúpula: las caras miran hacia afuera
+  ok     techo a dos aguas: tiene triángulos (6)
+  ok     techo a dos aguas: el orden de los vértices coincide con las normales
+  ok     techo a dos aguas: las caras miran hacia afuera
+  ok     viga: tiene triángulos (12)
+  ok     viga: el orden de los vértices coincide con las normales
+  ok     viga: las caras miran hacia afuera
+  ok     prisma (sentido antihorario): tiene triángulos (10)
+  ok     prisma (sentido antihorario): el orden de los vértices coincide con las normales
+  ok     prisma (sentido antihorario): las caras miran hacia afuera
+  ok     prisma (sentido horario): tiene triángulos (10)
+  ok     prisma (sentido horario): el orden de los vértices coincide con las normales
+  ok     prisma (sentido horario): las caras miran hacia afuera
+  ok     caja girada y escalada: tiene triángulos (12)
+  ok     caja girada y escalada: el orden de los vértices coincide con las normales
+  ok     caja girada y escalada: las caras miran hacia afuera
+  ok     caja reflejada: tiene triángulos (12)
+  ok     caja reflejada: el orden de los vértices coincide con las normales
+  ok     caja reflejada: las caras miran hacia afuera
+  ok     pop() devuelve la colocación anterior
+  ok     un tubo de 4 puntos y 6 lados tiene 36 triángulos
+  ok     el tubo del escenario tiene el orden de vértices correcto
+  ok     el tubo del escenario mira hacia afuera
+  ok     una estrella plana tiene 20 triángulos (dos lados)
+  ok     la estrella tiene el mismo número de caras hacia cada lado
+  ok     la malla guarda UVs y colores por vértice
+  ok     el color por vértice es el pedido
+  ok     una malla vacía no tiene superficies
+  ok     pieza decorativa 'árbol' tiene una cantidad razonable de triángulos (78)
+  ok     pieza decorativa 'frutal' tiene una cantidad razonable de triángulos (162)
+  ok     pieza decorativa 'ciprés' tiene una cantidad razonable de triángulos (24)
+  ok     pieza decorativa 'olivo' tiene una cantidad razonable de triángulos (92)
+  ok     pieza decorativa 'palmera' tiene una cantidad razonable de triángulos (166)
+  ok     pieza decorativa 'papiro' tiene una cantidad razonable de triángulos (54)
+  ok     pieza decorativa 'roca' tiene una cantidad razonable de triángulos (24)
+  ok     pieza decorativa 'casa con tejado' tiene una cantidad razonable de triángulos (54)
+  ok     pieza decorativa 'casa de techo plano' tiene una cantidad razonable de triángulos (48)
+  ok     pieza decorativa 'torre' tiene una cantidad razonable de triángulos (32)
+  ok     pieza decorativa 'muro' tiene una cantidad razonable de triángulos (96)
+  ok     pieza decorativa 'columna' tiene una cantidad razonable de triángulos (40)
+  ok     pieza decorativa 'obelisco' tiene una cantidad razonable de triángulos (16)
+  ok     pieza decorativa 'tienda' tiene una cantidad razonable de triángulos (24)
+  ok     pieza decorativa 'objetos pequeños' tiene una cantidad razonable de triángulos (212)
+  ok     animal 'elefante' tiene una cantidad razonable de triángulos (278)
+  ok     animal 'elefante' tiene el orden de vértices correcto
+  ok     animal 'jirafa' tiene una cantidad razonable de triángulos (296)
+  ok     animal 'jirafa' tiene el orden de vértices correcto
+  ok     animal 'leon' tiene una cantidad razonable de triángulos (216)
+  ok     animal 'leon' tiene el orden de vértices correcto
+  ok     animal 'cebra' tiene una cantidad razonable de triángulos (280)
+  ok     animal 'cebra' tiene el orden de vértices correcto
+  ok     animal 'oveja' tiene una cantidad razonable de triángulos (112)
+  ok     animal 'oveja' tiene el orden de vértices correcto
+  ok     animal 'burro' tiene una cantidad razonable de triángulos (178)
+  ok     animal 'burro' tiene el orden de vértices correcto
+  ok     animal 'buey' tiene una cantidad razonable de triángulos (166)
+  ok     animal 'buey' tiene el orden de vértices correcto
+  ok     animal 'paloma' tiene una cantidad razonable de triángulos (92)
+  ok     animal 'paloma' tiene el orden de vértices correcto
+  ok     un animal desconocido no agrega nada
+  ok     colocar un animal deja el MeshKit como estaba
+  ok     textura 'grass' de 64 x 64
+  ok     la textura 'grass' no es ni muy oscura ni quemada (0.89)
+  ok     textura 'sand' de 64 x 64
+  ok     la textura 'sand' no es ni muy oscura ni quemada (0.95)
+  ok     textura 'dirt' de 64 x 64
+  ok     la textura 'dirt' no es ni muy oscura ni quemada (0.87)
+  ok     textura 'stone' de 64 x 64
+  ok     la textura 'stone' no es ni muy oscura ni quemada (0.85)
+  ok     textura 'rock' de 64 x 64
+  ok     la textura 'rock' no es ni muy oscura ni quemada (0.73)
+  ok     textura 'cobble' de 64 x 64
+  ok     la textura 'cobble' no es ni muy oscura ni quemada (0.80)
+  ok     textura 'bricks' de 64 x 64
+  ok     la textura 'bricks' no es ni muy oscura ni quemada (0.83)
+  ok     textura 'planks' de 64 x 64
+  ok     la textura 'planks' no es ni muy oscura ni quemada (0.82)
+  ok     textura 'sandstone' de 64 x 64
+  ok     la textura 'sandstone' no es ni muy oscura ni quemada (0.87)
+  ok     textura 'plaster' de 64 x 64
+  ok     la textura 'plaster' no es ni muy oscura ni quemada (0.94)
+  ok     las texturas se guardan en caché
+  ok     los materiales se guardan en caché
+  ok     el material con textura usa también el color por vértice
+  ok     el material de luz es aditivo
+  ok     el punto suave de las partículas es de 32 píxeles
+  ok     bajo el tablero el terreno es plano
+  ok     lejos del tablero el relieve actúa completo
+  ok     entre medias la subida es gradual (0.50)
+  ok     el terreno de 8 x 8 tiene 128 triángulos
+  ok     el terreno tiene las caras hacia arriba
+  ok     todas las normales del terreno miran hacia arriba
+  ok     la cinta del río del escenario mira hacia arriba
+  ok     las normales de la cinta miran hacia arriba
+  ok     la lámina de 3 x 2 tiene 12 triángulos
+  ok     los shaders de agua están definidos
+  ok     el material del agua tiene su shader
+  ok     el material del agua se guarda en caché
+  ok     las partículas flotantes se crean y se agregan
+  ok     se crean las 4 nubes pedidas
+  ok     se crean las 3 aves pedidas
+  ok     50 estrellas tienen 200 triángulos
+  ok     el haz de luz tiene geometría
+-- Números de trazos y marcas de casillas
+  ok     el glifo '0' tiene trazos (20 triángulos)
+  ok     el glifo '1' tiene trazos (6 triángulos)
+  ok     el glifo '2' tiene trazos (14 triángulos)
+  ok     el glifo '3' tiene trazos (26 triángulos)
+  ok     el glifo '4' tiene trazos (6 triángulos)
+  ok     el glifo '5' tiene trazos (20 triángulos)
+  ok     el glifo '6' tiene trazos (24 triángulos)
+  ok     el glifo '7' tiene trazos (4 triángulos)
+  ok     el glifo '8' tiene trazos (32 triángulos)
+  ok     el glifo '9' tiene trazos (24 triángulos)
+  ok     el glifo '?' tiene trazos (16 triángulos)
+  ok     el ancho de '100' suma tres glifos
+  ok     un texto vacío no mide nada
+  ok     el número queda dentro de su caja y a una sola altura
+  ok     los trazos miran hacia arriba
+  ok     hay glifos para 0-9 y '?'
+  ok     el número 37 tiene geometría
+  ok     el icono 'advance' tiene figuras (35 triángulos)
+  ok     el icono 'extra_roll' tiene figuras (26 triángulos)
+  ok     el icono 'stars' tiene figuras (44 triángulos)
+  ok     el icono 'back' tiene figuras (35 triángulos)
+  ok     el icono 'skip' tiene figuras (40 triángulos)
+  ok     el disco de desafío tiene 14 triángulos
+  ok     el número es claro sobre casillas oscuras y oscuro sobre casillas claras
+  ok     en un tablero de noche el número va en claro aunque la casilla sea clara
+-- Escenarios 3D
+  ok     el desierto conserva su decoración original
+  ok     Edén: el suelo bajo el tablero está a la altura esperada
+  ok     Edén: el cauce del río queda bajo el agua
+  ok     Edén: la cima del acantilado de la cascada es alta
+  ok     Edén: hay colinas lejos del tablero
+  ok     Edén: las alturas están entre -1.6 y 10.7
+  Edén: 31 mallas, 21853 triángulos, 2 sistemas de partículas
+  ok     Edén: tiene mallas suficientes (31)
+  ok     Edén: triángulos dentro del presupuesto (21853 de 90000)
+  ok     Edén: pocas llamadas de dibujo (31 mallas)
+  ok     Edén: el escenario no proyecta sombras (solo el tablero)
+  ok     Edén: tiene terreno y río
+  ok     Edén: tiene cascada
+  ok     Edén: tiene polen y niebla de cascada
+  ok     Edén: la calidad baja usa menos triángulos que la alta (16615 < 24721)
+  ok     Arca de Noé: el estilo 'arca' tiene escenario propio
+  ok     Arca de Noé: el mapa 'arca_noe' usa el estilo 'arca'
+  Arca de Noé: 23 mallas, 10316 triángulos, 1 sistemas de partículas
+  ok     Arca de Noé: tiene mallas suficientes (23)
+  ok     Arca de Noé: triángulos dentro del presupuesto (10316 de 90000)
+  ok     Arca de Noé: pocas llamadas de dibujo (23 mallas)
+  ok     Arca de Noé: el escenario no proyecta sombras (solo el tablero)
+  ok     Arca de Noé: tiene 'Sea'
+  ok     Arca de Noé: tiene 'Ark'
+  ok     Arca de Noé: tiene 'Animals'
+  ok     Arca de Noé: tiene 'Ararat'
+  ok     Arca de Noé: tiene 'Rainbow'
+  ok     Arca de Noé: la calidad baja usa menos triángulos que la alta (8584 < 10316)
+  ok     Arca de Noé: con la misma semilla el escenario es idéntico
+  ok     Egipto: el estilo 'egipto' tiene escenario propio
+  ok     Egipto: el mapa 'egipto_exodo' usa el estilo 'egipto'
+  Egipto: 23 mallas, 19822 triángulos, 3 sistemas de partículas
+  ok     Egipto: tiene mallas suficientes (23)
+  ok     Egipto: triángulos dentro del presupuesto (19822 de 90000)
+  ok     Egipto: pocas llamadas de dibujo (23 mallas)
+  ok     Egipto: el escenario no proyecta sombras (solo el tablero)
+  ok     Egipto: tiene 'Terrain'
+  ok     Egipto: tiene 'WaterWall'
+  ok     Egipto: tiene 'SeaVolume'
+  ok     Egipto: tiene 'Monuments'
+  ok     Egipto: tiene 'Flames'
+  ok     Egipto: tiene 'Seabed'
+  ok     Egipto: la calidad baja usa menos triángulos que la alta (15350 < 22111)
+  ok     Egipto: con la misma semilla el escenario es idéntico
+  ok     Monte Sinaí: el estilo 'sinai' tiene escenario propio
+  ok     Monte Sinaí: el mapa 'monte_sinai' usa el estilo 'sinai'
+  Monte Sinaí: 21 mallas, 14080 triángulos, 1 sistemas de partículas
+  ok     Monte Sinaí: tiene mallas suficientes (21)
+  ok     Monte Sinaí: triángulos dentro del presupuesto (14080 de 90000)
+  ok     Monte Sinaí: pocas llamadas de dibujo (21 mallas)
+  ok     Monte Sinaí: el escenario no proyecta sombras (solo el tablero)
+  ok     Monte Sinaí: tiene 'Terrain'
+  ok     Monte Sinaí: tiene 'Land'
+  ok     Monte Sinaí: tiene 'Glow'
+  ok     Monte Sinaí: tiene 'SummitCloud'
+  ok     Monte Sinaí: tiene 'Beam'
+  ok     Monte Sinaí: la calidad baja usa menos triángulos que la alta (12208 < 14464)
+  ok     Monte Sinaí: con la misma semilla el escenario es idéntico
+  ok     Jerusalén: el estilo 'jerusalen' tiene escenario propio
+  ok     Jerusalén: el mapa 'jerusalen' usa el estilo 'jerusalen'
+  Jerusalén: 21 mallas, 27775 triángulos, 2 sistemas de partículas
+  ok     Jerusalén: tiene mallas suficientes (21)
+  ok     Jerusalén: triángulos dentro del presupuesto (27775 de 90000)
+  ok     Jerusalén: pocas llamadas de dibujo (21 mallas)
+  ok     Jerusalén: el escenario no proyecta sombras (solo el tablero)
+  ok     Jerusalén: tiene 'Terrain'
+  ok     Jerusalén: tiene 'City'
+  ok     Jerusalén: tiene 'Trim'
+  ok     Jerusalén: tiene 'Nature'
+  ok     Jerusalén: la calidad baja usa menos triángulos que la alta (24183 < 29483)
+  ok     Jerusalén: con la misma semilla el escenario es idéntico
+  ok     Belén: el estilo 'belen' tiene escenario propio
+  ok     Belén: el mapa 'belen' usa el estilo 'belen'
+  Belén: 17 mallas, 16285 triángulos, 1 sistemas de partículas
+  ok     Belén: tiene mallas suficientes (17)
+  ok     Belén: triángulos dentro del presupuesto (16285 de 90000)
+  ok     Belén: pocas llamadas de dibujo (17 mallas)
+  ok     Belén: el escenario no proyecta sombras (solo el tablero)
+  ok     Belén: tiene 'Terrain'
+  ok     Belén: tiene 'Village'
+  ok     Belén: tiene 'VillageGlow'
+  ok     Belén: tiene 'Stable'
+  ok     Belén: tiene 'StableGlow'
+  ok     Belén: tiene 'BethlehemStar'
+  ok     Belén: tiene 'Nature'
+  ok     Belén: la calidad baja usa menos triángulos que la alta (14111 < 16589)
+  ok     Belén: con la misma semilla el escenario es idéntico
+  ok     Jerusalén: el suelo bajo el tablero está a la altura esperada
+  ok     Jerusalén: el monte de los Olivos es alto
+  ok     Belén: el suelo bajo el tablero está a la altura esperada
+  ok     Belén: el establo está sobre terreno casi plano
+  ok     Belén: la fogata y el establo tienen luz cálida (calidad media)
+  ok     Belén: la calidad baja no usa luces dinámicas
+  ok     scatter_rect reparte puntos (30)
+  ok     scatter_rect separa los puntos al menos lo pedido
+  ok     scatter_rect no pone nada en la zona del tablero
+-- Tableros propios de cada mapa
+  ok     un estilo desconocido usa el del desierto
+  ok     solo el tablero de Belén es de noche
+  ok     hay 7 mapas con tablero propio
+  ok     Jardín del Edén: usa el estilo 'garden'
+  ok     Jardín del Edén: 100 casillas, 6 escaleras y 7 serpientes
+  ok     Jardín del Edén: tiene 'TileSurface'
+  ok     Jardín del Edén: tiene 'TileMarks'
+  ok     Jardín del Edén: tiene 'TileInk'
+  ok     Jardín del Edén: tiene 'FrameDecor'
+  ok     Jardín del Edén: tiene 'StartMarker/Body'
+  ok     Jardín del Edén: tiene 'GoalMarker/Body'
+  ok     Jardín del Edén: superficie con geometría (1627 triángulos)
+  ok     Jardín del Edén: pocas llamadas de dibujo en el tablero (31 mallas)
+  ok     Jardín del Edén: solo hay dos rótulos de texto (INICIO y META)
+  ok     Jardín del Edén: el tablero cabe en el presupuesto de triángulos (12550)
+  ok     Jardín del Edén: todas las casillas de desafío tienen su marca
+  ok     Jardín del Edén: las 8 casillas especiales tienen su icono
+  ok     Jardín del Edén: las anclas están sobre sus casillas
+  ok     Jardín del Edén: la cabeza de la serpiente es una malla
+  ok     Jardín del Edén: cada escalera es una malla
+  ok     Jardín del Edén: las serpientes tienen camino
+  ok     Arca de Noé: usa el estilo 'deck'
+  ok     Arca de Noé: 100 casillas, 6 escaleras y 7 serpientes
+  ok     Arca de Noé: tiene 'TileSurface'
+  ok     Arca de Noé: tiene 'TileMarks'
+  ok     Arca de Noé: tiene 'TileInk'
+  ok     Arca de Noé: tiene 'FrameDecor'
+  ok     Arca de Noé: tiene 'StartMarker/Body'
+  ok     Arca de Noé: tiene 'GoalMarker/Body'
+  ok     Arca de Noé: superficie con geometría (4800 triángulos)
+  ok     Arca de Noé: pocas llamadas de dibujo en el tablero (30 mallas)
+  ok     Arca de Noé: solo hay dos rótulos de texto (INICIO y META)
+  ok     Arca de Noé: el tablero cabe en el presupuesto de triángulos (13918)
+  ok     Arca de Noé: todas las casillas de desafío tienen su marca
+  ok     Arca de Noé: las 8 casillas especiales tienen su icono
+  ok     Arca de Noé: las anclas están sobre sus casillas
+  ok     Arca de Noé: la cabeza de la serpiente es una malla
+  ok     Arca de Noé: cada escalera es una malla
+  ok     Arca de Noé: las serpientes tienen camino
+  ok     Egipto y el Éxodo: usa el estilo 'causeway'
+  ok     Egipto y el Éxodo: 100 casillas, 6 escaleras y 7 serpientes
+  ok     Egipto y el Éxodo: tiene 'TileSurface'
+  ok     Egipto y el Éxodo: tiene 'TileMarks'
+  ok     Egipto y el Éxodo: tiene 'TileInk'
+  ok     Egipto y el Éxodo: tiene 'FrameDecor'
+  ok     Egipto y el Éxodo: tiene 'StartMarker/Body'
+  ok     Egipto y el Éxodo: tiene 'GoalMarker/Body'
+  ok     Egipto y el Éxodo: superficie con geometría (2000 triángulos)
+  ok     Egipto y el Éxodo: pocas llamadas de dibujo en el tablero (31 mallas)
+  ok     Egipto y el Éxodo: solo hay dos rótulos de texto (INICIO y META)
+  ok     Egipto y el Éxodo: el tablero cabe en el presupuesto de triángulos (10126)
+  ok     Egipto y el Éxodo: todas las casillas de desafío tienen su marca
+  ok     Egipto y el Éxodo: las 8 casillas especiales tienen su icono
+  ok     Egipto y el Éxodo: las anclas están sobre sus casillas
+  ok     Egipto y el Éxodo: la cabeza de la serpiente es una malla
+  ok     Egipto y el Éxodo: cada escalera es una malla
+  ok     Egipto y el Éxodo: las serpientes tienen camino
+  ok     Desierto del Sinaí: usa el estilo 'sand'
+  ok     Desierto del Sinaí: 100 casillas, 6 escaleras y 7 serpientes
+  ok     Desierto del Sinaí: tiene 'TileSurface'
+  ok     Desierto del Sinaí: tiene 'TileMarks'
+  ok     Desierto del Sinaí: tiene 'TileInk'
+  ok     Desierto del Sinaí: tiene 'FrameDecor'
+  ok     Desierto del Sinaí: tiene 'StartMarker/Body'
+  ok     Desierto del Sinaí: tiene 'GoalMarker/Body'
+  ok     Desierto del Sinaí: superficie con geometría (1200 triángulos)
+  ok     Desierto del Sinaí: pocas llamadas de dibujo en el tablero (31 mallas)
+  ok     Desierto del Sinaí: solo hay dos rótulos de texto (INICIO y META)
+  ok     Desierto del Sinaí: el tablero cabe en el presupuesto de triángulos (9010)
+  ok     Desierto del Sinaí: todas las casillas de desafío tienen su marca
+  ok     Desierto del Sinaí: las 8 casillas especiales tienen su icono
+  ok     Desierto del Sinaí: las anclas están sobre sus casillas
+  ok     Desierto del Sinaí: la cabeza de la serpiente es una malla
+  ok     Desierto del Sinaí: cada escalera es una malla
+  ok     Desierto del Sinaí: las serpientes tienen camino
+  ok     Monte Sinaí: usa el estilo 'rock'
+  ok     Monte Sinaí: 100 casillas, 6 escaleras y 7 serpientes
+  ok     Monte Sinaí: tiene 'TileSurface'
+  ok     Monte Sinaí: tiene 'TileMarks'
+  ok     Monte Sinaí: tiene 'TileInk'
+  ok     Monte Sinaí: tiene 'FrameDecor'
+  ok     Monte Sinaí: tiene 'StartMarker/Body'
+  ok     Monte Sinaí: tiene 'GoalMarker/Body'
+  ok     Monte Sinaí: superficie con geometría (2200 triángulos)
+  ok     Monte Sinaí: pocas llamadas de dibujo en el tablero (31 mallas)
+  ok     Monte Sinaí: solo hay dos rótulos de texto (INICIO y META)
+  ok     Monte Sinaí: el tablero cabe en el presupuesto de triángulos (11811)
+  ok     Monte Sinaí: todas las casillas de desafío tienen su marca
+  ok     Monte Sinaí: las 8 casillas especiales tienen su icono
+  ok     Monte Sinaí: las anclas están sobre sus casillas
+  ok     Monte Sinaí: la cabeza de la serpiente es una malla
+  ok     Monte Sinaí: cada escalera es una malla
+  ok     Monte Sinaí: las serpientes tienen camino
+  ok     Jerusalén: usa el estilo 'city'
+  ok     Jerusalén: 100 casillas, 6 escaleras y 7 serpientes
+  ok     Jerusalén: tiene 'TileSurface'
+  ok     Jerusalén: tiene 'TileMarks'
+  ok     Jerusalén: tiene 'TileInk'
+  ok     Jerusalén: tiene 'FrameDecor'
+  ok     Jerusalén: tiene 'StartMarker/Body'
+  ok     Jerusalén: tiene 'GoalMarker/Body'
+  ok     Jerusalén: superficie con geometría (4800 triángulos)
+  ok     Jerusalén: pocas llamadas de dibujo en el tablero (31 mallas)
+  ok     Jerusalén: solo hay dos rótulos de texto (INICIO y META)
+  ok     Jerusalén: el tablero cabe en el presupuesto de triángulos (15043)
+  ok     Jerusalén: todas las casillas de desafío tienen su marca
+  ok     Jerusalén: las 8 casillas especiales tienen su icono
+  ok     Jerusalén: las anclas están sobre sus casillas
+  ok     Jerusalén: la cabeza de la serpiente es una malla
+  ok     Jerusalén: cada escalera es una malla
+  ok     Jerusalén: las serpientes tienen camino
+  ok     Belén: usa el estilo 'village'
+  ok     Belén: 100 casillas, 6 escaleras y 7 serpientes
+  ok     Belén: tiene 'TileSurface'
+  ok     Belén: tiene 'TileMarks'
+  ok     Belén: tiene 'TileInk'
+  ok     Belén: tiene 'FrameDecor'
+  ok     Belén: tiene 'StartMarker/Body'
+  ok     Belén: tiene 'GoalMarker/Body'
+  ok     Belén: superficie con geometría (9600 triángulos)
+  ok     Belén: pocas llamadas de dibujo en el tablero (33 mallas)
+  ok     Belén: solo hay dos rótulos de texto (INICIO y META)
+  ok     Belén: el tablero cabe en el presupuesto de triángulos (18389)
+  ok     Belén: todas las casillas de desafío tienen su marca
+  ok     Belén: las 8 casillas especiales tienen su icono
+  ok     Belén: las anclas están sobre sus casillas
+  ok     Belén: la cabeza de la serpiente es una malla
+  ok     Belén: cada escalera es una malla
+  ok     Belén: las serpientes tienen camino
+  ok     las superficies de los tableros son distintas entre sí (6 variantes)
+  ok     las puertas de salida y meta son distintas entre sí (7 variantes)
+-- Mundo bíblico: relieve, caminos e iconos 3D
+  ok     hay 6 caminos que unen los 7 mundos (6)
+  ok     las regiones están donde dice el catálogo (por la escala del mundo)
+  ok     las 7 regiones están sobre tierra firme
+  ok     las regiones están bien separadas (mínimo 32.7)
+  ok     el suelo bajo cada plataforma es plano
+  ok     el terreno que toca cada plataforma queda por debajo de ella (máx. 0.22)
+  ok     los caminos unen los mundos en el orden en que se abren
+  ok     cada camino va de borde a borde de dos plataformas
+  ok     los caminos van por suelo plano
+  ok     hay montañas altas (cumbre 15.1)
+  ok     el continente está rodeado de mar
+  ok     el terreno junto a cada región toma el color de su mundo
+  ok     las cumbres tienen nieve y la costa arena
+  ok     cada mundo tiene un icono 3D distinto (7)
+  ok     el icono 'tree' lo usa un mundo del catálogo
+  ok     icono 'tree': 608 triángulos y 9.6 de alto
+  ok     icono 'tree': el orden de los vértices coincide con las normales
+  ok     icono 'tree': cabe en la plataforma ([P: (-4.352755, -0.207692, -4.174008), S: (9.252152, 9.263309, 8.917175)])
+  ok     icono 'tree': decorado de 978 triángulos dentro de la plataforma
+  ok     icono 'tree': con calidad baja el decorado sigue ahí (586 triángulos)
+  ok     el icono 'ark' lo usa un mundo del catálogo
+  ok     icono 'ark': 620 triángulos y 7.2 de alto
+  ok     icono 'ark': el orden de los vértices coincide con las normales
+  ok     icono 'ark': cabe en la plataforma ([P: (-5.364491, -0.9, -2.5), S: (11.36449, 7.306, 5.0)])
+  ok     icono 'ark': decorado de 1308 triángulos dentro de la plataforma
+  ok     icono 'ark': con calidad baja el decorado sigue ahí (1236 triángulos)
+  ok     el icono 'pyramid' lo usa un mundo del catálogo
+  ok     icono 'pyramid': 52 triángulos y 6.4 de alto
+  ok     icono 'pyramid': el orden de los vértices coincide con las normales
+  ok     icono 'pyramid': cabe en la plataforma ([P: (-6.8, 0.0, -4.6), S: (12.7, 5.616, 9.200001)])
+  ok     icono 'pyramid': decorado de 914 triángulos dentro de la plataforma
+  ok     icono 'pyramid': con calidad baja el decorado sigue ahí (558 triángulos)
+  ok     el icono 'tent' lo usa un mundo del catálogo
+  ok     icono 'tent': 343 triángulos y 5.6 de alto
+  ok     icono 'tent': el orden de los vértices coincide con las normales
+  ok     icono 'tent': cabe en la plataforma ([P: (-7.455376, -1.319286, -5.608436), S: (14.82726, 6.719286, 11.36058)])
+  ok     icono 'tent': decorado de 864 triángulos dentro de la plataforma
+  ok     icono 'tent': con calidad baja el decorado sigue ahí (674 triángulos)
+  ok     el icono 'mountain' lo usa un mundo del catálogo
+  ok     icono 'mountain': 133 triángulos y 11.8 de alto
+  ok     icono 'mountain': el orden de los vértices coincide con las normales
+  ok     icono 'mountain': cabe en la plataforma ([P: (-7.6, 0.0, -5.849567), S: (14.6, 11.68, 11.69913)])
+  ok     icono 'mountain': decorado de 376 triángulos dentro de la plataforma
+  ok     icono 'mountain': con calidad baja el decorado sigue ahí (280 triángulos)
+  ok     el icono 'temple' lo usa un mundo del catálogo
+  ok     icono 'temple': 907 triángulos y 9.8 de alto
+  ok     icono 'temple': el orden de los vértices coincide con las normales
+  ok     icono 'temple': cabe en la plataforma ([P: (-7.127, 0.0, -5.627), S: (14.254, 9.7, 9.677)])
+  ok     icono 'temple': decorado de 448 triángulos dentro de la plataforma
+  ok     icono 'temple': con calidad baja el decorado sigue ahí (400 triángulos)
+  ok     el icono 'stable' lo usa un mundo del catálogo
+  ok     icono 'stable': 458 triángulos y 8.4 de alto
+  ok     icono 'stable': el orden de los vértices coincide con las normales
+  ok     icono 'stable': cabe en la plataforma ([P: (-3.7, 0.0, -2.9), S: (7.4, 5.1, 5.8)])
+  ok     icono 'stable': decorado de 682 triángulos dentro de la plataforma
+  ok     icono 'stable': con calidad baja el decorado sigue ahí (434 triángulos)
+  ok     los iconos son distintos entre sí (7 formas)
+  ok     un icono desconocido no agrega nada
+  ok     el candado tiene forma (128 triángulos, 2.2 de alto)
+  ok     el aro de luz es plano y mide lo que debe (15.8 de ancho)
+  ok     la estrella de región completada tiene forma (40 triángulos)
+  ok     la flecha apunta hacia abajo con la punta en el origen
+  ok     calidad 0: se construyen las 7 regiones con su nombre (7 rótulos)
+  ok     calidad 0: 89 objetos de malla (cada uno es una orden de dibujo)
+  ok     calidad 0: el mundo tiene su propia luz y no usa sombras (más fluido en el teléfono)
+  ok     calidad 1: se construyen las 7 regiones con su nombre (7 rótulos)
+  ok     calidad 1: 94 objetos de malla (cada uno es una orden de dibujo)
+  ok     calidad 1: el mundo tiene su propia luz y no usa sombras (más fluido en el teléfono)
+  ok     calidad 2: se construyen las 7 regiones con su nombre (7 rótulos)
+  ok     calidad 2: 94 objetos de malla (cada uno es una orden de dibujo)
+  ok     calidad 2: el mundo tiene su propia luz y no usa sombras (más fluido en el teléfono)
+  ok     los triángulos del mundo suben con la calidad: 44503, 46625, 47649
+-- Cámara del mundo bíblico: gestos táctiles
+  ok     la cámara empieza en la vista general
+  ok     la cámara mira el mapa desde arriba y desde el sur (1.0000)
+  ok     la rueda hacia arriba acerca la cámara
+  ok     la rueda hacia abajo la aleja otra vez
+  ok     el zoom no pasa de la distancia mínima
+  ok     el zoom no pasa de la distancia máxima
+  ok     cada zoom avisa que el jugador movió la cámara
+  ok     la cámara sabe cuánto mundo cubre un píxel (0.0951)
+  ok     arrastrar a la derecha mueve el mapa a la derecha (-11.41)
+  ok     arrastrar hacia abajo mueve el mapa hacia abajo (-12.07)
+  ok     arrastrar no cuenta como un toque
+  ok     un clic sin mover avisa el toque con su posición
+  ok     un temblor pequeño sigue siendo un toque y no mueve el mapa
+  ok     los eventos de ratón emulados por toques se ignoran
+  ok     un toque corto con el dedo avisa su posición
+  ok     un dedo arrastra el mapa y no cuenta como toque (-19.02)
+  ok     separar los dedos acerca la cámara (62.0)
+  ok     juntar los dedos aleja la cámara (124.0)
+  ok     un pellizco no cuenta como toque
+  ok     después del pellizco los toques vuelven a funcionar
+  ok     no se puede arrastrar más allá del borde este y sur
+  ok     no se puede arrastrar más allá del borde oeste y norte
+  ok     focus_on apunta al lado izquierdo de la región
+  ok     la cámara todavía no llegó
+  ok     la cámara se acerca a la meta sin pasarse
+  ok     la cámara termina de llegar con el tiempo
+  ok     VISTA vuelve a la vista general
+-- Conexión en línea: protocolo
+  ok     el saludo lleva su tipo y la versión del protocolo
+  ok     el saludo lleva el identificador, el nombre limpio y la versión de la app
+  ok     sin sesión previa, el saludo no pide reanudar
+  ok     con una sesión válida, el saludo pide reanudarla
+  ok     una sesión mal formada no se envía
+  ok     mensaje de despedida (bye)
+  ok     mensaje de estadísticas (stats)
+  ok     se lee un mensaje válido
+  ok     se ignora el mensaje inválido: 
+  ok     se ignora el mensaje inválido: hola
+  ok     se ignora el mensaje inválido: {
+  ok     se ignora el mensaje inválido: []
+  ok     se ignora el mensaje inválido: null
+  ok     se ignora el mensaje inválido: 7
+  ok     se ignora el mensaje inválido: "t"
+  ok     se ignora el mensaje inválido: {}
+  ok     se ignora el mensaje inválido: {"t":1}
+  ok     se ignora el mensaje inválido: {"t":""}
+  ok     se ignora el mensaje inválido: {"t":"xxxxxxxxxxxxxx
+  ok     se ignora el mensaje inválido: [{"t":"a"}]
+  ok     limpia el nombre 'Ana   María'
+  ok     limpia el nombre 'Abc'
+  ok     limpia el nombre 'Zero​Width'
+  ok     limpia el nombre '‮atrás'
+  ok     limpia el nombre ''
+  ok     limpia el nombre ''
+  ok     el nombre se recorta a 20 caracteres
+  ok     validación del identificador de dispositivo
+  ok     validación del código de sesión
+  ok     los identificadores de dispositivo generados son válidos y distintos
+  ok     existe el protocolo del servidor (server/src/protocol.js)
+  ok     el juego y el servidor coinciden en PROTOCOL_VERSION = 1
+  ok     el juego y el servidor coinciden en REPLACED: 4000
+  ok     el juego y el servidor coinciden en BAD_VERSION: 4001
+  ok     el juego y el servidor coinciden en BAD_MESSAGE: 4002
+  ok     el juego y el servidor coinciden en RATE_LIMITED: 4003
+  ok     el juego y el servidor coinciden en TOO_MANY: 4004
+  ok     el juego y el servidor coinciden en HANDSHAKE_TIMEOUT: 4005
+  ok     el juego y el servidor coinciden en NAME_MAX_CHARS: 20
+  ok     el juego y el servidor coinciden en MAX_MESSAGE_CHARS: 4096
+-- Conexión en línea: configuración
+  ok     dirección 'https://a.b.workers.dev' -> 'https://a.b.workers.dev'
+  ok     dirección 'https://a.b.workers.dev/' -> 'https://a.b.workers.dev'
+  ok     dirección 'wss://a.b.workers.dev/ws' -> 'https://a.b.workers.dev'
+  ok     dirección 'https://a.b.workers.dev/ws/' -> 'https://a.b.workers.dev'
+  ok     dirección 'http://127.0.0.1:8787' -> 'http://127.0.0.1:8787'
+  ok     dirección 'ws://localhost:8787/ws' -> 'http://localhost:8787'
+  ok     dirección 'http://evil.example' -> ''
+  ok     dirección 'ws://evil.example/ws' -> ''
+  ok     dirección 'ftp://a.dev' -> ''
+  ok     dirección 'a.b.workers.dev' -> ''
+  ok     dirección '' -> ''
+  ok     dirección '' -> ''
+  ok     dirección 'https://' -> ''
+  ok     dirección 'https://a b.dev' -> ''
+  ok     dirección 'https://a.dev/otra/ruta' -> ''
+  ok     dirección 'https://usuario@a.dev' -> ''
+  ok     dirección 'https://a.dev?x=1' -> ''
+  ok     https se convierte en wss://.../ws
+  ok     http local se convierte en ws://.../ws
+  ok     una dirección no permitida no genera WebSocket
+  ok     dirección de /health
+  ok     existe data/online.json
+  ok     data/online.json es un JSON con el campo server_url
+  ok     la dirección del servidor del juego está vacía o es https
+  ok     lee y normaliza la dirección del archivo
+  ok     un archivo dañado da una dirección vacía
+  ok     un archivo que no es un objeto da una dirección vacía
+  ok     una dirección insegura se rechaza
+  ok     sin archivo, la dirección está vacía
+  ok     se crea un identificador de dispositivo válido
+  ok     el identificador se conserva entre sesiones
+  ok     un identificador dañado se vuelve a crear
+-- Conexión en línea: cliente (con servidor falso)
+  ok     sin dirección de servidor no se intenta conectar (FAILED no_server)
+  ok     una dirección insegura no se usa
+  ok     un identificador de dispositivo inválido no se usa
+  ok     el cliente nuevo está en reposo
+  ok     start() empieza a conectar
+  ok     se conecta a wss://servidor/ws (wss://juego.example/ws)
+  ok     con la conexión abierta se espera el welcome
+  ok     lo primero que se envía es el hello
+  ok     el hello lleva identificador, nombre y versión; sin sesión previa no pide reanudar
+  ok     tras el welcome el cliente está ONLINE
+  ok     guarda la sesión y el número de jugadores en línea
+  ok     avisa con la señal welcomed
+  ok     request_stats() envía el pedido de estadísticas
+  ok     las estadísticas actualizan el número de jugadores
+  ok     los mensajes de juego se pasan a message_received
+  ok     los errores del servidor se avisan
+  ok     los mensajes inválidos o desconocidos no cortan la conexión
+  ok     send_message() envía un mensaje de juego
+  ok     un mensaje demasiado grande no se envía
+  ok     todavía no toca el latido
+  ok     cada 20 s se envía un ping
+  ok     el pong mantiene la conexión y mide la demora (200 ms)
+  ok     el latido se repite
+  ok     mientras no pase el plazo del pong sigue conectado
+  ok     sin pong a tiempo se da por perdida la conexión (WAITING)
+  ok     avisa que se perdió la conexión y que va a reintentar
+  ok     se descarta la conexión muerta
+  ok     espera 1 s antes del primer reintento
+  ok     reintenta con una conexión nueva
+  ok     al reconectar pide reanudar la misma sesión
+  ok     sesión reanudada: vuelve a ONLINE y se reinicia el contador de reintentos
+  ok     espera del reintento 1 = 1.0 s
+  ok     espera del reintento 2 = 2.0 s
+  ok     espera del reintento 3 = 4.0 s
+  ok     espera del reintento 4 = 8.0 s
+  ok     espera del reintento 5 = 16.0 s
+  ok     espera del reintento 6 = 30.0 s
+  ok     espera del reintento 7 = 30.0 s
+  ok     los errores de límite esperan más (5, 10, 20, 30 s)
+  ok     la variación al azar es de ±20 %
+  ok     fallo 1: espera 1.0 s
+  ok     fallo 1: reintenta justo después de la espera
+  ok     fallo 2: espera 2.0 s
+  ok     fallo 2: reintenta justo después de la espera
+  ok     fallo 3: espera 4.0 s
+  ok     fallo 3: reintenta justo después de la espera
+  ok     si nunca estuvo conectado no avisa 'conexión perdida'
+  ok     tras 10 reintentos se rinde (FAILED unreachable)
+  ok     ya no reintenta solo
+  ok     start() de nuevo reinicia los reintentos
+  ok     si ni siquiera se puede empezar a conectar, se reintenta después
+  ok     cierre 4001: versión distinta, no reintenta
+  ok     cierre 4000: se abrió en otro lugar, no reintenta
+  ok     el aviso 'bye replaced' también detiene los reintentos
+  ok     cierre 4003: reintenta
+  ok     cierre 4003: espera 5 s (más que un corte normal)
+  ok     un corte de red (1006) reintenta a los 1,0 s
+  ok     cierre 4004 (servidor lleno): espera y reintenta
+  ok     stop() envía la despedida (bye)
+  ok     stop() cierra con el código normal 1000
+  ok     tras stop() queda en reposo y sin sesión
+  ok     tras stop() no reintenta ni queda nada pendiente
+  ok     después de una despedida voluntaria no se intenta reanudar la sesión
+  ok     stop() durante la espera cancela el reintento
+  ok     mientras no pase el plazo sigue conectando
+  ok     si la conexión no abre a tiempo, se reintenta
+  ok     si el servidor no responde al saludo, se reintenta
+  ok     al volver de segundo plano se comprueba la conexión enseguida
+  ok     la comprobación espera hasta 4 s
+  ok     sin respuesta a la comprobación se reconecta
+  ok     volver a primer plano durante la espera reconecta sin esperar
+  ok     un código de sesión mal formado se descarta
+  ok     sin conexión no se envía nada
+  ok     el servidor no puede saltarse el saludo para dejar al cliente ONLINE
+-- Sonidos ambientales de los mundos
+  ok     hay un sonido ambiental para cada uno de los 7 mundos (7)
+  ok     solo se aceptan los nombres de sonido conocidos
+  ok     cada bucle dura 5.0 segundos (55125 muestras)
+  ok     sonido 'garden': audio de 16 bits, mono, 11025 Hz (58 ms)
+  ok     sonido 'garden': se repite en bucle de principio a fin
+  ok     sonido 'garden': volumen medio 0.120 (ni mudo ni fuerte)
+  ok     sonido 'garden': el pico (17372 de 32767) no se recorta
+  ok     sonido 'garden': el final del bucle encaja con el principio (salto 4490, normal 5215)
+  ok     sonido 'garden': tiene movimiento, no es un zumbido plano (x1.80)
+  ok     sonido 'sea': audio de 16 bits, mono, 11025 Hz (76 ms)
+  ok     sonido 'sea': se repite en bucle de principio a fin
+  ok     sonido 'sea': volumen medio 0.140 (ni mudo ni fuerte)
+  ok     sonido 'sea': el pico (23912 de 32767) no se recorta
+  ok     sonido 'sea': el final del bucle encaja con el principio (salto 376, normal 4179)
+  ok     sonido 'sea': tiene movimiento, no es un zumbido plano (x2.71)
+  ok     sonido 'wind': audio de 16 bits, mono, 11025 Hz (80 ms)
+  ok     sonido 'wind': se repite en bucle de principio a fin
+  ok     sonido 'wind': volumen medio 0.130 (ni mudo ni fuerte)
+  ok     sonido 'wind': el pico (18971 de 32767) no se recorta
+  ok     sonido 'wind': el final del bucle encaja con el principio (salto 4512, normal 3955)
+  ok     sonido 'wind': tiene movimiento, no es un zumbido plano (x3.43)
+  ok     sonido 'desert': audio de 16 bits, mono, 11025 Hz (52 ms)
+  ok     sonido 'desert': se repite en bucle de principio a fin
+  ok     sonido 'desert': volumen medio 0.100 (ni mudo ni fuerte)
+  ok     sonido 'desert': el pico (15532 de 32767) no se recorta
+  ok     sonido 'desert': el final del bucle encaja con el principio (salto 2937, normal 2053)
+  ok     sonido 'desert': tiene movimiento, no es un zumbido plano (x2.98)
+  ok     sonido 'mountain': audio de 16 bits, mono, 11025 Hz (103 ms)
+  ok     sonido 'mountain': se repite en bucle de principio a fin
+  ok     sonido 'mountain': volumen medio 0.120 (ni mudo ni fuerte)
+  ok     sonido 'mountain': el pico (23158 de 32767) no se recorta
+  ok     sonido 'mountain': el final del bucle encaja con el principio (salto 566, normal 1903)
+  ok     sonido 'mountain': tiene movimiento, no es un zumbido plano (x3.28)
+  ok     sonido 'city': audio de 16 bits, mono, 11025 Hz (84 ms)
+  ok     sonido 'city': se repite en bucle de principio a fin
+  ok     sonido 'city': volumen medio 0.110 (ni mudo ni fuerte)
+  ok     sonido 'city': el pico (15114 de 32767) no se recorta
+  ok     sonido 'city': el final del bucle encaja con el principio (salto 3823, normal 3885)
+  ok     sonido 'city': tiene movimiento, no es un zumbido plano (x1.95)
+  ok     sonido 'night': audio de 16 bits, mono, 11025 Hz (67 ms)
+  ok     sonido 'night': se repite en bucle de principio a fin
+  ok     sonido 'night': volumen medio 0.100 (ni mudo ni fuerte)
+  ok     sonido 'night': el pico (17141 de 32767) no se recorta
+  ok     sonido 'night': el final del bucle encaja con el principio (salto 1033, normal 1917)
+  ok     sonido 'night': tiene movimiento, no es un zumbido plano (x2.65)
+  ok     los 7 sonidos son distintos entre sí (7)
+  ok     los 7 sonidos se generan en 520 ms
+  (generar los 7 sonidos tardó 520 ms en esta máquina)
+  ok     cada sonido se genera una sola vez
+  ok     un nombre desconocido da el sonido del viento
+  ok     los 7 mundos del catálogo piden 7 sonidos que existen (7)
+  ok     el reproductor toca el sonido pedido por el bus de música
+  ok     sin entrada suave suena al volumen final (-9.0 dB)
+  ok     con entrada suave empieza casi en silencio (-60.0 dB)
+  ok     la entrada suave llega al volumen pedido (-20.0 dB)
+  ok     un sonido desconocido deja el reproductor en silencio
+  ok     fade_out(0) lo apaga de golpe
+-- Menú principal y pantallas
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+  ok     el menú principal se abre
+  ok     el menú muestra el bloque del título
+  ok     botón LifeButton existe y está activo
+  ok     botón PlayButton existe y está activo
+  ok     botón MapsButton existe y está activo
+  ok     botón MultiplayerButton existe y está activo
+  ok     botón CharactersButton existe y está activo
+  ok     botón SettingsButton existe y está activo
+  ok     LifeButton abre la pantalla 'life'
+  ok     la pantalla del Camino tiene la lista de etapas
+  ok     el Camino declara sus etapas (9)
+  ok     la lista muestra una fila por etapa
+  ok     EMPEZAR VIAJE existe y sigue bloqueado hasta la etapa 2
+  ok     la pantalla 'life' tiene botón VOLVER
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+  ok     VOLVER regresa al menú desde 'life'
+  ok     MapsButton abre la pantalla 'world'
+-- Mundo bíblico: la pantalla (regiones, estados, toques, desbloqueos, insignias y tableros)
+  ok     la pantalla tiene el mapa 3D y su cámara
+  ok     la prueba tiene una pantalla de tamaño real ((1920.0, 1080.0))
+  ok     el mapa muestra los 7 mundos en el orden del viaje
+  ok     cada mundo lleva su nombre flotando sobre el icono
+  ok     el Edén aparece abierto y los otros 6 mundos, con candado
+  ok     solo el mundo abierto tiene aro de luz y ninguno tiene estrella todavía
+  ok     los caminos que llevan a mundos cerrados están apagados
+  ok     la flecha dorada señala el próximo mundo
+  ok     el mapa mundial suena: oleaje de fondo
+  ok     el Edén está elegido al empezar
+  ok     el mundo 3D tiene 46625 triángulos (tope para el teléfono: 110 mil)
+  ok     el mundo 3D usa 94 objetos de malla (cada uno es una orden de dibujo)
+  ok     existe el nodo %RegionNameLabel
+  ok     existe el nodo %RegionRefLabel
+  ok     existe el nodo %RegionStatusLabel
+  ok     existe el nodo %RegionDetailLabel
+  ok     existe el nodo %RegionStatsLabel
+  ok     existe el nodo %RegionBadgeLabel
+  ok     existe el nodo %PlayRegionButton
+  ok     existe el nodo %ProgressLabel
+  ok     existe el nodo %ProgressBar
+  ok     existe el nodo %JourneyLabel
+  ok     el panel cuenta el mundo elegido (Jardín del Edén · DISPONIBLE)
+  ok     JUGAR está activo en el primer mundo
+  ok     el panel muestra que falta jugar y la insignia pendiente con su premio
+  ok     el avance del viaje empieza en 0 de 7 (Mundos completados: 0 de 7  ·  0 %)
+  ok     las estrellas y las insignias del viaje empiezan en cero (0 estrellas del viaje  ·  0 de 11 insignias)
+  ok     la cámara vuela sola hasta el mundo elegido
+  ok     el Edén queda a la vista y se puede tocar
+  ok     en la vista general se ven los 7 mundos dentro de la pantalla
+  ok     en la vista general ningún panel ni botón tapa un mundo
+  ok     tocar el icono de cada mundo elige ese mundo
+  ok     los mundos se ven bien separados (286 px entre los más cercanos)
+  ok     tocar fuera del mapa no elige ningún mundo
+  ok     existe el nodo %RegionNameLabel
+  ok     existe el nodo %RegionStatusLabel
+  ok     existe el nodo %RegionDetailLabel
+  ok     existe el nodo %RegionStatsLabel
+  ok     existe el nodo %PlayRegionButton
+  ok     existe el nodo %HintLabel
+  ok     tocar el Arca de Noé (cerrada) la elige
+  ok     el aro de selección pasa al Arca de Noé
+  ok     un mundo cerrado dice qué hay que completar (Completa «Jardín del Edén» para abrir este mundo.)
+  ok     un mundo cerrado no se puede jugar ni muestra estadísticas
+  ok     la cámara vuela hasta el mundo tocado
+  ok     otro toque sobre un mundo cerrado no abre su tablero
+  ok     el aviso repite qué hay que completar (Completa «Jardín del Edén» para abrir este mundo.)
+  ok     tocar el mapa vacío no cambia la selección
+  ok     un dedo que arrastra recorre el mapa (-28.5) sin elegir nada
+  ok     separar dos dedos acerca la cámara (124 → 62)
+  ok     la rueda del ratón también acerca la cámara
+  ok     existe el nodo %ZoomInButton
+  ok     existe el nodo %ZoomOutButton
+  ok     existe el nodo %ViewButton
+  ok     el botón + acerca la cámara
+  ok     el botón - la aleja
+  ok     VISTA vuelve a la vista general
+  ok     existe el nodo %RegionRefLabel
+  ok     tocar cada uno de los 7 mundos lo elige
+  ok     el panel muestra el nombre, la referencia y el estado de cada mundo
+  ok     existe el nodo %RegionNameLabel
+  ok     existe el nodo %RegionStatusLabel
+  ok     existe el nodo %RegionStatsLabel
+  ok     existe el nodo %RegionBadgeLabel
+  ok     existe el nodo %PlayRegionButton
+  ok     existe el nodo %ProgressLabel
+  ok     existe el nodo %ProgressBar
+  ok     existe el nodo %JourneyLabel
+  ok     completar el Edén abre el Arca de Noé (["arca_noe"])
+  ok     el Edén completado muestra su estrella y ya no su aro
+  ok     el Arca de Noé pierde el candado y se ilumina
+  ok     el camino hacia el Arca se enciende y el siguiente sigue apagado
+  ok     la flecha dorada pasa al Arca de Noé
+  ok     el avance del viaje sube a 1 de 7 (Mundos completados: 1 de 7  ·  14 %)
+  ok     las estrellas y las insignias del viaje se actualizan (10 estrellas del viaje  ·  1 de 11 insignias)
+  ok     el panel del Edén muestra completado, sus estadísticas y la insignia ganada
+  ok     tocar el Arca de Noé (abierta) la elige
+  ok     el Arca abierta se puede jugar
+  ok     un solo toque no abre el tablero
+  ok     un segundo toque sobre el Arca de Noé abre su tablero
+  ok     el tablero abierto es el del mundo tocado
+  ok     al volver, el último mundo jugado queda elegido
+  ok     existe el nodo %PlayRegionButton
+  ok     el botón JUGAR abre el tablero del mundo elegido
+  ok     existe el nodo %PlayRegionButton
+  ok     JUGAR está desactivado en un mundo cerrado
+  ok     ni siquiera forzando el botón se abre un mundo cerrado
+  ok     al volver de una partida que abrió un mundo, el mapa lo celebra
+  ok     el mundo nuevo se muestra primero con su candado
+  ok     durante la celebración los toques no cambian la selección
+  ok     la cámara va al mundo nuevo
+  ok     aparece el aviso de mundo nuevo
+  ok     existe el nodo %BannerTitle
+  ok     existe el nodo %BannerDetail
+  ok     el aviso dice cuál mundo se abrió (Arca de Noé)
+  ok     la celebración termina
+  ok     al terminar, el candado desapareció y el camino está encendido
+  ok     la celebración queda anotada para no repetirse
+  ok     al volver a abrir el mapa no se repite la celebración
+  ok     existe el nodo %BadgesButton
+  ok     existe el nodo %BadgesPanel
+  ok     existe el nodo %BadgeGrid
+  ok     existe el nodo %BadgesCountLabel
+  ok     existe el nodo %BadgesCloseButton
+  ok     las insignias empiezan cerradas
+  ok     INSIGNIAS abre la pantalla de insignias
+  ok     se muestran las 11 insignias (11)
+  ok     el contador de insignias coincide con el progreso (1 de 11 insignias ganadas)
+  ok     cada tarjeta muestra el nombre y la condición de su insignia
+  ok     con las insignias abiertas, el mapa de atrás no recibe toques
+  ok     el botón atrás de Android cierra las insignias sin salir del mapa
+  ok     CERRAR cierra las insignias
+  ok     existe el nodo %ListButton
+  ok     existe el nodo %MapList
+  ok     existe el nodo %PlayMapButton
+  ok     existe el nodo %MapStatusLabel
+  ok     la lista de mapas muestra los 7 mapas
+  ok     el primer mapa aparece abierto (1. Jardín del Edén)
+  ok     los otros 6 mapas aparecen bloqueados
+  ok     un mapa bloqueado explica qué hay que completar (BLOQUEADO  ·  Completa «Jardín del Edén» para abrir este mundo.)
+  ok     elegir un mapa bloqueado no cambia la selección
+  ok     el primer mapa se puede jugar y queda elegido
+  ok     existe el nodo %MapNameLabel
+  ok     se muestra el nombre del mapa
+  ok     existe el nodo %Swatches
+  ok     se muestran los 4 colores del tablero
+  ok     existe el nodo %MapBadgeLabel
+  ok     se muestra la insignia pendiente del mapa
+  ok     existe el nodo %MapList
+  ok     existe el nodo %PlayMapButton
+  ok     el primer mapa aparece completado y el segundo se abre
+  ok     el segundo mapa ya se puede elegir
+  ok     existe el nodo %MapBadgeLabel
+  ok     existe el nodo %MapStatsLabel
+  ok     el mapa completado muestra su insignia ganada y sus estadísticas
+  ok     la lista de mapas tiene botón VOLVER
+  ok     VOLVER en la lista de mapas regresa al mapa mundial
+  ok     la pantalla 'world' tiene botón VOLVER
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+  ok     VOLVER regresa al menú desde 'world'
+  ok     MultiplayerButton abre la pantalla 'multiplayer'
+  ok     existe el nodo %PlusButton
+  ok     existe el nodo %MinusButton
+  ok     existe el nodo %CountLabel
+  ok     existe el nodo %PlayerList
+  ok     existe el nodo %PlayLocalButton
+  ok     no se puede bajar de 1 jugador
+  ok     el botón + sube a 2 jugadores
+  ok     el botón + sube a 3 jugadores
+  ok     el botón + sube a 4 jugadores
+  ok     el botón + se desactiva en 4 jugadores
+  ok     no se puede pasar de 4 jugadores
+  ok     el botón - baja a 3 y la lista se actualiza
+  ok     el botón JUGAR de la partida local está activo
+  ok     el autoload OnlineManager existe
+  ok     existe el nodo %OnlinePanel
+  ok     existe el nodo %StatusDot
+  ok     existe el nodo %StatusLabel
+  ok     existe el nodo %DetailLabel
+  ok     existe el nodo %ConnectButton
+  ok     existe el nodo %OnlineTitle
+  ok     existe el nodo %OnlineText
+  ok     el panel en línea tiene título y explicación
+  ok     sin servidor configurado el panel avisa y el botón está desactivado
+  ok     sin servidor: aviso amarillo con explicación
+  ok     con servidor configurado el botón PROBAR CONEXIÓN está activo
+  ok     al probar la conexión el panel muestra 'Conectando…' y el botón pasa a CANCELAR
+  ok     pulsar el botón abre una conexión
+  ok     OnlineManager hace avanzar al cliente en cada fotograma
+  ok     el cliente llega a ONLINE dentro del juego
+  ok     el panel muestra 'Conectado' con el número de jugadores
+  ok     el punto de estado se pone verde
+  ok     el panel se actualiza con las estadísticas (singular)
+  ok     si se corta la conexión el panel avisa que reintenta
+  ok     el punto de estado se pone amarillo
+  ok     CANCELAR detiene los reintentos
+  ok     si el servidor no responde, el panel explica el problema
+  ok     el punto de estado se pone rojo
+  ok     después del error se puede volver a probar
+  ok     se puede volver a conectar después de un error
+  ok     la pantalla 'multiplayer' tiene botón VOLVER
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+  ok     VOLVER regresa al menú desde 'multiplayer'
+  ok     al salir de Multijugador se cierra la conexión en línea
+  ok     al salir de Multijugador se avisa al servidor con bye
+  ok     CharactersButton abre la pantalla 'characters'
+  ok     existe el nodo %CharacterList
+  ok     existe el nodo %PlayButton
+  ok     existe el nodo %NameLabel
+  ok     la lista muestra los 6 personajes
+  ok     elegir a Moisés lo guarda y muestra su nombre
+  ok     elegir a David lo guarda y muestra su nombre
+  ok     elegir a Ester lo guarda y muestra su nombre
+  ok     elegir a Rut lo guarda y muestra su nombre
+  ok     elegir a Daniel lo guarda y muestra su nombre
+  ok     elegir a Josué lo guarda y muestra su nombre
+  ok     el botón JUGAR de la pantalla de personajes está activo
+  ok     la pantalla 'characters' tiene botón VOLVER
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+  ok     VOLVER regresa al menú desde 'characters'
+  ok     SettingsButton abre la pantalla 'settings'
+  ok     existe el nodo %MasterSlider
+  ok     existe el nodo %MusicSlider
+  ok     existe el nodo %SfxSlider
+  ok     existe el nodo %MasterValue
+  ok     existe el nodo %QualityRow
+  ok     existe el nodo %FpsButton
+  ok     existe el nodo %ResetButton
+  ok     existe el nodo %TestSoundButton
+  ok     el volumen general cambia
+  ok     el volumen de música cambia
+  ok     el volumen de efectos cambia
+  ok     el porcentaje del volumen se actualiza
+  ok     hay 3 niveles de calidad
+  ok     la calidad 0 se aplica
+  ok     la calidad 2 se aplica
+  ok     la calidad 1 se aplica
+  ok     se activa el contador de FPS
+  ok     se desactiva el contador de FPS
+  ok     PROBAR SONIDO se ejecuta sin errores
+  ok     los ajustes se guardan en user://settings.cfg
+  ok     RESTABLECER vuelve a los valores iniciales
+-- Ajustes: pestaña REGLAS DEL JUEGO
+  ok     existe el nodo %GeneralTab
+  ok     existe el nodo %RulesTab
+  ok     existe el nodo %Content
+  ok     existe el nodo %RulesContent
+  ok     existe el nodo %ChallengesToggle
+  ok     existe el nodo %RewardRow
+  ok     existe el nodo %RewardStepper
+  ok     existe el nodo %PenaltyRow
+  ok     existe el nodo %PenaltyStepper
+  ok     existe el nodo %ExactToggle
+  ok     existe el nodo %RulesResetButton
+  ok     la pestaña REGLAS DEL JUEGO muestra las reglas
+  ok     hay 3 tipos de premio y 3 de castigo
+  ok     las reglas empiezan con los valores iniciales
+  ok     el premio 0 se aplica a las opciones de la partida
+  ok     el castigo 0 se aplica a las opciones de la partida
+  ok     el premio 1 se aplica a las opciones de la partida
+  ok     el castigo 1 se aplica a las opciones de la partida
+  ok     el premio 2 se aplica a las opciones de la partida
+  ok     el castigo 2 se aplica a las opciones de la partida
+  ok     el premio no pasa de 4 casillas
+  ok     el castigo no baja de 1 casilla
+  ok     los botones + y - se desactivan en sus límites
+  ok     las casillas del premio y del castigo se pueden cambiar
+  ok     se activa la tirada exacta en la meta
+  ok     se pueden desactivar los desafíos
+  ok     sin desafíos, los premios y castigos se desactivan en pantalla
+  ok     las reglas se guardan en user://settings.cfg
+  ok     RESTABLECER REGLAS vuelve a los valores iniciales
+  ok     la pestaña GENERAL vuelve a mostrar el sonido y los gráficos
+  ok     la pantalla 'settings' tiene botón VOLVER
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+  ok     VOLVER regresa al menú desde 'settings'
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+  ok     el botón atrás de Android vuelve al menú
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+  ok     la tecla Esc vuelve al menú
+-- Tablero 3D
+  ok     JUGAR abre el tablero con 4 jugador(es)
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+-- Tablero: casillas, escaleras, serpientes y fichas
+  ok     el tablero tiene 100 casillas
+  ok     el tablero tiene 6 escaleras
+  ok     el tablero tiene 7 serpientes
+  ok     la casilla 1 existe y tiene su ancla
+  ok     la casilla 2 existe y tiene su ancla
+  ok     la casilla 11 existe y tiene su ancla
+  ok     la casilla 50 existe y tiene su ancla
+  ok     la casilla 100 existe y tiene su ancla
+  ok     las 100 casillas son una sola malla con geometría propia del estilo
+  ok     los 100 números se dibujan como una sola malla de trazos
+  ok     el tablero suena como su mundo ('desert') por el bus de música
+  ok     hay un punto de inicio
+  ok     hay una meta
+  ok     hay una zona para el dado
+  ok     existe la escalera 3 -> 22
+  ok     existe la serpiente 98 -> 78
+  ok     la serpiente del tablero tiene las caras hacia afuera
+  ok     las 20 casillas de desafío llevan su signo de pregunta
+  ok     una casilla normal no lleva signo de pregunta
+  ok     las 8 casillas especiales llevan su icono
+  ok     hay una ficha por jugador (4)
+  ok     las fichas están sobre la casilla de inicio
+  ok     las fichas no se superponen
+  ok     cada jugador tiene su propio color de ficha
+  ok     al empezar, fichas, lista e insignias muestran la casilla 1
+-- Interfaz del tablero
+  ok     hay un botón LANZAR DADO
+  ok     hay un botón PAUSAR
+  ok     la lista muestra a los 4 jugadores con su posición
+  ok     hay un indicador de progreso
+  ok     el panel dice de quién es el turno (Turno de Moisés)
+  ok     el recuadro del dado espera la primera tirada
+  ok     el jugador 1 aparece en la casilla 1
+  ok     el jugador 2 aparece en la casilla 1
+  ok     el jugador 3 aparece en la casilla 1
+  ok     el jugador 4 aparece en la casilla 1
+  ok     LANZAR DADO está activo al empezar
+  ok     la partida espera la tirada del jugador 1
+  ok     el panel de desafíos está cerrado
+  ok     el juego no empieza en pausa
+-- Cámara y dado 3D
+  ok     la cámara 3D del tablero está activa
+  ok     la cámara termina su animación de entrada
+  ok     arrastrar gira la cámara
+  ok     mover la cámara a mano evita que el juego la mueva sola
+  ok     el zoom acerca la cámara
+  ok     VISTA restablece la cámara
+  ok     VISTA devuelve la cámara al juego
+  ok     la entrada de la escena está en marcha
+  ok     la entrada empieza con la cámara baja (12°), mirando el paisaje
+  ok     la entrada empieza con la cámara alejada
+  ok     la entrada empieza con el ángulo ancho (56°)
+  ok     enfocar una ficha detiene la entrada
+  ok     al interrumpir la entrada, la cámara va a la inclinación, el giro y el ángulo de juego
+  ok     un gesto del jugador durante la entrada tampoco deja la cámara baja
+  ok     VISTA después de la entrada deja la cámara y el ángulo en la vista de juego
+  ok     arrastrar hacia abajo baja la cámara hasta el límite (12°)
+  ok     arrastrar hacia arriba sube la cámara hasta el límite (84°)
+  ok     el dado acepta el valor 1
+  ok     el dado 1 termina de rodar
+  ok     el dado deja la cara 1 hacia arriba
+  ok     el dado acepta el valor 2
+  ok     el dado 2 termina de rodar
+  ok     el dado deja la cara 2 hacia arriba
+  ok     el dado acepta el valor 3
+  ok     el dado 3 termina de rodar
+  ok     el dado deja la cara 3 hacia arriba
+  ok     el dado acepta el valor 4
+  ok     el dado 4 termina de rodar
+  ok     el dado deja la cara 4 hacia arriba
+  ok     el dado acepta el valor 5
+  ok     el dado 5 termina de rodar
+  ok     el dado deja la cara 5 hacia arriba
+  ok     el dado acepta el valor 6
+  ok     el dado 6 termina de rodar
+  ok     el dado deja la cara 6 hacia arriba
+  ok     mientras rueda, el dado ignora un segundo lanzamiento
+  ok     el dado vuelve a quedar libre
+  ok     el segundo lanzamiento ignorado no cambió el resultado
+  ok     los lanzamientos al azar dan siempre del 1 al 6
+  ok     el dado siempre muestra el número que anunció
+  ok     los lanzamientos al azar varían (6 números distintos en 18)
+-- Efectos visuales
+  ok     los 7 efectos (chispas, estrellas, polvo, aro, columna de luz, texto y confeti) se crean
+  ok     un efecto sin dónde mostrarse no falla
+  ok     la estrella 3D tiene su malla
+  ok     los efectos se borran solos al terminar
+-- Turnos y bloqueo del dado
+  ok     solo la ficha del jugador en turno está marcada (jugador 1)
+  ok     solo la ficha del jugador en turno está marcada (jugador 2)
+  ok     solo la ficha del jugador en turno está marcada (jugador 3)
+  ok     solo la ficha del jugador en turno está marcada (jugador 4)
+  ok     la lista resalta al jugador en turno
+  ok     la ayuda nombra al jugador en turno (Moisés, toca LANZAR DADO)
+  ok     el jugador 1 no puede tirar fuera de su turno
+  ok     el jugador 2 no puede tirar fuera de su turno
+  ok     el jugador 3 no puede tirar fuera de su turno
+  ok     el jugador -1 no puede tirar fuera de su turno
+  ok     el jugador 4 no puede tirar fuera de su turno
+  ok     el jugador 9 no puede tirar fuera de su turno
+  ok     los intentos fuera de turno no mueven el dado ni la partida
+  ok     LANZAR DADO hace rodar el dado 3D
+  ok     el botón se bloquea mientras el dado rueda
+  ok     mientras rueda el recuadro muestra una interrogación
+  ok     la partida deja de esperar tirada
+  ok     no se puede tirar otra vez mientras rueda
+  ok     tocar de nuevo el botón tampoco lanza otra vez
+  ok     el dado ignora un nuevo lanzamiento mientras rueda
+  ok     el dado termina y se anuncia la tirada
+  ok     la tirada es del jugador 1 y vale del 1 al 6 (6)
+  ok     el dado 3D muestra el mismo número que se anunció
+  ok     el número obtenido se muestra en la interfaz (6)
+  ok     el mensaje dice quién sacó qué (Moisés sacó 6)
+  ok     el turno termina y la partida vuelve a esperar
+  ok     el doble toque lanzó el dado una sola vez
+  ok     se avisó del fin del turno
+  ok     el turno pasa al jugador 2
+  ok     el panel ahora dice: Turno de David
+  ok     la lista resalta al nuevo jugador
+  ok     la marca de turno pasó a la ficha del jugador 2
+  ok     LANZAR DADO se activa para el siguiente jugador
+  ok     se anuncia el turno en grande
+  ok     la ficha del jugador 1 salió de la casilla 1
+  ok     la ficha del jugador 2 no se movió
+  ok     la ficha del jugador 3 no se movió
+  ok     la ficha del jugador 4 no se movió
+  ok     tras el primer turno, fichas, lista e insignias coinciden con las reglas
+  ok     el jugador 1 ya no puede tirar
+-- Movimiento de las fichas
+  ok     el jugador 2 tira un 1 desde la casilla 19
+  ok     el movimiento del 1 termina y pasa el turno
+  ok     con un 1 la ficha avanza una casilla por vez [20]
+  ok     con un 1 queda en la casilla 20
+  ok     la lista muestra la casilla actual (Casilla 20)
+  ok     el número flotante sobre la ficha muestra la casilla 20
+  ok     la ficha sigue dentro del tablero
+  ok     con un 1, ficha, lista e insignia coinciden con las reglas
+  ok     con un 1 hubo un solo turno y una sola tirada
+  ok     el jugador 3 tira un 2 desde la casilla 28
+  ok     el movimiento del 2 termina y pasa el turno
+  ok     con un 2 la ficha avanza una casilla por vez [29, 30]
+  ok     con un 2 queda en la casilla 30
+  ok     la lista muestra la casilla actual (Casilla 30)
+  ok     el número flotante sobre la ficha muestra la casilla 30
+  ok     la ficha sigue dentro del tablero
+  ok     con un 2, ficha, lista e insignia coinciden con las reglas
+  ok     con un 2 hubo un solo turno y una sola tirada
+  ok     el jugador 4 tira un 3 desde la casilla 37
+  ok     el movimiento del 3 termina y pasa el turno
+  ok     con un 3 la ficha avanza una casilla por vez [38, 39, 40]
+  ok     con un 3 queda en la casilla 40
+  ok     la lista muestra la casilla actual (Casilla 40)
+  ok     el número flotante sobre la ficha muestra la casilla 40
+  ok     la ficha sigue dentro del tablero
+  ok     con un 3, ficha, lista e insignia coinciden con las reglas
+  ok     con un 3 hubo un solo turno y una sola tirada
+  ok     el jugador 1 tira un 4 desde la casilla 49
+  ok     el movimiento del 4 termina y pasa el turno
+  ok     con un 4 la ficha avanza una casilla por vez [50, 51, 52, 53]
+  ok     con un 4 queda en la casilla 53
+  ok     la lista muestra la casilla actual (Casilla 53)
+  ok     el número flotante sobre la ficha muestra la casilla 53
+  ok     la ficha sigue dentro del tablero
+  ok     con un 4, ficha, lista e insignia coinciden con las reglas
+  ok     con un 4 hubo un solo turno y una sola tirada
+  ok     el jugador 2 tira un 5 desde la casilla 55
+  ok     el movimiento del 5 termina y pasa el turno
+  ok     con un 5 la ficha avanza una casilla por vez [56, 57, 58, 59, 60]
+  ok     con un 5 queda en la casilla 60
+  ok     la lista muestra la casilla actual (Casilla 60)
+  ok     el número flotante sobre la ficha muestra la casilla 60
+  ok     la ficha sigue dentro del tablero
+  ok     con un 5, ficha, lista e insignia coinciden con las reglas
+  ok     con un 5 hubo un solo turno y una sola tirada
+  ok     el jugador 3 tira un 6 desde la casilla 64
+  ok     el movimiento del 6 termina y pasa el turno
+  ok     con un 6 la ficha avanza una casilla por vez [65, 66, 67, 68, 69, 70]
+  ok     con un 6 queda en la casilla 70
+  ok     la lista muestra la casilla actual (Casilla 70)
+  ok     el número flotante sobre la ficha muestra la casilla 70
+  ok     la ficha sigue dentro del tablero
+  ok     con un 6, ficha, lista e insignia coinciden con las reglas
+  ok     con un 6 hubo un solo turno y una sola tirada
+  ok     ninguna casilla coloca una ficha fuera del tablero
+  ok     una casilla menor que 1 se corrige a la casilla 1
+  ok     una casilla mayor que 100 se corrige a la meta
+  ok     el turno del jugador 4 se juega completo
+  ok     el turno del jugador 1 se juega completo
+  ok     el turno del jugador 2 se juega completo
+  ok     el turno del jugador 3 se juega completo
+  ok     el turno del jugador 4 se juega completo
+  ok     el turno del jugador 1 se juega completo
+  ok     el turno del jugador 2 se juega completo
+  ok     el turno del jugador 3 se juega completo
+  ok     el turno del jugador 4 se juega completo
+  ok     el turno del jugador 1 se juega completo
+  ok     el turno del jugador 2 se juega completo
+  ok     el turno del jugador 3 se juega completo
+  ok     los turnos se alternan solos en orden 1, 2, 3, 4 ([3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2])
+  ok     se avisó del comienzo de cada turno (12)
+  ok     tras 12 turnos, fichas, lista e insignias coinciden con las reglas
+-- Las 6 escaleras y las 7 serpientes en la partida real
+  ok     el mapa tiene 6 escaleras y 7 serpientes (13 saltos)
+  ok     escalera 3 -> 22: con un 1 desde la casilla 2 se cae en la base y el turno termina
+  ok     escalera 3 -> 22: se avisa del salto con su tipo, su origen y su destino
+  ok     escalera 3 -> 22: la ficha termina en la casilla 22
+  ok     escalera 3 -> 22: ficha, lista e insignia terminan en la casilla 22
+  ok     escalera 3 -> 22: las estadísticas cuentan el salto
+  ok     escalera 3 -> 22: camina hasta la base y sube hasta la casilla 22 [3, 22]
+  ok     escalera 3 -> 22: la animación recorre el camino y no se teletransporta (16 cuadros intermedios)
+  ok     escalera 3 -> 22: la ficha sube siguiendo la escalera (se separó 0.07)
+  ok     escalera 3 -> 22: la ficha termina dentro del tablero
+  ok     escalera 8 -> 30: con un 2 desde la casilla 6 se cae en la base y el turno termina
+  ok     escalera 8 -> 30: se avisa del salto con su tipo, su origen y su destino
+  ok     escalera 8 -> 30: la ficha termina en la casilla 30
+  ok     escalera 8 -> 30: ficha, lista e insignia terminan en la casilla 30
+  ok     escalera 8 -> 30: las estadísticas cuentan el salto
+  ok     escalera 8 -> 30: camina hasta la base y sube hasta la casilla 30 [7, 8, 30]
+  ok     escalera 8 -> 30: la animación recorre el camino y no se teletransporta (17 cuadros intermedios)
+  ok     escalera 8 -> 30: la ficha sube siguiendo la escalera (se separó 0.07)
+  ok     escalera 8 -> 30: la ficha termina dentro del tablero
+  ok     escalera 28 -> 56: con un 3 desde la casilla 25 se cae en la base y el turno termina
+  ok     escalera 28 -> 56: se avisa del salto con su tipo, su origen y su destino
+  ok     escalera 28 -> 56: la ficha termina en la casilla 56
+  ok     escalera 28 -> 56: ficha, lista e insignia terminan en la casilla 56
+  ok     escalera 28 -> 56: las estadísticas cuentan el salto
+  ok     escalera 28 -> 56: camina hasta la base y sube hasta la casilla 56 [26, 27, 28, 56]
+  ok     escalera 28 -> 56: la animación recorre el camino y no se teletransporta (22 cuadros intermedios)
+  ok     escalera 28 -> 56: la ficha sube siguiendo la escalera (se separó 0.07)
+  ok     escalera 28 -> 56: la ficha termina dentro del tablero
+  ok     escalera 39 -> 60: con un 4 desde la casilla 35 se cae en la base y el turno termina
+  ok     escalera 39 -> 60: se avisa del salto con su tipo, su origen y su destino
+  ok     escalera 39 -> 60: la ficha termina en la casilla 60
+  ok     escalera 39 -> 60: ficha, lista e insignia terminan en la casilla 60
+  ok     escalera 39 -> 60: las estadísticas cuentan el salto
+  ok     escalera 39 -> 60: camina hasta la base y sube hasta la casilla 60 [36, 37, 38, 39, 60]
+  ok     escalera 39 -> 60: la animación recorre el camino y no se teletransporta (17 cuadros intermedios)
+  ok     escalera 39 -> 60: la ficha sube siguiendo la escalera (se separó 0.07)
+  ok     escalera 39 -> 60: la ficha termina dentro del tablero
+  ok     escalera 51 -> 72: con un 5 desde la casilla 46 se cae en la base y el turno termina
+  ok     escalera 51 -> 72: se avisa del salto con su tipo, su origen y su destino
+  ok     escalera 51 -> 72: la ficha termina en la casilla 72
+  ok     escalera 51 -> 72: ficha, lista e insignia terminan en la casilla 72
+  ok     escalera 51 -> 72: las estadísticas cuentan el salto
+  ok     escalera 51 -> 72: camina hasta la base y sube hasta la casilla 72 [47, 48, 49, 50, 51, 72]
+  ok     escalera 51 -> 72: la animación recorre el camino y no se teletransporta (17 cuadros intermedios)
+  ok     escalera 51 -> 72: la ficha sube siguiendo la escalera (se separó 0.07)
+  ok     escalera 51 -> 72: la ficha termina dentro del tablero
+  ok     escalera 71 -> 92: con un 6 desde la casilla 65 se cae en la base y el turno termina
+  ok     escalera 71 -> 92: se avisa del salto con su tipo, su origen y su destino
+  ok     escalera 71 -> 92: la ficha termina en la casilla 92
+  ok     escalera 71 -> 92: ficha, lista e insignia terminan en la casilla 92
+  ok     escalera 71 -> 92: las estadísticas cuentan el salto
+  ok     escalera 71 -> 92: camina hasta la base y sube hasta la casilla 92 [66, 67, 68, 69, 70, 71, 92]
+  ok     escalera 71 -> 92: la animación recorre el camino y no se teletransporta (17 cuadros intermedios)
+  ok     escalera 71 -> 92: la ficha sube siguiendo la escalera (se separó 0.07)
+  ok     escalera 71 -> 92: la ficha termina dentro del tablero
+  ok     serpiente 98 -> 78: con un 1 desde la casilla 97 se cae en la base y el turno termina
+  ok     serpiente 98 -> 78: se avisa del salto con su tipo, su origen y su destino
+  ok     serpiente 98 -> 78: la ficha termina en la casilla 78
+  ok     serpiente 98 -> 78: ficha, lista e insignia terminan en la casilla 78
+  ok     serpiente 98 -> 78: las estadísticas cuentan el salto
+  ok     serpiente 98 -> 78: camina hasta la base y baja hasta la casilla 78 [98, 78]
+  ok     serpiente 98 -> 78: la animación recorre el camino y no se teletransporta (18 cuadros intermedios)
+  ok     serpiente 98 -> 78: la ficha baja siguiendo el cuerpo de la serpiente (se separó 0.00)
+  ok     serpiente 98 -> 78: la ficha termina dentro del tablero
+  ok     serpiente 94 -> 67: con un 2 desde la casilla 92 se cae en la base y el turno termina
+  ok     serpiente 94 -> 67: se avisa del salto con su tipo, su origen y su destino
+  ok     serpiente 94 -> 67: la ficha termina en la casilla 67
+  ok     serpiente 94 -> 67: ficha, lista e insignia terminan en la casilla 67
+  ok     serpiente 94 -> 67: las estadísticas cuentan el salto
+  ok     serpiente 94 -> 67: camina hasta la base y baja hasta la casilla 67 [93, 94, 67]
+  ok     serpiente 94 -> 67: la animación recorre el camino y no se teletransporta (23 cuadros intermedios)
+  ok     serpiente 94 -> 67: la ficha baja siguiendo el cuerpo de la serpiente (se separó 0.00)
+  ok     serpiente 94 -> 67: la ficha termina dentro del tablero
+  ok     serpiente 85 -> 64: con un 3 desde la casilla 82 se cae en la base y el turno termina
+  ok     serpiente 85 -> 64: se avisa del salto con su tipo, su origen y su destino
+  ok     serpiente 85 -> 64: la ficha termina en la casilla 64
+  ok     serpiente 85 -> 64: ficha, lista e insignia terminan en la casilla 64
+  ok     serpiente 85 -> 64: las estadísticas cuentan el salto
+  ok     serpiente 85 -> 64: camina hasta la base y baja hasta la casilla 64 [83, 84, 85, 64]
+  ok     serpiente 85 -> 64: la animación recorre el camino y no se teletransporta (18 cuadros intermedios)
+  ok     serpiente 85 -> 64: la ficha baja siguiendo el cuerpo de la serpiente (se separó 0.00)
+  ok     serpiente 85 -> 64: la ficha termina dentro del tablero
+  ok     serpiente 62 -> 44: con un 4 desde la casilla 58 se cae en la base y el turno termina
+  ok     serpiente 62 -> 44: se avisa del salto con su tipo, su origen y su destino
+  ok     serpiente 62 -> 44: la ficha termina en la casilla 44
+  ok     serpiente 62 -> 44: ficha, lista e insignia terminan en la casilla 44
+  ok     serpiente 62 -> 44: las estadísticas cuentan el salto
+  ok     serpiente 62 -> 44: camina hasta la base y baja hasta la casilla 44 [59, 60, 61, 62, 44]
+  ok     serpiente 62 -> 44: la animación recorre el camino y no se teletransporta (21 cuadros intermedios)
+  ok     serpiente 62 -> 44: la ficha baja siguiendo el cuerpo de la serpiente (se separó 0.00)
+  ok     serpiente 62 -> 44: la ficha termina dentro del tablero
+  ok     serpiente 54 -> 34: con un 5 desde la casilla 49 se cae en la base y el turno termina
+  ok     serpiente 54 -> 34: se avisa del salto con su tipo, su origen y su destino
+  ok     serpiente 54 -> 34: la ficha termina en la casilla 34
+  ok     serpiente 54 -> 34: ficha, lista e insignia terminan en la casilla 34
+  ok     serpiente 54 -> 34: las estadísticas cuentan el salto
+  ok     serpiente 54 -> 34: camina hasta la base y baja hasta la casilla 34 [50, 51, 52, 53, 54, 34]
+  ok     serpiente 54 -> 34: la animación recorre el camino y no se teletransporta (19 cuadros intermedios)
+  ok     serpiente 54 -> 34: la ficha baja siguiendo el cuerpo de la serpiente (se separó 0.00)
+  ok     serpiente 54 -> 34: la ficha termina dentro del tablero
+  ok     serpiente 46 -> 15: con un 6 desde la casilla 40 se cae en la base y el turno termina
+  ok     serpiente 46 -> 15: se avisa del salto con su tipo, su origen y su destino
+  ok     serpiente 46 -> 15: la ficha termina en la casilla 15
+  ok     serpiente 46 -> 15: ficha, lista e insignia terminan en la casilla 15
+  ok     serpiente 46 -> 15: las estadísticas cuentan el salto
+  ok     serpiente 46 -> 15: camina hasta la base y baja hasta la casilla 15 [41, 42, 43, 44, 45, 46, 15]
+  ok     serpiente 46 -> 15: la animación recorre el camino y no se teletransporta (23 cuadros intermedios)
+  ok     serpiente 46 -> 15: la ficha baja siguiendo el cuerpo de la serpiente (se separó 0.00)
+  ok     serpiente 46 -> 15: la ficha termina dentro del tablero
+  ok     serpiente 36 -> 6: con un 1 desde la casilla 35 se cae en la base y el turno termina
+  ok     serpiente 36 -> 6: se avisa del salto con su tipo, su origen y su destino
+  ok     serpiente 36 -> 6: la ficha termina en la casilla 6
+  ok     serpiente 36 -> 6: ficha, lista e insignia terminan en la casilla 6
+  ok     serpiente 36 -> 6: las estadísticas cuentan el salto
+  ok     serpiente 36 -> 6: camina hasta la base y baja hasta la casilla 6 [36, 6]
+  ok     serpiente 36 -> 6: la animación recorre el camino y no se teletransporta (23 cuadros intermedios)
+  ok     serpiente 36 -> 6: la ficha baja siguiendo el cuerpo de la serpiente (se separó 0.00)
+  ok     serpiente 36 -> 6: la ficha termina dentro del tablero
+-- Desafíos bíblicos en la partida real
+  ok     [PREGUNTA BÍBLICA, acierta] al caer en la casilla 14 sale un desafío
+  ok     [PREGUNTA BÍBLICA, acierta] el desafío es del tipo pedido
+  ok     [PREGUNTA BÍBLICA, acierta] el panel se abre y espera la respuesta
+  ok     [PREGUNTA BÍBLICA, acierta] mientras responde no se puede tirar
+  ok     [PREGUNTA BÍBLICA, acierta] nadie puede tirar durante el desafío
+  ok     [PREGUNTA BÍBLICA, acierta] el panel muestra 4 opciones
+  ok     [PREGUNTA BÍBLICA, acierta] se muestra la pregunta
+  ok     [PREGUNTA BÍBLICA, acierta] las pistas solo salen al adivinar personajes
+  ok     [PREGUNTA BÍBLICA, acierta] la nota sobre el versículo solo sale al completar versículos
+  ok     [PREGUNTA BÍBLICA, acierta] el panel anuncia el premio (Si aciertas: +2 estrellas y avanzas 2 casillas)
+  ok     [PREGUNTA BÍBLICA, acierta] el panel anuncia el castigo (Si fallas: retrocedes 2 casillas)
+  ok     [PREGUNTA BÍBLICA, acierta] se toca una opción
+  ok     [PREGUNTA BÍBLICA, acierta] una segunda respuesta se ignora
+  ok     [PREGUNTA BÍBLICA, acierta] aparece la corrección y el botón CONTINUAR
+  ok     [PREGUNTA BÍBLICA, acierta] dice si acertó (¡CORRECTO!)
+  ok     [PREGUNTA BÍBLICA, acierta] muestra la respuesta correcta
+  ok     [PREGUNTA BÍBLICA, acierta] muestra la explicación
+  ok     [PREGUNTA BÍBLICA, acierta] muestra la referencia bíblica (Éxodo 17:12)
+  ok     [PREGUNTA BÍBLICA, acierta] el panel anuncia lo ganado (+2 estrellas, avanzas 2 casillas)
+  ok     [PREGUNTA BÍBLICA, acierta] las estrellas ganadas son 2
+  ok     [PREGUNTA BÍBLICA, acierta] las estadísticas cuentan el desafío
+  ok     [PREGUNTA BÍBLICA, acierta] tras CONTINUAR el turno termina
+  ok     [PREGUNTA BÍBLICA, acierta] se avisa del resultado
+  ok     [PREGUNTA BÍBLICA, acierta] la ficha avanza 2 y queda en la casilla 16
+  ok     [PREGUNTA BÍBLICA, acierta] camina casilla por casilla, también el premio o el castigo [12, 13, 14, 15, 16]
+  ok     [PREGUNTA BÍBLICA, acierta] el panel se cierra
+  ok     [PREGUNTA BÍBLICA, acierta] la lista muestra las estrellas
+  ok     [PREGUNTA BÍBLICA, acierta] se muestra un mensaje de ánimo (¡Muy bien! Dios bendice a quien lo busca de corazón.)
+  ok     [PREGUNTA BÍBLICA, acierta] ficha, lista e insignia coinciden con las reglas
+  ok     [PREGUNTA BÍBLICA, falla] al caer en la casilla 26 sale un desafío
+  ok     [PREGUNTA BÍBLICA, falla] el desafío es del tipo pedido
+  ok     [PREGUNTA BÍBLICA, falla] el panel se abre y espera la respuesta
+  ok     [PREGUNTA BÍBLICA, falla] mientras responde no se puede tirar
+  ok     [PREGUNTA BÍBLICA, falla] nadie puede tirar durante el desafío
+  ok     [PREGUNTA BÍBLICA, falla] el panel muestra 4 opciones
+  ok     [PREGUNTA BÍBLICA, falla] se muestra la pregunta
+  ok     [PREGUNTA BÍBLICA, falla] las pistas solo salen al adivinar personajes
+  ok     [PREGUNTA BÍBLICA, falla] la nota sobre el versículo solo sale al completar versículos
+  ok     [PREGUNTA BÍBLICA, falla] el panel anuncia el premio (Si aciertas: +1 estrella y avanzas 2 casillas)
+  ok     [PREGUNTA BÍBLICA, falla] el panel anuncia el castigo (Si fallas: retrocedes 2 casillas)
+  ok     [PREGUNTA BÍBLICA, falla] se toca una opción
+  ok     [PREGUNTA BÍBLICA, falla] una segunda respuesta se ignora
+  ok     [PREGUNTA BÍBLICA, falla] aparece la corrección y el botón CONTINUAR
+  ok     [PREGUNTA BÍBLICA, falla] dice si acertó (NO ERA ESA)
+  ok     [PREGUNTA BÍBLICA, falla] muestra la respuesta correcta
+  ok     [PREGUNTA BÍBLICA, falla] muestra la explicación
+  ok     [PREGUNTA BÍBLICA, falla] muestra la referencia bíblica (Éxodo 17:6)
+  ok     [PREGUNTA BÍBLICA, falla] el panel anuncia lo perdido (Retrocedes 2 casillas)
+  ok     [PREGUNTA BÍBLICA, falla] las estrellas ganadas son 0
+  ok     [PREGUNTA BÍBLICA, falla] las estadísticas cuentan el desafío
+  ok     [PREGUNTA BÍBLICA, falla] tras CONTINUAR el turno termina
+  ok     [PREGUNTA BÍBLICA, falla] se avisa del resultado
+  ok     [PREGUNTA BÍBLICA, falla] la ficha retrocede 2 y queda en la casilla 24
+  ok     [PREGUNTA BÍBLICA, falla] camina casilla por casilla, también el premio o el castigo [24, 25, 26, 25, 24]
+  ok     [PREGUNTA BÍBLICA, falla] el panel se cierra
+  ok     [PREGUNTA BÍBLICA, falla] la lista muestra las estrellas
+  ok     [PREGUNTA BÍBLICA, falla] se muestra un mensaje de ánimo (Lo importante es seguir intentándolo con fe.)
+  ok     [PREGUNTA BÍBLICA, falla] ficha, lista e insignia coinciden con las reglas
+  ok     [VERDADERO O FALSO, acierta] al caer en la casilla 41 sale un desafío
+  ok     [VERDADERO O FALSO, acierta] el desafío es del tipo pedido
+  ok     [VERDADERO O FALSO, acierta] el panel se abre y espera la respuesta
+  ok     [VERDADERO O FALSO, acierta] mientras responde no se puede tirar
+  ok     [VERDADERO O FALSO, acierta] nadie puede tirar durante el desafío
+  ok     [VERDADERO O FALSO, acierta] el panel muestra 2 opciones
+  ok     [VERDADERO O FALSO, acierta] se muestra la pregunta
+  ok     [VERDADERO O FALSO, acierta] las pistas solo salen al adivinar personajes
+  ok     [VERDADERO O FALSO, acierta] la nota sobre el versículo solo sale al completar versículos
+  ok     [VERDADERO O FALSO, acierta] el panel anuncia el premio (Si aciertas: +3 estrellas y avanzas 2 casillas)
+  ok     [VERDADERO O FALSO, acierta] el panel anuncia el castigo (Si fallas: retrocedes 2 casillas)
+  ok     [VERDADERO O FALSO, acierta] se toca una opción
+  ok     [VERDADERO O FALSO, acierta] una segunda respuesta se ignora
+  ok     [VERDADERO O FALSO, acierta] aparece la corrección y el botón CONTINUAR
+  ok     [VERDADERO O FALSO, acierta] dice si acertó (¡CORRECTO!)
+  ok     [VERDADERO O FALSO, acierta] muestra la respuesta correcta
+  ok     [VERDADERO O FALSO, acierta] muestra la explicación
+  ok     [VERDADERO O FALSO, acierta] muestra la referencia bíblica (Números 17:5-8)
+  ok     [VERDADERO O FALSO, acierta] el panel anuncia lo ganado (+3 estrellas, avanzas 2 casillas)
+  ok     [VERDADERO O FALSO, acierta] las estrellas ganadas son 3
+  ok     [VERDADERO O FALSO, acierta] las estadísticas cuentan el desafío
+  ok     [VERDADERO O FALSO, acierta] tras CONTINUAR el turno termina
+  ok     [VERDADERO O FALSO, acierta] se avisa del resultado
+  ok     [VERDADERO O FALSO, acierta] la ficha avanza 2 y queda en la casilla 43
+  ok     [VERDADERO O FALSO, acierta] camina casilla por casilla, también el premio o el castigo [39, 40, 41, 42, 43]
+  ok     [VERDADERO O FALSO, acierta] el panel se cierra
+  ok     [VERDADERO O FALSO, acierta] la lista muestra las estrellas
+  ok     [VERDADERO O FALSO, acierta] se muestra un mensaje de ánimo (¡Excelente! Tu estudio de la Palabra da fruto.)
+  ok     [VERDADERO O FALSO, acierta] ficha, lista e insignia coinciden con las reglas
+  ok     [VERDADERO O FALSO, falla] al caer en la casilla 55 sale un desafío
+  ok     [VERDADERO O FALSO, falla] el desafío es del tipo pedido
+  ok     [VERDADERO O FALSO, falla] el panel se abre y espera la respuesta
+  ok     [VERDADERO O FALSO, falla] mientras responde no se puede tirar
+  ok     [VERDADERO O FALSO, falla] nadie puede tirar durante el desafío
+  ok     [VERDADERO O FALSO, falla] el panel muestra 2 opciones
+  ok     [VERDADERO O FALSO, falla] se muestra la pregunta
+  ok     [VERDADERO O FALSO, falla] las pistas solo salen al adivinar personajes
+  ok     [VERDADERO O FALSO, falla] la nota sobre el versículo solo sale al completar versículos
+  ok     [VERDADERO O FALSO, falla] el panel anuncia el premio (Si aciertas: +2 estrellas y avanzas 2 casillas)
+  ok     [VERDADERO O FALSO, falla] el panel anuncia el castigo (Si fallas: retrocedes 2 casillas)
+  ok     [VERDADERO O FALSO, falla] se toca una opción
+  ok     [VERDADERO O FALSO, falla] una segunda respuesta se ignora
+  ok     [VERDADERO O FALSO, falla] aparece la corrección y el botón CONTINUAR
+  ok     [VERDADERO O FALSO, falla] dice si acertó (NO ERA ESA)
+  ok     [VERDADERO O FALSO, falla] muestra la respuesta correcta
+  ok     [VERDADERO O FALSO, falla] muestra la explicación
+  ok     [VERDADERO O FALSO, falla] muestra la referencia bíblica (Éxodo 16:22-26)
+  ok     [VERDADERO O FALSO, falla] el panel anuncia lo perdido (Retrocedes 2 casillas)
+  ok     [VERDADERO O FALSO, falla] las estrellas ganadas son 0
+  ok     [VERDADERO O FALSO, falla] las estadísticas cuentan el desafío
+  ok     [VERDADERO O FALSO, falla] tras CONTINUAR el turno termina
+  ok     [VERDADERO O FALSO, falla] se avisa del resultado
+  ok     [VERDADERO O FALSO, falla] la ficha retrocede 2 y queda en la casilla 53
+  ok     [VERDADERO O FALSO, falla] camina casilla por casilla, también el premio o el castigo [53, 54, 55, 54, 53]
+  ok     [VERDADERO O FALSO, falla] el panel se cierra
+  ok     [VERDADERO O FALSO, falla] la lista muestra las estrellas
+  ok     [VERDADERO O FALSO, falla] se muestra un mensaje de ánimo (Aprender la Palabra es un camino: cada paso suma.)
+  ok     [VERDADERO O FALSO, falla] ficha, lista e insignia coinciden con las reglas
+  ok     [¿QUIÉN SOY?, acierta] al caer en la casilla 69 sale un desafío
+  ok     [¿QUIÉN SOY?, acierta] el desafío es del tipo pedido
+  ok     [¿QUIÉN SOY?, acierta] el panel se abre y espera la respuesta
+  ok     [¿QUIÉN SOY?, acierta] mientras responde no se puede tirar
+  ok     [¿QUIÉN SOY?, acierta] nadie puede tirar durante el desafío
+  ok     [¿QUIÉN SOY?, acierta] el panel muestra 4 opciones
+  ok     [¿QUIÉN SOY?, acierta] se muestra la pregunta
+  ok     [¿QUIÉN SOY?, acierta] las pistas solo salen al adivinar personajes
+  ok     [¿QUIÉN SOY?, acierta] la nota sobre el versículo solo sale al completar versículos
+  ok     [¿QUIÉN SOY?, acierta] el panel anuncia el premio (Si aciertas: +2 estrellas y avanzas 2 casillas)
+  ok     [¿QUIÉN SOY?, acierta] el panel anuncia el castigo (Si fallas: retrocedes 2 casillas)
+  ok     [¿QUIÉN SOY?, acierta] se toca una opción
+  ok     [¿QUIÉN SOY?, acierta] una segunda respuesta se ignora
+  ok     [¿QUIÉN SOY?, acierta] aparece la corrección y el botón CONTINUAR
+  ok     [¿QUIÉN SOY?, acierta] dice si acertó (¡CORRECTO!)
+  ok     [¿QUIÉN SOY?, acierta] muestra la respuesta correcta
+  ok     [¿QUIÉN SOY?, acierta] muestra la explicación
+  ok     [¿QUIÉN SOY?, acierta] muestra la referencia bíblica (Éxodo 18:1-24)
+  ok     [¿QUIÉN SOY?, acierta] el panel anuncia lo ganado (+2 estrellas, avanzas 2 casillas)
+  ok     [¿QUIÉN SOY?, acierta] las estrellas ganadas son 2
+  ok     [¿QUIÉN SOY?, acierta] las estadísticas cuentan el desafío
+  ok     [¿QUIÉN SOY?, acierta] tras CONTINUAR el turno termina
+  ok     [¿QUIÉN SOY?, acierta] se avisa del resultado
+  ok     [¿QUIÉN SOY?, acierta] la ficha avanza 2 y queda en la casilla 71
+  ok     [¿QUIÉN SOY?, acierta] camina casilla por casilla, también el premio o el castigo [67, 68, 69, 70, 71]
+  ok     [¿QUIÉN SOY?, acierta] el panel se cierra
+  ok     [¿QUIÉN SOY?, acierta] la lista muestra las estrellas
+  ok     [¿QUIÉN SOY?, acierta] se muestra un mensaje de ánimo (¡Correcto! Sigue creciendo en el conocimiento de Dios.)
+  ok     [¿QUIÉN SOY?, acierta] ficha, lista e insignia coinciden con las reglas
+  ok     [¿QUIÉN SOY?, falla] al caer en la casilla 87 sale un desafío
+  ok     [¿QUIÉN SOY?, falla] el desafío es del tipo pedido
+  ok     [¿QUIÉN SOY?, falla] el panel se abre y espera la respuesta
+  ok     [¿QUIÉN SOY?, falla] mientras responde no se puede tirar
+  ok     [¿QUIÉN SOY?, falla] nadie puede tirar durante el desafío
+  ok     [¿QUIÉN SOY?, falla] el panel muestra 4 opciones
+  ok     [¿QUIÉN SOY?, falla] se muestra la pregunta
+  ok     [¿QUIÉN SOY?, falla] las pistas solo salen al adivinar personajes
+  ok     [¿QUIÉN SOY?, falla] la nota sobre el versículo solo sale al completar versículos
+  ok     [¿QUIÉN SOY?, falla] el panel anuncia el premio (Si aciertas: +3 estrellas y avanzas 2 casillas)
+  ok     [¿QUIÉN SOY?, falla] el panel anuncia el castigo (Si fallas: retrocedes 2 casillas)
+  ok     [¿QUIÉN SOY?, falla] se toca una opción
+  ok     [¿QUIÉN SOY?, falla] una segunda respuesta se ignora
+  ok     [¿QUIÉN SOY?, falla] aparece la corrección y el botón CONTINUAR
+  ok     [¿QUIÉN SOY?, falla] dice si acertó (NO ERA ESA)
+  ok     [¿QUIÉN SOY?, falla] muestra la respuesta correcta
+  ok     [¿QUIÉN SOY?, falla] muestra la explicación
+  ok     [¿QUIÉN SOY?, falla] muestra la referencia bíblica (Números 13:6; Números 13:30; Números 14:24)
+  ok     [¿QUIÉN SOY?, falla] el panel anuncia lo perdido (Retrocedes 2 casillas)
+  ok     [¿QUIÉN SOY?, falla] las estrellas ganadas son 0
+  ok     [¿QUIÉN SOY?, falla] las estadísticas cuentan el desafío
+  ok     [¿QUIÉN SOY?, falla] tras CONTINUAR el turno termina
+  ok     [¿QUIÉN SOY?, falla] se avisa del resultado
+  ok     [¿QUIÉN SOY?, falla] la ficha retrocede 2 y queda en la casilla 85
+  ok     [¿QUIÉN SOY?, falla] camina casilla por casilla, también el premio o el castigo [85, 86, 87, 86, 85]
+  ok     [¿QUIÉN SOY?, falla] el panel se cierra
+  ok     [¿QUIÉN SOY?, falla] la lista muestra las estrellas
+  ok     [¿QUIÉN SOY?, falla] se muestra un mensaje de ánimo (Dios es paciente contigo. ¡Tú también sé paciente!)
+  ok     [¿QUIÉN SOY?, falla] ficha, lista e insignia coinciden con las reglas
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] al caer en la casilla 5 sale un desafío
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] el desafío es del tipo pedido
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] el panel se abre y espera la respuesta
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] mientras responde no se puede tirar
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] nadie puede tirar durante el desafío
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] el panel muestra 4 opciones
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] se muestra la pregunta
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] las pistas solo salen al adivinar personajes
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] la nota sobre el versículo solo sale al completar versículos
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] el panel anuncia el premio (Si aciertas: +1 estrella y avanzas 2 casillas)
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] el panel anuncia el castigo (Si fallas: retrocedes 2 casillas)
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] se toca una opción
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] una segunda respuesta se ignora
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] aparece la corrección y el botón CONTINUAR
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] dice si acertó (¡CORRECTO!)
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] muestra la respuesta correcta
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] muestra la explicación
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] muestra la referencia bíblica (Éxodo 16:4)
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] el panel anuncia lo ganado (+1 estrella, avanzas 2 casillas)
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] las estrellas ganadas son 1
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] las estadísticas cuentan el desafío
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] tras CONTINUAR el turno termina
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] se avisa del resultado
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] la ficha avanza 2 y queda en la casilla 7
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] camina casilla por casilla, también el premio o el castigo [3, 4, 5, 6, 7]
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] el panel se cierra
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] la lista muestra las estrellas
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] se muestra un mensaje de ánimo (¡Así se hace! Cada respuesta es un paso de fe.)
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, acierta] ficha, lista e insignia coinciden con las reglas
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] al caer en la casilla 19 sale un desafío
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] el desafío es del tipo pedido
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] el panel se abre y espera la respuesta
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] mientras responde no se puede tirar
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] nadie puede tirar durante el desafío
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] el panel muestra 4 opciones
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] se muestra la pregunta
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] las pistas solo salen al adivinar personajes
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] la nota sobre el versículo solo sale al completar versículos
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] el panel anuncia el premio (Si aciertas: +2 estrellas y avanzas 2 casillas)
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] el panel anuncia el castigo (Si fallas: retrocedes 2 casillas)
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] se toca una opción
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] una segunda respuesta se ignora
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] aparece la corrección y el botón CONTINUAR
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] dice si acertó (NO ERA ESA)
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] muestra la respuesta correcta
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] muestra la explicación
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] muestra la referencia bíblica (Números 6:24)
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] el panel anuncia lo perdido (Retrocedes 2 casillas)
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] las estrellas ganadas son 0
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] las estadísticas cuentan el desafío
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] tras CONTINUAR el turno termina
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] se avisa del resultado
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] la ficha retrocede 2 y queda en la casilla 17
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] camina casilla por casilla, también el premio o el castigo [17, 18, 19, 18, 17]
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] el panel se cierra
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] la lista muestra las estrellas
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] se muestra un mensaje de ánimo (Aprender la Palabra es un camino: cada paso suma.)
+  ok     [COMPLETA LA IDEA DEL VERSÍCULO, falla] ficha, lista e insignia coinciden con las reglas
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] al caer en la casilla 33 sale un desafío
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] el desafío es del tipo pedido
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] el panel se abre y espera la respuesta
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] mientras responde no se puede tirar
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] nadie puede tirar durante el desafío
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] el panel muestra 4 opciones
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] se muestra la pregunta
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] las pistas solo salen al adivinar personajes
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] la nota sobre el versículo solo sale al completar versículos
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] el panel anuncia el premio (Si aciertas: +1 estrella y avanzas 2 casillas)
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] el panel anuncia el castigo (Si fallas: retrocedes 2 casillas)
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] se toca una opción
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] una segunda respuesta se ignora
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] aparece la corrección y el botón CONTINUAR
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] dice si acertó (¡CORRECTO!)
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] muestra la respuesta correcta
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] muestra la explicación
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] muestra la referencia bíblica (Éxodo 16:13-15; Éxodo 16:35)
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] el panel anuncia lo ganado (+1 estrella, avanzas 2 casillas)
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] las estrellas ganadas son 1
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] las estadísticas cuentan el desafío
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] tras CONTINUAR el turno termina
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] se avisa del resultado
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] la ficha avanza 2 y queda en la casilla 35
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] camina casilla por casilla, también el premio o el castigo [31, 32, 33, 34, 35]
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] el panel se cierra
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] la lista muestra las estrellas
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] se muestra un mensaje de ánimo (¡Muy bien! Dios bendice a quien lo busca de corazón.)
+  ok     [¿QUÉ ACONTECIMIENTO ES?, acierta] ficha, lista e insignia coinciden con las reglas
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] al caer en la casilla 48 sale un desafío
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] el desafío es del tipo pedido
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] el panel se abre y espera la respuesta
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] mientras responde no se puede tirar
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] nadie puede tirar durante el desafío
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] el panel muestra 4 opciones
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] se muestra la pregunta
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] las pistas solo salen al adivinar personajes
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] la nota sobre el versículo solo sale al completar versículos
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] el panel anuncia el premio (Si aciertas: +2 estrellas y avanzas 2 casillas)
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] el panel anuncia el castigo (Si fallas: retrocedes 2 casillas)
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] se toca una opción
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] una segunda respuesta se ignora
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] aparece la corrección y el botón CONTINUAR
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] dice si acertó (NO ERA ESA)
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] muestra la respuesta correcta
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] muestra la explicación
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] muestra la referencia bíblica (Éxodo 17:8-13)
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] el panel anuncia lo perdido (Retrocedes 2 casillas)
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] las estrellas ganadas son 0
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] las estadísticas cuentan el desafío
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] tras CONTINUAR el turno termina
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] se avisa del resultado
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] la ficha retrocede 2 y queda en la casilla 46
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] camina casilla por casilla, también el premio o el castigo [46, 47, 48, 47, 46]
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] el panel se cierra
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] la lista muestra las estrellas
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] se muestra un mensaje de ánimo (Equivocarse también enseña. ¡Sigue adelante con ánimo!)
+  ok     [¿QUÉ ACONTECIMIENTO ES?, falla] ficha, lista e insignia coinciden con las reglas
+-- Premios y castigos configurables
+  ok     la casilla 41 es de desafío
+  ok     solo estrellas: acertar da estrellas y la ficha se queda en la casilla 41
+  ok     solo estrellas: el panel no promete avanzar (Si aciertas: +1 estrella)
+  ok     sin castigo: el panel lo dice (Si fallas: no pasa nada, ¡sigue intentando!)
+  ok     sin castigo: fallar no mueve la ficha ni quita estrellas
+  ok     sin castigo: el panel lo anuncia (Sin penalización)
+  ok     avanzar 3: acertar lleva la ficha a la casilla 44
+  ok     avanzar 3: el panel lo anuncia (Si aciertas: +1 estrella y avanzas 3 casillas)
+  ok     retroceder 3: fallar lleva la ficha a la casilla 38
+  ok     retroceder 3: el panel lo anuncia (Si fallas: retrocedes 3 casillas)
+  ok     tirada extra: el panel lo anuncia (Si aciertas: +2 estrellas y tiras otra vez)
+  ok     tirada extra: el mismo jugador vuelve a tirar
+  ok     tirada extra: las estadísticas la cuentan
+  ok     tirada extra: se anuncia en pantalla (¡Tirada extra para Ester!)
+  ok     tirada extra: se juega la tirada extra
+  ok     tirada extra: después sigue el siguiente jugador
+  ok     perder turno: el panel lo anuncia (Si fallas: pierdes tu próximo turno)
+  ok     perder turno: la ficha no retrocede
+  ok     perder turno: queda marcado
+  ok     perder turno: la lista lo avisa (Casilla 41  ·  pierde su próximo turno)
+  ok     perder turno: juegan los demás
+  ok     perder turno: juegan los demás
+  ok     perder turno: juegan los demás
+  ok     perder turno: juegan los otros tres en orden [0, 1, 2]
+  ok     perder turno: el jugador 4 se salta su turno
+  ok     perder turno: las estadísticas lo cuentan
+  ok     perder turno: el aviso desaparece
+  ok     perder turno: la marca se borra
+  ok     tras perder un turno, fichas, lista e insignias coinciden con las reglas
+  ok     sin desafíos: se tira normalmente
+  ok     sin desafíos: el turno termina sin abrir el panel
+  ok     sin desafíos: la ficha queda en la casilla de desafío 41
+-- Tirada exacta en la meta
+  ok     con tirada exacta, un 6 desde la casilla 97 se intenta
+  ok     el turno termina aunque la tirada se pase de la meta
+  ok     la ficha no se mueve ni gana si se pasa de la meta
+  ok     la ficha no da ningún salto
+  ok     las estadísticas cuentan la tirada bloqueada
+  ok     tras la tirada bloqueada, ficha, lista e insignia siguen en su casilla
+  ok     tras la tirada bloqueada pasa el turno
+-- Pausa
+  ok     existen los botones PAUSAR y CONTINUAR
+  ok     el juego corre antes de pausar
+  ok     PAUSAR abre el menú y detiene el juego
+  ok     en pausa no se puede lanzar el dado
+  ok     el reloj de la partida se detiene en pausa
+  ok     el menú ofrece reiniciar y volver al menú principal
+  ok     el botón de sonido cambia de estado (SONIDO: SILENCIADO)
+  ok     silenciar y volver a activar deja el volumen como estaba
+  ok     CONTINUAR cierra el menú y reanuda el juego
+  ok     el botón atrás de Android abre la pausa
+  ok     el botón atrás de Android la cierra
+  ok     la tecla Esc abre la pausa
+  ok     la tecla Esc la cierra
+  ok     se lanza el dado
+  ok     se puede pausar con el dado en el aire
+  ok     en pausa el dado se queda en el aire
+  ok     en pausa la partida no avanza
+  ok     al reanudar la jugada continúa hasta el final del turno
+  ok     la ficha llega a su casilla tras reanudar
+  ok     tras la pausa, fichas, lista e insignias coinciden con las reglas
+  ok     REINICIAR pide confirmar con un segundo toque (¿SEGURO? TOCA DE NUEVO)
+  ok     un solo toque no reinicia la partida
+  ok     el segundo toque reinicia la partida
+  ok     la pausa no se arrastra a la partida nueva
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     la partida nueva empieza desde el primer turno
+  ok     la partida nueva empieza con todas las fichas en la casilla 1
+  ok     el jugador 1 empieza en la casilla 1 y sin estrellas
+  ok     el jugador 2 empieza en la casilla 1 y sin estrellas
+  ok     el jugador 3 empieza en la casilla 1 y sin estrellas
+  ok     el jugador 4 empieza en la casilla 1 y sin estrellas
+  ok     MENÚ PRINCIPAL pide confirmar con un segundo toque
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+  ok     el segundo toque vuelve al menú principal
+  ok     la pausa no se arrastra al menú
+-- Victoria, estadísticas y jugar otra vez
+  ok     JUGAR abre el tablero con 4 jugador(es)
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     el jugador 1 tira un 6 desde la casilla 97 (más de lo que falta)
+  ok     al llegar a la meta se avisa de que la partida terminó
+  ok     el primero en llegar a la meta gana
+  ok     con una tirada de más la ficha se detiene en la meta, sin salirse del tablero
+  ok     con la partida terminada nadie puede tirar
+  ok     LANZAR DADO queda bloqueado al terminar
+  ok     se abre la pantalla de victoria 3D
+  ok     la pantalla de victoria tiene su interfaz
+  ok     el resumen de la partida nombra al ganador (Moisés)
+  ok     la victoria completa el mapa por primera vez y da +25 estrellas del viaje
+  ok     el progreso anota la partida del Desierto del Sinaí
+  ok     la pantalla de victoria muestra el mapa completado, la recompensa y la insignia (+25 estrellas del viaje  ·  Insignia: «Peregrino del Desierto»  ·  Viaje: 1 de 7 mundos)
+  ok     la victoria tiene el botón MUNDO BÍBLICO
+  ok     si no hay nada nuevo no se muestra recompensa
+  ok     el texto de recompensa dice mapa, estrellas, insignia y mapa que se abre
+  ok     la pantalla muestra el nombre del ganador (¡Moisés ganó la partida!)
+  ok     la tabla muestra las estadísticas de los 4 jugadores
+  ok     se muestran turnos, duración, tiradas y desafíos
+  ok     el podio ordena a los jugadores: ganador y luego por avance [0, 3, 1, 2]
+  ok     el ganador figura primero
+  ok     las estadísticas cuentan tiradas y turnos
+  ok     el podio 3D tiene una ficha por jugador
+  ok     el podio 3D tiene una copa para el ganador
+  ok     hay fuegos artificiales
+  ok     hay botones para jugar otra vez y para volver al menú
+  ok     JUGAR OTRA VEZ abre un tablero nuevo
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     la nueva partida empieza desde cero con los mismos 4 jugadores
+  ok     en la nueva partida todos están en la casilla 1
+  ok     la nueva partida espera la primera tirada
+-- Partida completa jugada por un robot (respuestas al azar)
+  ok     el jugador 1 sale de la casilla 1
+  ok     el jugador 2 sale de la casilla 1
+  ok     el jugador 3 sale de la casilla 1
+  ok     el jugador 4 sale de la casilla 1
+  ok     la partida termina sola con un ganador tras 84 turnos
+  ok     durante toda la partida las fichas, la lista y las reglas coinciden []
+  ok     el ganador está en la meta
+  ok     los turnos siguieron el orden 1, 2, 3, 4 durante toda la partida (con 9 casillas especiales)
+  ok     las estadísticas cuentan las tiradas (84)
+  ok     las estadísticas cuentan los desafíos (19, 5 correctos)
+  ok     la partida completa termina en la pantalla de victoria
+  ok     la pantalla de victoria tiene el botón MENÚ
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+  ok     el botón MENÚ de la victoria vuelve al menú principal
+-- Partidas de 1, 2 y 3 jugadores
+  ok     JUGAR abre el tablero con 1 jugador(es)
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     con 1 jugador(es) hay 1 ficha(s) y 1 fila(s) en la lista
+  ok     con 1 jugador(es) las fichas no se superponen
+  ok     la ayuda dice: Toca LANZAR DADO
+  ok     con un solo jugador no hay aviso de turno
+  ok     turno 1 de la partida de 1 jugador(es)
+  ok     turno 2 de la partida de 1 jugador(es)
+  ok     turno 3 de la partida de 1 jugador(es)
+  ok     con 1 jugador(es) los turnos se alternan [0, 0, 0]
+  ok     con 1 jugador(es), fichas, lista e insignias coinciden con las reglas
+  ok     con un jugador, perder el turno no se anuncia (Si fallas: no pasa nada, ¡sigue intentando!)
+  ok     con un jugador, fallar no le quita el turno
+  ok     el jugador solitario tira un 4 desde la casilla 96
+  ok     al llegar a la meta se abre la victoria
+  ok     la victoria de un solo jugador lo felicita por llegar a la meta (¡Moisés llegó a la meta!)
+  ok     el botón MUNDO BÍBLICO de la victoria abre el mundo bíblico
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+  ok     JUGAR abre el tablero con 2 jugador(es)
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     con 2 jugador(es) hay 2 ficha(s) y 2 fila(s) en la lista
+  ok     con 2 jugador(es) las fichas no se superponen
+  ok     la ayuda dice: Moisés, toca LANZAR DADO
+  ok     turno 1 de la partida de 2 jugador(es)
+  ok     turno 2 de la partida de 2 jugador(es)
+  ok     turno 3 de la partida de 2 jugador(es)
+  ok     turno 4 de la partida de 2 jugador(es)
+  ok     turno 5 de la partida de 2 jugador(es)
+  ok     con 2 jugador(es) los turnos se alternan [0, 1, 0, 1, 0]
+  ok     con 2 jugador(es), fichas, lista e insignias coinciden con las reglas
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+  ok     JUGAR abre el tablero con 3 jugador(es)
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     con 3 jugador(es) hay 3 ficha(s) y 3 fila(s) en la lista
+  ok     con 3 jugador(es) las fichas no se superponen
+  ok     la ayuda dice: Moisés, toca LANZAR DADO
+  ok     turno 1 de la partida de 3 jugador(es)
+  ok     turno 2 de la partida de 3 jugador(es)
+  ok     turno 3 de la partida de 3 jugador(es)
+  ok     turno 4 de la partida de 3 jugador(es)
+  ok     turno 5 de la partida de 3 jugador(es)
+  ok     turno 6 de la partida de 3 jugador(es)
+  ok     turno 7 de la partida de 3 jugador(es)
+  ok     con 3 jugador(es) los turnos se alternan [0, 1, 2, 0, 1, 2, 0]
+  ok     con 3 jugador(es), fichas, lista e insignias coinciden con las reglas
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+-- Los 7 tableros en la escena real
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     Jardín del Edén: tablero de 100 casillas con sus 6 escaleras y sus 7 serpientes
+  ok     Jardín del Edén: 20 desafíos y 8 casillas especiales, todos marcados
+  ok     Jardín del Edén: la interfaz dice el mundo y su referencia bíblica
+  ok     Jardín del Edén: suena su ambiente ('garden')
+  Jardín del Edén: 75 mallas y 34802 triángulos en total
+  ok     Jardín del Edén: cabe en el presupuesto del teléfono (34802 triángulos, 75 mallas)
+  ok     Jardín del Edén: el primer turno funciona (casilla 3, ahora le toca al jugador 2)
+  ok     Jardín del Edén: fichas, lista e insignias coinciden con las reglas
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     Arca de Noé: tablero de 100 casillas con sus 6 escaleras y sus 7 serpientes
+  ok     Arca de Noé: 20 desafíos y 8 casillas especiales, todos marcados
+  ok     Arca de Noé: la interfaz dice el mundo y su referencia bíblica
+  ok     Arca de Noé: suena su ambiente ('sea')
+  Arca de Noé: 66 mallas y 24777 triángulos en total
+  ok     Arca de Noé: cabe en el presupuesto del teléfono (24777 triángulos, 66 mallas)
+  ok     Arca de Noé: el primer turno funciona (casilla 4, ahora le toca al jugador 2)
+  ok     Arca de Noé: fichas, lista e insignias coinciden con las reglas
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     Egipto y el Éxodo: tablero de 100 casillas con sus 6 escaleras y sus 7 serpientes
+  ok     Egipto y el Éxodo: 20 desafíos y 8 casillas especiales, todos marcados
+  ok     Egipto y el Éxodo: la interfaz dice el mundo y su referencia bíblica
+  ok     Egipto y el Éxodo: suena su ambiente ('wind')
+  Egipto y el Éxodo: 67 mallas y 30539 triángulos en total
+  ok     Egipto y el Éxodo: cabe en el presupuesto del teléfono (30539 triángulos, 67 mallas)
+  ok     Egipto y el Éxodo: el primer turno funciona (casilla 4, ahora le toca al jugador 2)
+  ok     Egipto y el Éxodo: fichas, lista e insignias coinciden con las reglas
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     Desierto del Sinaí: tablero de 100 casillas con sus 6 escaleras y sus 7 serpientes
+  ok     Desierto del Sinaí: 20 desafíos y 8 casillas especiales, todos marcados
+  ok     Desierto del Sinaí: la interfaz dice el mundo y su referencia bíblica
+  ok     Desierto del Sinaí: suena su ambiente ('desert')
+  Desierto del Sinaí: 195 mallas y 11548 triángulos en total
+  ok     Desierto del Sinaí: cabe en el presupuesto del teléfono (11548 triángulos, 195 mallas)
+  ok     Desierto del Sinaí: el primer turno funciona (casilla 2, ahora le toca al jugador 2)
+  ok     Desierto del Sinaí: fichas, lista e insignias coinciden con las reglas
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     Monte Sinaí: tablero de 100 casillas con sus 6 escaleras y sus 7 serpientes
+  ok     Monte Sinaí: 20 desafíos y 8 casillas especiales, todos marcados
+  ok     Monte Sinaí: la interfaz dice el mundo y su referencia bíblica
+  ok     Monte Sinaí: suena su ambiente ('mountain')
+  Monte Sinaí: 65 mallas y 26530 triángulos en total
+  ok     Monte Sinaí: cabe en el presupuesto del teléfono (26530 triángulos, 65 mallas)
+  ok     Monte Sinaí: el primer turno funciona (casilla 2, ahora le toca al jugador 2)
+  ok     Monte Sinaí: fichas, lista e insignias coinciden con las reglas
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     Jerusalén: tablero de 100 casillas con sus 6 escaleras y sus 7 serpientes
+  ok     Jerusalén: 20 desafíos y 8 casillas especiales, todos marcados
+  ok     Jerusalén: la interfaz dice el mundo y su referencia bíblica
+  ok     Jerusalén: suena su ambiente ('city')
+  Jerusalén: 65 mallas y 43417 triángulos en total
+  ok     Jerusalén: cabe en el presupuesto del teléfono (43417 triángulos, 65 mallas)
+  ok     Jerusalén: el primer turno funciona (casilla 5, ahora le toca al jugador 2)
+  ok     Jerusalén: fichas, lista e insignias coinciden con las reglas
+  ok     el tablero tiene casillas, fichas, cámara, dado, interfaz, director, panel de desafíos, pausa y efectos
+  ok     Belén: tablero de 100 casillas con sus 6 escaleras y sus 7 serpientes
+  ok     Belén: 20 desafíos y 8 casillas especiales, todos marcados
+  ok     Belén: la interfaz dice el mundo y su referencia bíblica
+  ok     Belén: suena su ambiente ('night')
+  Belén: 63 mallas y 35353 triángulos en total
+  ok     Belén: cabe en el presupuesto del teléfono (35353 triángulos, 63 mallas)
+  ok     Belén: el primer turno funciona (casilla 3, ahora le toca al jugador 2)
+  ok     Belén: fichas, lista e insignias coinciden con las reglas
+El Camino de la Vida v0.4.0-alfa.1: menú principal listo
+
+=== RESULTADO: 2292 controles, 0 fallos ===
+WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
